@@ -1,0 +1,4 @@
+{
+    "snyk.advanced.autoSelectOrganization": true,
+    "djlint.showInstallError": false
+}
