@@ -1,6 +1,8 @@
 # Scotland Yard (workspace)
 
-Sample **tic-tac-toe** app built with **[boardgame.io](https://boardgame.io/)** and **React**, with a **random bot** for the second seat. The client uses the **default (single-device) transport** so `AI.Step` can apply the bot’s moves; `Local()` is avoided because it would attribute every action to the human’s `playerID` and stall the bot forever. The repo name is a convenient umbrella for future board-game work (for example Scotland Yard rules later).
+**Tic-tac-toe** in **React** + **TypeScript** with a tiny **immutable game module** (no board engine dependency). **Hotseat only:** two humans share one device; **X** (player 0) and **O** (player 1) alternate; `tryPlayCell` enforces whose turn it is.
+
+The repo name is a convenient umbrella for future board-game work (for example Scotland Yard rules later).
 
 ## Requirements
 
@@ -11,7 +13,7 @@ Sample **tic-tac-toe** app built with **[boardgame.io](https://boardgame.io/)** 
 | Command | Description |
 |--------|---------------|
 | `npm install` | Install dependencies |
-| `npm run dev` | Start Vite dev server (play in the browser) |
+| `npm run dev` | Start Vite dev server |
 | `npm run build` | Typecheck (`tsc --noEmit`) and production build |
 | `npm run preview` | Serve the production build locally |
 | `npm test` | Run Vitest once |
@@ -20,22 +22,17 @@ Sample **tic-tac-toe** app built with **[boardgame.io](https://boardgame.io/)** 
 ## How to play
 
 1. Run `npm run dev` and open the URL Vite prints (usually `http://localhost:5173`).
-2. You are player **0** (shown as **X**). The bot is player **1** (**O**).
-3. On the bot’s turn, a `RandomBot` plus `Step` from `boardgame.io/ai` picks a legal move automatically.
+2. **Hotseat:** pass the device so the player whose turn it is taps an empty square.
+3. **Reset** starts a new game.
 
 ## Project layout
 
-- [`src/game/ticTacToe.ts`](src/game/ticTacToe.ts) — Game definition: `setup`, `moves`, `turn`, `endIf`, `ai.enumerate`
-- [`src/client.ts`](src/client.ts) — boardgame.io **React** `Client` (default transport, two seats)
-- [`src/App.tsx`](src/App.tsx) — Bot stepping (`RandomBot`, `Step`) with a re-entrancy guard
-- [`src/TicTacToeBoard.tsx`](src/TicTacToeBoard.tsx) — Board UI and **Reset**
-- [`src/game/ticTacToe.test.ts`](src/game/ticTacToe.test.ts) — Vitest rules and enumerate checks
+- [`src/game/ticTacToe.ts`](src/game/ticTacToe.ts) — Pure rules: `initialState`, `tryPlayCell`, win/draw helpers, `legalCellIndices`
+- [`src/App.tsx`](src/App.tsx) — Game state only
+- [`src/TicTacToeBoard.tsx`](src/TicTacToeBoard.tsx) — Board UI
+- [`src/constants.ts`](src/constants.ts) — `PLAYER_X` / `PLAYER_O` ids
+- [`src/game/ticTacToe.test.ts`](src/game/ticTacToe.test.ts) — Vitest rules + legal cells
 
 ## Stack
 
 - [Vite](https://vitejs.dev/) + [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- [boardgame.io](https://boardgame.io/) (game state, turns, AI helpers)
-
-## Notes
-
-- There is **no networked lobby** (no Koa server). Adding real multiplayer would use boardgame.io’s `SocketIO` transport and server separately.

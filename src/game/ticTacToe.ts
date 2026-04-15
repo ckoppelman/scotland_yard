@@ -1,11 +1,14 @@
-import { INVALID_MOVE } from "boardgame.io/core";
-import type { Ctx, Game, PlayerID } from "boardgame.io";
+/** Seat ids used on the board. */
+export type PlayerId = "0" | "1";
 
-/** Board cell: player id who claimed it, or empty. */
-export type TTTCell = PlayerID | null;
+export type TTTCell = PlayerId | null;
+
+export type GameOver = { winner: PlayerId } | { draw: true };
 
 export interface TTTState {
   cells: TTTCell[];
+  currentPlayer: PlayerId;
+  gameover: GameOver | null;
 }
 
 const WIN_LINES: ReadonlyArray<readonly [number, number, number]> = [
@@ -19,8 +22,7 @@ const WIN_LINES: ReadonlyArray<readonly [number, number, number]> = [
   [2, 4, 6],
 ];
 
-/** Returns the winning player id, or null if no winner yet. */
-export function getWinner(cells: TTTCell[]): PlayerID | null {
+export function getWinner(cells: TTTCell[]): PlayerId | null {
   for (const [a, b, c] of WIN_LINES) {
     const s = cells[a];
     if (s !== null && s === cells[b] && s === cells[c]) {
@@ -38,55 +40,48 @@ export function isVictory(cells: TTTCell[]): boolean {
   return getWinner(cells) !== null;
 }
 
-/** Legal cell indices for the current player (same targets as `ai.enumerate`). */
-export function legalClickCells(G: TTTState): number[] {
+/** Indices of empty cells (legal placements). */
+export function legalCellIndices(cells: TTTCell[]): number[] {
   const out: number[] = [];
   for (let i = 0; i < 9; i++) {
-    if (G.cells[i] === null) out.push(i);
+    if (cells[i] === null) out.push(i);
   }
   return out;
 }
 
-export const TicTacToe: Game<TTTState> = {
-  setup: () => ({ cells: Array(9).fill(null) }),
+export function initialState(): TTTState {
+  return {
+    cells: Array(9).fill(null),
+    currentPlayer: "0",
+    gameover: null,
+  };
+}
 
-  turn: {
-    minMoves: 1,
-    maxMoves: 1,
-  },
+/**
+ * If the move is legal for `player` on this `state`, returns the next state.
+ * Otherwise returns `null`.
+ */
+export function tryPlayCell(
+  state: TTTState,
+  player: PlayerId,
+  cell: number
+): TTTState | null {
+  if (state.gameover) return null;
+  if (state.currentPlayer !== player) return null;
+  if (typeof cell !== "number" || cell < 0 || cell > 8) return null;
+  if (state.cells[cell] !== null) return null;
 
-  moves: {
-    clickCell: ({ G, playerID }, id: number) => {
-      if (typeof id !== "number" || id < 0 || id > 8) {
-        return INVALID_MOVE;
-      }
-      if (G.cells[id] !== null) {
-        return INVALID_MOVE;
-      }
-      G.cells[id] = playerID;
-    },
-  },
+  const cells = [...state.cells] as TTTCell[];
+  cells[cell] = player;
 
-  endIf: ({ G }) => {
-    const winner = getWinner(G.cells);
-    if (winner !== null) {
-      return { winner };
-    }
-    if (isDraw(G.cells)) {
-      return { draw: true };
-    }
-    return;
-  },
+  const winner = getWinner(cells);
+  if (winner !== null) {
+    return { cells, currentPlayer: player, gameover: { winner } };
+  }
+  if (isDraw(cells)) {
+    return { cells, currentPlayer: player, gameover: { draw: true } };
+  }
 
-  ai: {
-    enumerate: (G: TTTState, _ctx: Ctx, _playerID: PlayerID) => {
-      const moves: { move: "clickCell"; args: [number] }[] = [];
-      for (let i = 0; i < 9; i++) {
-        if (G.cells[i] === null) {
-          moves.push({ move: "clickCell", args: [i] });
-        }
-      }
-      return moves;
-    },
-  },
-};
+  const nextPlayer: PlayerId = player === "0" ? "1" : "0";
+  return { cells, currentPlayer: nextPlayer, gameover: null };
+}

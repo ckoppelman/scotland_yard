@@ -1,47 +1,29 @@
-import { RandomBot, Step } from "boardgame.io/ai";
-import { useEffect, useMemo, useRef } from "react";
-import { TicTacToeClient } from "./client";
-import { BOT_PLAYER_ID } from "./constants";
-import { TicTacToe } from "./game/ticTacToe";
+import { useState } from "react";
+import { ScotlandYardBoard } from "./ScotlandYardBoard";
+import { initialState as initialScotlandYardState, ScotlandYardState } from "./game/scotlandYard";
+import { Ticket } from "./constants";
+import { tryPlayNode, tryPlayTicket } from "./game/scotlandYardRules";
 
 export default function App() {
-  const clientRef = useRef<InstanceType<typeof TicTacToeClient>>(null);
-  const steppingRef = useRef(false);
+  const [state, setState] = useState<ScotlandYardState>(() => initialScotlandYardState());
 
-  const bot = useMemo(
-    () =>
-      new RandomBot({
-        enumerate: TicTacToe.ai!.enumerate,
-      }),
-    []
-  );
+  const handleTicketClick = (ticket: Ticket) => {
+    setState((s) => tryPlayTicket(s, ticket) ?? s);
+  };
 
-  useEffect(() => {
-    const impl = clientRef.current?.client;
-    if (!impl) return;
-
-    return impl.subscribe(() => {
-      const state = impl.getState();
-      if (!state?.ctx) return;
-      if (state.ctx.gameover) return;
-      if (state.ctx.currentPlayer !== BOT_PLAYER_ID) return;
-      if (steppingRef.current) return;
-
-      steppingRef.current = true;
-      void Step({ store: impl.store }, bot).finally(() => {
-        steppingRef.current = false;
-      });
-    });
-  }, [bot]);
+  const handleNodeClick = (node: number) => {
+    setState((s) => tryPlayNode(s, node) ?? s);
+  };
 
   return (
     <main>
-      <h1>Tic-Tac-Toe</h1>
-      <p className="status">
-        You are <strong>X</strong> (player {0}). The bot is <strong>O</strong> (player{" "}
-        {1}).
-      </p>
-      <TicTacToeClient ref={clientRef} />
+      <h1>Scotland Yard</h1>
+      <ScotlandYardBoard
+        state={state}
+        onTicketClick={handleTicketClick}
+        onNodeClick={handleNodeClick}
+        onReset={() => setState(initialScotlandYardState())}
+      />
     </main>
   );
 }
