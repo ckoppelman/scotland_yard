@@ -50,6 +50,7 @@ function PlayerMarkerInner({
             onPointerMove={dragBindings?.onPointerMove}
             onPointerUp={dragBindings?.onPointerUp}
             onPointerCancel={dragBindings?.onPointerCancel}
+            id={`player-marker-${player.description.id}`}
         >
             {player.description.isDetective ? (
                 <DetectiveMarkerIcon fill={fill} />

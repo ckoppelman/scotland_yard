@@ -1,5 +1,4 @@
-import { Color, Ticket, GameOver, COLOR_TO_BOARD_DISPLAY } from "../constants";
-import { interestingMapGraph } from "./defaultMapGraph";
+import { Color, Ticket, GameOver } from "../constants";
 import { defaultTurns } from "./defaultTurns";
 
 

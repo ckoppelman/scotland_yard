@@ -87,7 +87,7 @@ export default function App() {
         onReset={() => {
           setPendingMoveNode(null);
           setPendingTicketAnchor(null);
-          setState(initialState());
+          setState(initialState(interestingMapGraph, 2, 1));
         }}
         pendingMoveNode={pendingMoveNode}
         pendingTicketAnchor={pendingTicketAnchor}

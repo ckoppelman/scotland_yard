@@ -8,6 +8,14 @@ import type {
 } from "../game/gameState";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
+
+function scrollToPlayerMarker(player: PlayerState) {
+    const playerMarker = document.getElementById(`player-marker-${player.description.id}`);
+    if (playerMarker) {
+        playerMarker.scrollIntoView({ behavior: "smooth" });
+    }
+}
+
 export function PlayerCard({ player, currentTurn }: { player: PlayerState; currentTurn: CurrentTurn }) {
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
     return (
@@ -16,6 +24,8 @@ export function PlayerCard({ player, currentTurn }: { player: PlayerState; curre
             style={{
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
+            onClick={() => scrollToPlayerMarker(player)}
+            id={`player-card-${player.description.id}`}
         >
             <div className="player-card__head">
                 <PlayerCardPawnIcon player={player} />
@@ -50,6 +60,7 @@ export function MrXCard({ state, player }: { state: GameState; player: PlayerSta
             style={{
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
+            onClick={isMyTurn || shouldShowMrX ? () => scrollToPlayerMarker(player) : () => {}}
         >
             <div className="player-card__head">
                 <PlayerCardPawnIcon player={player} />
