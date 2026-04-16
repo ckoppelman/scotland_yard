@@ -7,7 +7,7 @@ nodes:
   - id: 2
     position: { x: 16, y: 7 }
   - id: 3
-    position: { x: 9, y: 9 }
+    position: { x: 9, y: 10 }
   - id: 4
     position: { x: 4, y: 5 }
   - id: 5
@@ -17,13 +17,13 @@ nodes:
   - id: 7
     position: { x: 14, y: 5 }
   - id: 8
-    position: { x: 9, y: 6 }
+    position: { x: 10, y: 6 }
   - id: 9
     position: { x: 3, y: 9 }
   - id: 10
     position: { x: 15, y: 9 }
   - id: 11
-    position: { x: 9, y: 11 }
+    position: { x: 8, y: 11 }
   - id: 12
     position: { x: 5, y: 12 }
   - id: 13
@@ -31,7 +31,7 @@ nodes:
   - id: 14
     position: { x: 2, y: 10 }
   - id: 15
-    position: { x: 16, y: 10 }
+    position: { x: 16, y: 11 }
   - id: 16
     position: { x: 7, y: 8 }
   - id: 17
@@ -82,9 +82,9 @@ connections:
   - between: [3, 11]
     ticket: taxi
   - between: [3, 16]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [3, 17]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [9, 3]
     ticket: underground
   - between: [10, 3]
@@ -99,7 +99,7 @@ connections:
   - between: [8, 17]
     ticket: taxi
   - between: [8, 11]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [8, 23]
     ticket: underground
   - between: [5, 8]
@@ -108,17 +108,17 @@ connections:
     ticket: taxi
   # Midtown ring
   - between: [4, 5]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [5, 6]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [6, 7]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [16, 17]
     ticket: taxi
   - between: [4, 16]
-    ticket: bus
+    ticket: [bus, taxi]
   - between: [7, 17]
-    ticket: bus
+    ticket: [bus, taxi]
   # North apex & approach
   - between: [23, 24]
     ticket: taxi

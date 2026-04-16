@@ -191,6 +191,33 @@ const STATION_CAP_SAGITTA = STATION_CAP_HALF_W * 2 / 3;
 const STATION_MID_W = 28;
 const STATION_MID_H = 18;
 
+/**
+ * Straight segment parallel to the station–station chord, shifted along the normal by `offset`.
+ * Multiple ticket types between the same pair stay parallel for the full length (unlike a shared-endpoint curve).
+ */
+function parallelConnectionEndpoints(
+    p1: { x: number; y: number },
+    p2: { x: number; y: number },
+    offset: number,
+): { x1: number; y1: number; x2: number; y2: number } {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1e-9) {
+        return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
+    }
+    const nx = -dy / len;
+    const ny = dx / len;
+    const ox = nx * offset;
+    const oy = ny * offset;
+    return {
+        x1: p1.x + ox,
+        y1: p1.y + oy,
+        x2: p2.x + ox,
+        y2: p2.y + oy,
+    };
+}
+
 type StationLayout = {
     yChordTop: number;
     yChordBot: number;
@@ -222,7 +249,7 @@ function stationLayout(cx: number, cy: number): StationLayout {
     return { yChordTop, yChordBot, midRect, topCapD, bottomCapD };
 }
 
-/** Furthest a connection endpoint sits from its node center (stacked parallel lines). */
+/** Furthest a parallel-offset edge sits from its node center. */
 const MAP_EDGE_OFFSET_MAX =
     Math.max(...Object.values(CONNECTION_TO_COLOR_AND_OFFSET).map((o) => Math.abs(o.offset))) + STROKE_WIDTH / 2;
 
@@ -321,7 +348,7 @@ function BoardNodeInner({ nodeId, coords, stationLook, onNodeClick }: BoardNodeP
 
 export const BoardNode = memo(BoardNodeInner);
 
-type ConnectionLineProps = {
+type ConnectionEdgeProps = {
     x1: number;
     y1: number;
     x2: number;
@@ -329,7 +356,7 @@ type ConnectionLineProps = {
     stroke: string;
 };
 
-function ConnectionLineInner({ x1, y1, x2, y2, stroke }: ConnectionLineProps) {
+function ConnectionEdgeInner({ x1, y1, x2, y2, stroke }: ConnectionEdgeProps) {
     return (
         <line
             className="connection-line"
@@ -341,11 +368,12 @@ function ConnectionLineInner({ x1, y1, x2, y2, stroke }: ConnectionLineProps) {
             stroke={stroke}
             strokeWidth={STROKE_WIDTH}
             strokeOpacity={0.85}
+            strokeLinecap="round"
         />
     );
 }
 
-export const ConnectionLine = memo(ConnectionLineInner);
+export const ConnectionEdge = memo(ConnectionEdgeInner);
 
 type PlayerMarkerProps = {
     player: PlayerState;
@@ -451,7 +479,7 @@ export function PlayerCard({ player, currentTurn }: { player: PlayerState; curre
 
 export function MrXCard({ state, player }: { state: ScotlandYardState; player: PlayerState }) {
     const currentTurn = state.currentTurn;
-    const shouldShowMrX = state.turns[currentTurn.turnNumber]?.showMrX ?? false;
+    const shouldShowMrX = state.turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
 
     return (
@@ -468,7 +496,7 @@ export function MrXCard({ state, player }: { state: ScotlandYardState; player: P
                 </div>
             </div>
             <p className="mr-x-card-position">
-                Last seen: {shouldShowMrX ? (player.position ?? "—") : "???"}
+                Last seen: {isMyTurn || shouldShowMrX ? (player.position ?? "—") : "???"}
             </p>
             <div className="mr-x-card-tickets">
                 <div className="mr-x-card-tickets__row">
@@ -1005,8 +1033,10 @@ export function ScotlandYardBoard({
         status = `Case closed — ${gameover.winner === "detective" ? "the detectives" : "Mr. X"} wins.`;
     } else {
         status = `${players[state.currentTurn.playerOrdinal].description.name}'s turn.`;
-        if (turns[currentTurn.turnNumber]?.showMrX) {
-            status += " Mr. X’s station is revealed this round.";
+        if (turns[currentTurn.turnNumber]?.showMrX ?? false) {
+            status += " Mr. X’s station will be revealed this round.";
+        } else if (turns[currentTurn.turnNumber - 1]?.showMrX ?? false) {
+            status += " Mr. X’s station is revealed!";
         }
     }
 
@@ -1058,13 +1088,14 @@ export function ScotlandYardBoard({
                                     const style = CONNECTION_TO_COLOR_AND_OFFSET[connection.ticket];
                                     const p1 = pixelCoords(nodePixelPositions, a);
                                     const p2 = pixelCoords(nodePixelPositions, b);
+                                    const line = parallelConnectionEndpoints(p1, p2, style.offset);
                                     return (
-                                        <ConnectionLine
+                                        <ConnectionEdge
                                             key={`${a}-${b}-${connection.ticket}`}
-                                            x1={p1.x + style.offset}
-                                            y1={p1.y + style.offset}
-                                            x2={p2.x + style.offset}
-                                            y2={p2.y + style.offset}
+                                            x1={line.x1}
+                                            y1={line.y1}
+                                            x2={line.x2}
+                                            y2={line.y2}
                                             stroke={style.color}
                                         />
                                     );
@@ -1079,7 +1110,15 @@ export function ScotlandYardBoard({
                                     />
                                 ))}
                                 {markersRenderOrder.map((player) => {
-                                    const isActive = player.description.order === state.currentTurn.playerOrdinal;
+                                    const activePlayer = state.players[state.currentTurn.playerOrdinal];
+                                    const isActive = player.description.order === activePlayer.description.order;
+                                    const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
+                                    if (state.gameover === null &&
+                                        !player.description.isDetective &&
+                                        !shouldShowMrX &&
+                                        activePlayer.description.isDetective) {
+                                        return null;
+                                    }
                                     return (
                                         <PlayerMarker
                                             key={player.description.id}
