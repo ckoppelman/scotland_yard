@@ -30,6 +30,25 @@ function connectionTicketTypes(state: ScotlandYardState, node1: number | null, n
     return state.mapGraph.connections.filter((connection) => connection.nodes.has(node1) && connection.nodes.has(node2)).map((connection) => connection.ticket);
 }
 
+/** Ticket types on direct edges between two stations (empty if not adjacent). */
+export function getTicketsBetweenNodes(state: ScotlandYardState, node1: number | null, node2: number | null): Ticket[] {
+    return connectionTicketTypes(state, node1, node2);
+}
+
+/**
+ * Select a ticket and move to an adjacent station in one step (for drag-and-drop flow).
+ * Fails atomically if the move is illegal.
+ */
+export function tryPlayMoveToAdjacent(state: ScotlandYardState, toNode: number, ticket: Ticket): PlayResult {
+    if (state.gameover) return { ok: false, message: "The game is over." };
+    if (state.currentTurn.ticket !== null) {
+        return { ok: false, message: "A ticket is already selected. Cancel or finish that move first." };
+    }
+    const withTicket = tryPlayTicket(state, ticket);
+    if (!withTicket.ok) return withTicket;
+    return tryPlayNode(withTicket.state, toNode);
+}
+
 export function getWinner(state: ScotlandYardState): PlayerDescription | null {
     const mrX = state.players.find((player) => !player.description.isDetective);
     if (mrX === undefined) return null;

@@ -19,6 +19,16 @@ export const COLOR_TO_BACKGROUND_COLOR: Record<Color, string> = {
     "mrX": "white",
 };
 
+/** Solid accent for player card borders and emphasis. */
+export const COLOR_TO_BORDER: Record<Color, string> = {
+    red: "#b91c1c",
+    blue: "#1d4ed8",
+    green: "#15803d",
+    yellow: "#a16207",
+    purple: "#a21caf",
+    mrX: "#44403c",
+};
+
 export type Ticket = "taxi" | "bus" | "underground" | "black" | "double";
 export type GameOver = {
   winner: "detective" | "mrX";
