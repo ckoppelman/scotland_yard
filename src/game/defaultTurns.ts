@@ -1,5 +1,5 @@
 import { parse } from "yaml";
-import type { TurnState } from "./scotlandYard";
+import type { TurnState } from "./gameState";
 import turnsYaml from "../../data/turns.yaml?raw";
 
 type RawTurnsYaml = {

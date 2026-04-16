@@ -27,7 +27,7 @@ export type CurrentTurn = {
   turnNumber: number;
 };
 
-export type ScotlandYardState = {
+export type GameState = {
   players: PlayerState[];
   currentTurn: CurrentTurn;
   gameover: GameOver | null;
@@ -60,7 +60,7 @@ export type TurnLogEntry = {
 
 export type TurnLog = TurnLogEntry[];
 
-export function initialState(): ScotlandYardState {
+export function initialState(): GameState {
   return {
     players: [
     {

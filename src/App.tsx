@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import { ScotlandYardBoard } from "./ScotlandYardBoard";
-import { initialState as initialScotlandYardState, ScotlandYardState } from "./game/scotlandYard";
+import { GameBoard } from "./game-board";
+import { initialState, type GameState } from "./game/gameState";
 import { Ticket } from "./constants";
-import { getTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/scotlandYardRules";
+import { getTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/gameRules";
 import { useToast } from "./toast";
 
 export default function App() {
   const { showToast } = useToast();
-  const [state, setState] = useState<ScotlandYardState>(() => initialScotlandYardState());
+  const [state, setState] = useState<GameState>(() => initialState());
   const [pendingMoveNode, setPendingMoveNode] = useState<number | null>(null);
   /** Screen coords for the “which ticket?” popup after a drag-drop. */
   const [pendingTicketAnchor, setPendingTicketAnchor] = useState<{ x: number; y: number } | null>(null);
@@ -79,14 +79,14 @@ export default function App() {
       <p className="app-tagline">
         Drag your pawn to an adjacent station, then pick a ticket — or choose a ticket and click the map.
       </p>
-      <ScotlandYardBoard
+      <GameBoard
         state={state}
         onTicketClick={handleTicketClick}
         onNodeClick={handleNodeClick}
         onReset={() => {
           setPendingMoveNode(null);
           setPendingTicketAnchor(null);
-          setState(initialScotlandYardState());
+          setState(initialState());
         }}
         pendingMoveNode={pendingMoveNode}
         pendingTicketAnchor={pendingTicketAnchor}

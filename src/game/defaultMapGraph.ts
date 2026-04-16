@@ -1,6 +1,6 @@
 import { parse } from "yaml";
 import type { Ticket } from "../constants";
-import type { MapConnection, MapGraph } from "./scotlandYard";
+import type { MapConnection, MapGraph } from "./gameState";
 import demoMapGraphYaml from "../../data/map-graph.yaml?raw";
 import interestingMapGraphYaml from "../../data/map-graph-interesting.yaml?raw";
 

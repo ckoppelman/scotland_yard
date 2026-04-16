@@ -1,7 +1,7 @@
 import { Ticket } from "../constants";
-import { PlayerDescription, ScotlandYardState, TurnLogEntry } from "./scotlandYard";
+import { PlayerDescription, GameState, TurnLogEntry } from "./gameState";
 
-export type PlayOk = { ok: true; state: ScotlandYardState };
+export type PlayOk = { ok: true; state: GameState };
 export type PlayFail = { ok: false; message: string };
 export type PlayResult = PlayOk | PlayFail;
 
@@ -16,7 +16,7 @@ function ticketLabel(ticket: Ticket): string {
     return labels[ticket];
 }
 
-export function tryPlayTicket(state: ScotlandYardState, ticket: Ticket): PlayResult {
+export function tryPlayTicket(state: GameState, ticket: Ticket): PlayResult {
     if (state.gameover) return { ok: false, message: "The game is over." };
     const player = state.players[state.currentTurn.playerOrdinal];
     if (player.tickets[ticket] === 0) {
@@ -25,13 +25,13 @@ export function tryPlayTicket(state: ScotlandYardState, ticket: Ticket): PlayRes
     return { ok: true, state: { ...state, currentTurn: { ...state.currentTurn, ticket } } };
 }
 
-function connectionTicketTypes(state: ScotlandYardState, node1: number | null, node2: number | null): Ticket[] {
+function connectionTicketTypes(state: GameState, node1: number | null, node2: number | null): Ticket[] {
     if (node1 === null || node2 === null) return [];
     return state.mapGraph.connections.filter((connection) => connection.nodes.has(node1) && connection.nodes.has(node2)).map((connection) => connection.ticket);
 }
 
 /** Ticket types on direct edges between two stations (empty if not adjacent). */
-export function getTicketsBetweenNodes(state: ScotlandYardState, node1: number | null, node2: number | null): Ticket[] {
+export function getTicketsBetweenNodes(state: GameState, node1: number | null, node2: number | null): Ticket[] {
     return connectionTicketTypes(state, node1, node2);
 }
 
@@ -39,7 +39,7 @@ export function getTicketsBetweenNodes(state: ScotlandYardState, node1: number |
  * Select a ticket and move to an adjacent station in one step (for drag-and-drop flow).
  * Fails atomically if the move is illegal.
  */
-export function tryPlayMoveToAdjacent(state: ScotlandYardState, toNode: number, ticket: Ticket): PlayResult {
+export function tryPlayMoveToAdjacent(state: GameState, toNode: number, ticket: Ticket): PlayResult {
     if (state.gameover) return { ok: false, message: "The game is over." };
     if (state.currentTurn.ticket !== null) {
         return { ok: false, message: "A ticket is already selected. Cancel or finish that move first." };
@@ -49,7 +49,7 @@ export function tryPlayMoveToAdjacent(state: ScotlandYardState, toNode: number, 
     return tryPlayNode(withTicket.state, toNode);
 }
 
-export function getWinner(state: ScotlandYardState): PlayerDescription | null {
+export function getWinner(state: GameState): PlayerDescription | null {
     const mrX = state.players.find((player) => !player.description.isDetective);
     if (mrX === undefined) return null;
     for (const player of state.players.filter((player) => player.description.isDetective)) {
@@ -59,7 +59,7 @@ export function getWinner(state: ScotlandYardState): PlayerDescription | null {
     return null;
 }
 
-export function tryPlayNode(state: ScotlandYardState, node: number): PlayResult {
+export function tryPlayNode(state: GameState, node: number): PlayResult {
     if (state.gameover) return { ok: false, message: "The game is over." };
     if (state.currentTurn.ticket === null) {
         return { ok: false, message: "Choose a ticket before selecting a station." };
@@ -90,14 +90,14 @@ export function tryPlayNode(state: ScotlandYardState, node: number): PlayResult 
 
     const winner = getWinner(newState);
     if (winner !== null) {
-        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } as ScotlandYardState };
+        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } as GameState };
     }
 
-    return { ok: true, state: { ...newState, gameover: null } as ScotlandYardState };
+    return { ok: true, state: { ...newState, gameover: null } as GameState };
 }
 
 
-export function initPlayer(state: ScotlandYardState, playerOrdinal: number, node: number): PlayResult {
+export function initPlayer(state: GameState, playerOrdinal: number, node: number): PlayResult {
     let player = state.players[playerOrdinal];
     player.position = node;
 
@@ -110,7 +110,7 @@ export function initPlayer(state: ScotlandYardState, playerOrdinal: number, node
     return { ok: true, state: { ...state, players: [...state.players.map((p, ix) => ix === playerOrdinal ? player : p)], turnLog: [...state.turnLog, turnLogEntry] } };
 }
 
-function movePlayer(state: ScotlandYardState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
+function movePlayer(state: GameState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
     let player = state.players[playerOrdinal];
     if (player.position === node) return { ok: false, message: "You are already on that station." };
     if (player.position === null) return { ok: false, message: "You are not on any station." };
