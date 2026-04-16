@@ -170,3 +170,5 @@ connections:
     ticket: black
   - between: [14, 15]
     ticket: black
+
+startingPositions: [1, 2, 3, 5, 7, 14, 23]

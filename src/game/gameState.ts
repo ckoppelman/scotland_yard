@@ -1,4 +1,4 @@
-import { Color, Ticket, GameOver } from "../constants";
+import { Color, Ticket, GameOver, COLOR_TO_BOARD_DISPLAY } from "../constants";
 import { interestingMapGraph } from "./defaultMapGraph";
 import { defaultTurns } from "./defaultTurns";
 
@@ -49,6 +49,7 @@ export type MapNode = {
 export type MapGraph = {
   nodes: MapNode[];
   connections: MapConnection[];
+  startingPositions: number[];
 };
 
 export type TurnLogEntry = {
@@ -60,68 +61,79 @@ export type TurnLogEntry = {
 
 export type TurnLog = TurnLogEntry[];
 
-export function initialState(): GameState {
+function getRandomValue(values: number[]): number {
+  return values[Math.floor(Math.random() * values.length)];
+}
+
+function getRandomValues(values: number[], k: number): number[] {
+  const result: Set<number> = new Set();
+  while (result.size < k) {
+    result.add(getRandomValue(values));
+  }
+  return Array.from(result);
+}
+
+const COLORS_FOR_DETECTIVES: Color[] = ["red", "blue", "green", "yellow", "purple"];
+
+function getDetectiveProperties(playerOrdinal: number, startingPosition: number): PlayerState {
   return {
-    players: [
-    {
-      description: {
-        id: "1",
-        name: "Detective 1",
-        color: "red",
-        order: 0,
-        isDetective: true,
-      },
-      position: 1,
-      tickets: {
-        taxi: 10,
-        bus: 8,
-        underground: 4,
-        black: 0,
-        double: 0,
-      },
+    description: {
+      id: `detective-${playerOrdinal + 1}`,
+      name: `Detective ${playerOrdinal + 1}`,
+      color: COLORS_FOR_DETECTIVES[playerOrdinal],
+      order: playerOrdinal,
+      isDetective: true,
     },
-    {
-        description: {
-          id: "2",
-          name: "Detective 2",
-          color: "blue",
-          order: 1,
-          isDetective: true,
-        },
-        position: 2,
-        tickets: {
-          taxi: 10,
-          bus: 8,
-          underground: 4,
-          black: 0,
-          double: 0,
-        },
-      },
-      {
-        description: {
-          id: "3",
-          name: "Mr X",
-          color: "mrX",
-          order: 2,
-          isDetective: false,
-        },
-        position: 3,
-        tickets: {
-          taxi: 4,
-          bus: 3,
-          underground: 2,
-          black: 5,
-          double: 2,
-        },
-      },
-    ],
+    position: startingPosition,
+    tickets: {
+      taxi: 10,
+      bus: 8,
+      underground: 4,
+      black: 0,
+      double: 0,
+    },
+  } as PlayerState;
+}
+
+const MR_X_NAMES = ["Mr X", "Mr Y", "Mr Z"];
+
+function getMrXProperties(playerOrdinal: number, startingPosition: number, mrXOrdinal: number): PlayerState {
+  return {
+    description: {
+      id: `mrX-${mrXOrdinal + 1}`,
+      name: MR_X_NAMES[mrXOrdinal],
+      color: "mrX",
+      order: playerOrdinal,
+      isDetective: false,
+    },
+    position: startingPosition,
+    tickets: {
+      taxi: 4,
+      bus: 3,
+      underground: 2,
+      black: 5,
+      double: 2,
+    }
+  } as PlayerState;
+}
+
+export function initialState(mapGraph: MapGraph, numDetectives: number, numMrX: number): GameState {
+  const startingPositions = getRandomValues(mapGraph.startingPositions, numDetectives + numMrX);
+  const players: PlayerState[] = startingPositions.map((startingPosition, playerOrdinal) => {
+    return playerOrdinal < numDetectives ?
+      getDetectiveProperties(playerOrdinal, startingPosition) :
+      getMrXProperties(playerOrdinal, startingPosition, playerOrdinal - numDetectives);
+  });
+
+  return {
+    players: players,
     currentTurn: {
       playerOrdinal: 0,
       ticket: null,
       turnNumber: 0,
     },
     gameover: null,
-    mapGraph: interestingMapGraph,
+    mapGraph: mapGraph,
     turns: defaultTurns,
     turnLog: [] as TurnLog,
   };

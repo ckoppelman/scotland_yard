@@ -30,6 +30,7 @@ function assertTicket(value: string | string[]): Ticket | Ticket[] {
 type RawMapGraphYaml = {
   nodes: { id: number; position: { x: number; y: number } }[];
   connections: { between: number[]; ticket: string | string[] }[];
+  startingPositions?: number[];
 };
 
 
@@ -53,6 +54,7 @@ function hydrateMapGraph(raw: RawMapGraphYaml): MapGraph {
       position: n.position,
     })),
     connections: raw.connections.map(hydrateConnection).reduce((acc, curr) => acc.concat(curr), [] as MapConnection[]),
+    startingPositions: raw.startingPositions ?? raw.nodes.map((n) => n.id),
   };
 }
 

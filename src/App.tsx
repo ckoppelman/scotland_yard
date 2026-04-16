@@ -4,10 +4,11 @@ import { initialState, type GameState } from "./game/gameState";
 import { Ticket } from "./constants";
 import { getTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/gameRules";
 import { useToast } from "./toast";
+import { interestingMapGraph } from "./game/defaultMapGraph";
 
 export default function App() {
   const { showToast } = useToast();
-  const [state, setState] = useState<GameState>(() => initialState());
+  const [state, setState] = useState<GameState>(() => initialState(interestingMapGraph, 2, 1));
   const [pendingMoveNode, setPendingMoveNode] = useState<number | null>(null);
   /** Screen coords for the “which ticket?” popup after a drag-drop. */
   const [pendingTicketAnchor, setPendingTicketAnchor] = useState<{ x: number; y: number } | null>(null);

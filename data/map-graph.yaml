@@ -74,3 +74,5 @@ connections:
     ticket: underground
   - between: [16, 1]
     ticket: taxi
+
+startingPositions: [1, 2, 3, 4]
