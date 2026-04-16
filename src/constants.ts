@@ -1,10 +1,4 @@
-/** First player — shown as X. */
-export const PLAYER_X = "0";
-
-/** Second player — shown as O. */
-export const PLAYER_O = "1";
-
-export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "mr_x";
+export type Color = "red" | "blue" | "green" | "yellow" | "purple" | "mrX";
 
 export const COLOR_TO_BOARD_DISPLAY: Record<Color, string> = {
   ["red"]: "R",
@@ -12,7 +6,7 @@ export const COLOR_TO_BOARD_DISPLAY: Record<Color, string> = {
   ["green"]: "G",
   ["yellow"]: "Y",
   ["purple"]: "P",
-  ["mr_x"]: "X",
+  ["mrX"]: "X",
 };
 
 
@@ -22,7 +16,7 @@ export const COLOR_TO_BACKGROUND_COLOR: Record<Color, string> = {
     "green": "rgba(0, 255, 0, 0.5)",
     "yellow": "rgba(255, 255, 0, 0.5)",
     "purple": "rgba(255, 0, 255, 0.5)",
-    "mr_x": "white",
+    "mrX": "white",
 };
 
 export type Ticket = "taxi" | "bus" | "underground" | "black" | "double";

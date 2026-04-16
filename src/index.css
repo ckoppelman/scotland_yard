@@ -55,7 +55,7 @@ h1 {
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 600;
-  border: 1px solid #94a3b8;
+  border: 1px solid lightblue;
   background: #e2e8f0;
 }
 
@@ -69,4 +69,151 @@ h1 {
   padding: 0.4rem 0.75rem;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.ticket-button {
+  padding: 0.5em;
+  margin: 7px;
+}
+
+.toast-region {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: none;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  animation: toast-in 220ms ease-out;
+}
+
+.toast--info {
+  background: #fff;
+  color: #0f172a;
+}
+
+.toast--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: left;
+  padding: 2rem;
+  border: 1px solid #64748b;
+  border-radius: 0.5rem;
+  background: #fff;
+  opacity: 0.7;
+  margin: 2rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.player-card.my-turn {
+  border-width: 5px;
+  opacity: 1;
+}
+
+.mr-x-board {
+  display: flexbox;
+  flex-direction: column;
+  align-items: left;
+  justify-content: left;
+  padding: 2rem;
+  border: 1px solid #64748b;
+  border-radius: 0.5rem;
+  background: #fff;
+  opacity: 0.7;
+  margin: 2rem;
+  transition: all 0.2s ease-in-out;
+  background-color: #238bf3;
+  border-color: black;
+  border-width: 2px;
+}
+
+.mr-x-turn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid #64748b;
+  border-radius: 1rem;
+  opacity: 1;
+  max-width: 100px;
+}
+
+.mr-x-turn.show-mr-x .mr-x-turn-number {
+  background-color: white;
+}
+
+.mr-x-turn-number {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-radius: 2rem;
+  padding: 0;
+  margin: 0;
+  background-color: #238bf3;
+  color: black;
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.mr-x-turn-ticket {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-radius: 2rem;
+  padding: 0;
+  margin: 0;
+  width: 4rem;
+  height: 2rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.mr-x-turn-ticket.taxi-ticket {
+  background-color: #e8d64c;
+}
+
+.mr-x-turn-ticket.bus-ticket {
+  background-color: #63d02d;
+}
+
+.mr-x-turn-ticket.underground-ticket {
+  background-color: #e830c3;
+}
+
+.mr-x-turn-ticket.black-ticket {
+  background-color: #04101d;
+  color: white;
 }

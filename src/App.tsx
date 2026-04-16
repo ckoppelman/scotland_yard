@@ -3,16 +3,28 @@ import { ScotlandYardBoard } from "./ScotlandYardBoard";
 import { initialState as initialScotlandYardState, ScotlandYardState } from "./game/scotlandYard";
 import { Ticket } from "./constants";
 import { tryPlayNode, tryPlayTicket } from "./game/scotlandYardRules";
+import { useToast } from "./toast";
 
 export default function App() {
+  const { showToast } = useToast();
   const [state, setState] = useState<ScotlandYardState>(() => initialScotlandYardState());
 
   const handleTicketClick = (ticket: Ticket) => {
-    setState((s) => tryPlayTicket(s, ticket) ?? s);
+    const result = tryPlayTicket(state, ticket);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    setState(result.state);
   };
 
   const handleNodeClick = (node: number) => {
-    setState((s) => tryPlayNode(s, node) ?? s);
+    const result = tryPlayNode(state, node);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    setState(result.state);
   };
 
   return (

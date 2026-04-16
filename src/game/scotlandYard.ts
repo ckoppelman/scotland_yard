@@ -1,4 +1,6 @@
 import { Color, Ticket, GameOver } from "../constants";
+import { interestingMapGraph } from "./defaultMapGraph";
+import { defaultTurns } from "./defaultTurns";
 
 
 export type PlayerDescription = {
@@ -16,19 +18,22 @@ export type PlayerState = {
 };
 
 export type TurnState = {
-  show_mr_x: boolean;
+  showMrX: boolean;
 }
+
+export type CurrentTurn = {
+  playerOrdinal: number;
+  ticket: Ticket | null;
+  turnNumber: number;
+};
 
 export type ScotlandYardState = {
   players: PlayerState[];
-  currentTurn: {
-    playerOrdinal: number;
-    ticket: Ticket | null;
-    turnNumber: number;
-  };
+  currentTurn: CurrentTurn;
   gameover: GameOver | null;
   mapGraph: MapGraph;
   turns: TurnState[];
+  turnLog: TurnLog;
 };
 
 export type MapConnection = {
@@ -46,6 +51,15 @@ export type MapGraph = {
   connections: MapConnection[];
 };
 
+export type TurnLogEntry = {
+  turnNumber: number;
+  playerOrdinal: number;
+  ticket: Ticket | null;
+  position: number;
+};
+
+export type TurnLog = TurnLogEntry[];
+
 export function initialState(): ScotlandYardState {
   return {
     players: [
@@ -54,7 +68,7 @@ export function initialState(): ScotlandYardState {
         id: "1",
         name: "Detective 1",
         color: "red",
-        order: 1,
+        order: 0,
         isDetective: true,
       },
       position: 1,
@@ -71,7 +85,7 @@ export function initialState(): ScotlandYardState {
           id: "2",
           name: "Detective 2",
           color: "blue",
-          order: 2,
+          order: 1,
           isDetective: true,
         },
         position: 2,
@@ -87,8 +101,8 @@ export function initialState(): ScotlandYardState {
         description: {
           id: "3",
           name: "Mr X",
-          color: "mr_x",
-          order: 3,
+          color: "mrX",
+          order: 2,
           isDetective: false,
         },
         position: 3,
@@ -107,53 +121,8 @@ export function initialState(): ScotlandYardState {
       turnNumber: 0,
     },
     gameover: null,
-    mapGraph: {
-        nodes: [
-          {
-            id: 1,
-            position: { x: 0, y: 0 },
-          },
-          {
-            id: 2,
-            position: { x: 0, y: 1 },
-          },
-          {
-            id: 3,
-            position: { x: 1, y: 0 },
-          }
-        ],
-        connections: [
-          {
-            nodes: new Set([1, 2]),
-            ticket: "taxi",
-          },
-          {
-            nodes: new Set([2, 3]),
-            ticket: "bus",
-          },
-          {
-            nodes: new Set([3, 1]),
-            ticket: "underground",
-          },
-          {
-            nodes: new Set([1, 2]),
-            ticket: "bus",
-          }
-        ],
-    },
-    turns: [
-      {
-        show_mr_x: false,
-      },
-      {
-        show_mr_x: false,
-      },
-      {
-        show_mr_x: false,
-      },
-      {
-        show_mr_x: true,
-      },
-    ],
+    mapGraph: interestingMapGraph,
+    turns: defaultTurns,
+    turnLog: [] as TurnLog,
   };
 }

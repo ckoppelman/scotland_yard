@@ -1,0 +1,172 @@
+# Larger “city” layout: central hub, north apex, east/west docks, south waterfront.
+# Multiple routes between districts; duplicate `between` pairs use different tickets.
+
+nodes:
+  - id: 1
+    position: { x: 2, y: 7 }
+  - id: 2
+    position: { x: 16, y: 7 }
+  - id: 3
+    position: { x: 9, y: 9 }
+  - id: 4
+    position: { x: 4, y: 5 }
+  - id: 5
+    position: { x: 7, y: 4 }
+  - id: 6
+    position: { x: 11, y: 4 }
+  - id: 7
+    position: { x: 14, y: 5 }
+  - id: 8
+    position: { x: 9, y: 6 }
+  - id: 9
+    position: { x: 3, y: 9 }
+  - id: 10
+    position: { x: 15, y: 9 }
+  - id: 11
+    position: { x: 9, y: 11 }
+  - id: 12
+    position: { x: 5, y: 12 }
+  - id: 13
+    position: { x: 13, y: 12 }
+  - id: 14
+    position: { x: 2, y: 10 }
+  - id: 15
+    position: { x: 16, y: 10 }
+  - id: 16
+    position: { x: 7, y: 8 }
+  - id: 17
+    position: { x: 11, y: 8 }
+  - id: 18
+    position: { x: 9, y: 14 }
+  - id: 19
+    position: { x: 6, y: 13 }
+  - id: 20
+    position: { x: 12, y: 13 }
+  - id: 21
+    position: { x: 1, y: 5 }
+  - id: 22
+    position: { x: 17, y: 5 }
+  - id: 23
+    position: { x: 9, y: 2 }
+  - id: 24
+    position: { x: 6, y: 3 }
+
+connections:
+  # West end (detective 1 starts at 1)
+  - between: [1, 4]
+    ticket: taxi
+  - between: [1, 21]
+    ticket: taxi
+  - between: [1, 9]
+    ticket: bus
+  - between: [1, 14]
+    ticket: taxi
+  - between: [21, 14]
+    ticket: taxi
+  - between: [21, 4]
+    ticket: underground
+  # East end (detective 2 starts at 2)
+  - between: [2, 7]
+    ticket: taxi
+  - between: [2, 22]
+    ticket: taxi
+  - between: [2, 10]
+    ticket: bus
+  - between: [2, 15]
+    ticket: taxi
+  - between: [22, 15]
+    ticket: taxi
+  - between: [22, 7]
+    ticket: underground
+  # Mr X (3) and inner south
+  - between: [3, 11]
+    ticket: taxi
+  - between: [3, 16]
+    ticket: bus
+  - between: [3, 17]
+    ticket: bus
+  - between: [9, 3]
+    ticket: underground
+  - between: [10, 3]
+    ticket: underground
+  # Central hub
+  - between: [8, 4]
+    ticket: taxi
+  - between: [8, 7]
+    ticket: taxi
+  - between: [8, 16]
+    ticket: taxi
+  - between: [8, 17]
+    ticket: taxi
+  - between: [8, 11]
+    ticket: bus
+  - between: [8, 23]
+    ticket: underground
+  - between: [5, 8]
+    ticket: taxi
+  - between: [6, 8]
+    ticket: taxi
+  # Midtown ring
+  - between: [4, 5]
+    ticket: bus
+  - between: [5, 6]
+    ticket: bus
+  - between: [6, 7]
+    ticket: bus
+  - between: [16, 17]
+    ticket: taxi
+  - between: [4, 16]
+    ticket: bus
+  - between: [7, 17]
+    ticket: bus
+  # North apex & approach
+  - between: [23, 24]
+    ticket: taxi
+  - between: [24, 5]
+    ticket: taxi
+  - between: [6, 23]
+    ticket: taxi
+  # East-west mid corridors
+  - between: [9, 16]
+    ticket: taxi
+  - between: [10, 17]
+    ticket: taxi
+  - between: [9, 14]
+    ticket: bus
+  - between: [10, 15]
+    ticket: bus
+  - between: [9, 12]
+    ticket: bus
+  - between: [10, 13]
+    ticket: bus
+  - between: [11, 12]
+    ticket: taxi
+  - between: [11, 13]
+    ticket: taxi
+  - between: [11, 18]
+    ticket: underground
+  - between: [12, 19]
+    ticket: taxi
+  - between: [13, 20]
+    ticket: taxi
+  - between: [12, 18]
+    ticket: taxi
+  - between: [13, 18]
+    ticket: taxi
+  - between: [18, 19]
+    ticket: bus
+  - between: [18, 20]
+    ticket: bus
+  - between: [19, 20]
+    ticket: taxi
+  # Cross-town ferries (Mr X)
+  - between: [1, 10]
+    ticket: black
+  - between: [2, 9]
+    ticket: black
+  - between: [3, 23]
+    ticket: black
+  - between: [8, 18]
+    ticket: black
+  - between: [14, 15]
+    ticket: black

@@ -1,11 +1,28 @@
 import { Ticket } from "../constants";
-import { PlayerDescription, ScotlandYardState } from "./scotlandYard";
+import { PlayerDescription, ScotlandYardState, TurnLogEntry } from "./scotlandYard";
 
-export function tryPlayTicket(state: ScotlandYardState, ticket: Ticket): ScotlandYardState | null {
-    if (state.gameover) return null;
+export type PlayOk = { ok: true; state: ScotlandYardState };
+export type PlayFail = { ok: false; message: string };
+export type PlayResult = PlayOk | PlayFail;
+
+function ticketLabel(ticket: Ticket): string {
+    const labels: Record<Ticket, string> = {
+        taxi: "taxi",
+        bus: "bus",
+        underground: "underground",
+        black: "black",
+        double: "double",
+    };
+    return labels[ticket];
+}
+
+export function tryPlayTicket(state: ScotlandYardState, ticket: Ticket): PlayResult {
+    if (state.gameover) return { ok: false, message: "The game is over." };
     const player = state.players[state.currentTurn.playerOrdinal];
-    if (player.tickets[ticket] === 0) return null;
-    return { ...state, currentTurn: { ...state.currentTurn, ticket } };
+    if (player.tickets[ticket] === 0) {
+        return { ok: false, message: `No ${ticketLabel(ticket)} tickets left.` };
+    }
+    return { ok: true, state: { ...state, currentTurn: { ...state.currentTurn, ticket } } };
 }
 
 function connectionTicketTypes(state: ScotlandYardState, node1: number | null, node2: number | null): Ticket[] {
@@ -13,50 +30,92 @@ function connectionTicketTypes(state: ScotlandYardState, node1: number | null, n
     return state.mapGraph.connections.filter((connection) => connection.nodes.has(node1) && connection.nodes.has(node2)).map((connection) => connection.ticket);
 }
 
-function isVictory(state: ScotlandYardState): boolean {
-    return getWinner(state) !== null;
-}
-
 export function getWinner(state: ScotlandYardState): PlayerDescription | null {
-    const mr_x = state.players.find((player) => !player.description.isDetective);
-    if (mr_x === undefined) return null;
-    for (const player of state.players) {
-        if (player.position === mr_x.position) return player.description;
+    const mrX = state.players.find((player) => !player.description.isDetective);
+    if (mrX === undefined) return null;
+    for (const player of state.players.filter((player) => player.description.isDetective)) {
+        if (player.position === mrX.position) return player.description;
     }
-    if (state.currentTurn.turnNumber > state.turns.length) return mr_x.description;
+    if (state.currentTurn.turnNumber > state.turns.length) return mrX.description;
     return null;
 }
 
-export function tryPlayNode(state: ScotlandYardState, node: number): ScotlandYardState | null {
-    if (state.gameover) return null;
-    if (state.currentTurn.ticket === null) return null;
-    const player_ordinal = state.currentTurn.playerOrdinal;
-    let player = state.players[player_ordinal];
-    if (player.position === node) return null;
-
-    const valid_tickets = connectionTicketTypes(state, player.position, node);
-    if (valid_tickets.length === 0) return null;
-    if (!valid_tickets.includes(state.currentTurn.ticket)) return null;
-
-    let new_state = movePlayer(state, player_ordinal, node, state.currentTurn.ticket!);
-
-    new_state.currentTurn.ticket = null;
-    new_state.currentTurn.turnNumber = new_state.currentTurn.turnNumber + (player.description.isDetective ? 0 : 1);
-
-    if (isVictory(new_state)) {
-        return { ...new_state, gameover: { winner: player.description.id } } as ScotlandYardState;
+export function tryPlayNode(state: ScotlandYardState, node: number): PlayResult {
+    if (state.gameover) return { ok: false, message: "The game is over." };
+    if (state.currentTurn.ticket === null) {
+        return { ok: false, message: "Choose a ticket before selecting a station." };
+    }
+    const playerOrdinal = state.currentTurn.playerOrdinal;
+    let player = state.players[playerOrdinal];
+    if (player.position === node) {
+        return { ok: false, message: "You are already on that station." };
     }
 
-    return { ...new_state, gameover: null } as ScotlandYardState;
-};
+    const validTickets = connectionTicketTypes(state, player.position, node);
+    if (validTickets.length === 0) {
+        return { ok: false, message: "There is no direct route to that station." };
+    }
+    if (!validTickets.includes(state.currentTurn.ticket)) {
+        const need = validTickets.map(ticketLabel).join(" or ");
+        return {
+            ok: false,
+            message: `That connection needs a ${need} ticket, not ${ticketLabel(state.currentTurn.ticket)}.`,
+        };
+    }
 
-function movePlayer(state: ScotlandYardState, player_ordinal: number, node: number, ticket: Ticket) {
-    let player = state.players[player_ordinal];
-    if (player.position === node) return state;
-    if (player.position === null) return state;
-    if (player.tickets[ticket] === 0) return state;
+    let result = movePlayer(state, playerOrdinal, node, state.currentTurn.ticket!);
+    if (!result.ok) return result;
+
+    const turnNumberIncrement = (playerOrdinal < state.players.length - 1) ? 0 : 1;
+    let newState = { ...result.state, currentTurn: { ...result.state.currentTurn, ticket: null, turnNumber: result.state.currentTurn.turnNumber + turnNumberIncrement } };
+
+    const winner = getWinner(newState);
+    if (winner !== null) {
+        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } as ScotlandYardState };
+    }
+
+    return { ok: true, state: { ...newState, gameover: null } as ScotlandYardState };
+}
+
+
+function initPlayer(state: ScotlandYardState, playerOrdinal: number, node: number) : PlayResult {
+    let player = state.players[playerOrdinal];
+    player.position = node;
+
+    const turnLogEntry = {
+        turnNumber: state.currentTurn.turnNumber,
+        playerOrdinal: playerOrdinal,
+        ticket: null,
+        position: node,
+    } as TurnLogEntry;
+    return { ok: true, state: { ...state, players: [...state.players.map((p, ix) => ix === playerOrdinal ? player : p)], turnLog: [...state.turnLog, turnLogEntry] } };
+}
+
+function movePlayer(state: ScotlandYardState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
+    let player = state.players[playerOrdinal];
+    if (player.position === node) return { ok: false, message: "You are already on that station." };
+    if (player.position === null) return { ok: false, message: "You are not on any station." };
+    if (player.tickets[ticket] === 0) return { ok: false, message: "You don't have that ticket." };
+    const occupier = state.players.find((p) => p.description.isDetective && p.position === node);
+    if (occupier !== undefined) {
+        return {
+            ok: false,
+            message: `That station is occupied by ${occupier.description.name}.`,
+        };
+    }
     player.tickets[ticket]--;
     player.position = node;
 
-    return { ...state, players: [...state.players.map((p, ix) => ix === player_ordinal ? player : p)] };
+    const turnLogEntry = {
+        turnNumber: state.currentTurn.turnNumber,
+        playerOrdinal: playerOrdinal,
+        ticket: ticket,
+        position: node,
+    } as TurnLogEntry;
+    return { ok: true, state: {
+        ...state,
+        currentTurn: { ...state.currentTurn, ticket: null, playerOrdinal: (playerOrdinal + 1) % state.players.length },
+        players: [...state.players.map((p, ix) => ix === playerOrdinal ? player : p)],
+        turnLog: [...state.turnLog, turnLogEntry],
+    } };
 }

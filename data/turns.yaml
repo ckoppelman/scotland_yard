@@ -1,0 +1,10 @@
+# One entry per round index: whether detectives see Mr X’s station this round.
+turns:
+  - showMrX: false
+  - showMrX: false
+  - showMrX: true
+  - showMrX: false
+  - showMrX: false
+  - showMrX: false
+  - showMrX: false
+  - showMrX: true
