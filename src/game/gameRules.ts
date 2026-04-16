@@ -1,5 +1,5 @@
 import { Ticket } from "../constants";
-import { PlayerDescription, GameState, TurnLogEntry } from "./gameState";
+import { PlayerDescription, GameState, TurnLogEntry, PlayerState } from "./gameState";
 
 export type PlayOk = { ok: true; state: GameState };
 export type PlayFail = { ok: false; message: string };
@@ -125,16 +125,31 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
     player.tickets[ticket]--;
     player.position = node;
 
+    const newPlayers: PlayerState[] = state.players.map((p, ix): PlayerState => {
+        if (player.description.isDetective && !p.description.isDetective) {
+            return { ...p, tickets: { ...p.tickets, [ticket]: p.tickets[ticket] + 1 } };
+        } else if (ix === playerOrdinal) {
+            return player;
+        } else {
+            return p;
+        }
+    });
+
     const turnLogEntry = {
         turnNumber: state.currentTurn.turnNumber,
         playerOrdinal: playerOrdinal,
         ticket: ticket,
         position: node,
     } as TurnLogEntry;
+
     return { ok: true, state: {
         ...state,
-        currentTurn: { ...state.currentTurn, ticket: null, playerOrdinal: (playerOrdinal + 1) % state.players.length },
-        players: [...state.players.map((p, ix) => ix === playerOrdinal ? player : p)],
+        currentTurn: {
+            ...state.currentTurn,
+            ticket: null,
+            playerOrdinal: (playerOrdinal + 1) % state.players.length
+        },
+        players: newPlayers,
         turnLog: [...state.turnLog, turnLogEntry],
     } };
 }
