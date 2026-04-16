@@ -78,7 +78,7 @@ export function tryPlayNode(state: ScotlandYardState, node: number): PlayResult 
 }
 
 
-function initPlayer(state: ScotlandYardState, playerOrdinal: number, node: number) : PlayResult {
+export function initPlayer(state: ScotlandYardState, playerOrdinal: number, node: number): PlayResult {
     let player = state.players[playerOrdinal];
     player.position = node;
 

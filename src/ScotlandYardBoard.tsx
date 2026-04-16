@@ -154,8 +154,8 @@ export function PlayerCard({ player, currentTurn }: { player: PlayerState; curre
             }}
         >
             <div>{player.description.name}</div>
-            <div>{player.description.color.toString()}</div>
-            <div>{player.position || "Not placed"}</div>
+            <div>{player.description.color}</div>
+            <div>{player.position === null ? "Not placed" : player.position}</div>
             <div>
                 <div>Taxi: {player.tickets.taxi}</div>
                 <div>Bus: {player.tickets.bus}</div>
@@ -318,7 +318,7 @@ export function ScotlandYardBoard({ state, onTicketClick, onNodeClick, onReset }
                 {state.players.map((player) => player.description.isDetective ? (
                     <PlayerCard key={player.description.id} player={player} currentTurn={currentTurn} />
                 ) : (
-                    <MrXCard key={player.description.id} state={state} player={player} currentTurn={currentTurn} />
+                    <MrXCard key={player.description.id} state={state} player={player} />
                 ))}
             </div>
             <div className="toolbar">
