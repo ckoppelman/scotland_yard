@@ -1,24 +1,26 @@
 # One entry per round index: whether detectives see Mr X’s station this round.
 turns:
-  - showMrX: false
-  - showMrX: false
-  - showMrX: true
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: true
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: true
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: true
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: false
-  - showMrX: true
+  - showMrX: false  # Round 1
+  - showMrX: false  # Round 2
+  - showMrX: true  # Round 3
+  - showMrX: false  # Round 4
+  - showMrX: false  # Round 5
+  - showMrX: false  # Round 6
+  - showMrX: false  # Round 7
+  - showMrX: true  # Round 8
+  - showMrX: false  # Round 9
+  - showMrX: false  # Round 10
+  - showMrX: false  # Round 11
+  - showMrX: false  # Round 12
+  - showMrX: true  # Round 13
+  - showMrX: false  # Round 14
+  - showMrX: false  # Round 15
+  - showMrX: false  # Round 16
+  - showMrX: false  # Round 17
+  - showMrX: true   # Round 18
+  - showMrX: false  # Round 19
+  - showMrX: false  # Round 20
+  - showMrX: false  # Round 21
+  - showMrX: false  # Round 22
+  - showMrX: false  # Round 23
+  - showMrX: true   # Round 24

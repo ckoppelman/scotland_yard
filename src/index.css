@@ -513,8 +513,8 @@ body {
 
 /* Column-major round log: fill down (~20 rows), then the next column to the right */
 .mr-x-board {
-  --mr-x-board-rows: 15;
-  --mr-x-board-col-width: minmax(10.25rem, 1fr);
+  --mr-x-board-rows: 12;
+  --mr-x-board-col-width: minmax(9.25rem, 1fr);
   display: grid;
   grid-template-rows: repeat(var(--mr-x-board-rows), auto);
   grid-auto-flow: column;
@@ -533,7 +533,7 @@ body {
 
 .mr-x-turn {
   display: grid;
-  grid-template-columns: 1.75rem 1fr 2.5rem;
+  grid-template-columns: 1.75rem 1fr 1.6rem;
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.4rem;
@@ -605,7 +605,7 @@ body {
 }
 
 .mr-x-turn-position {
-  text-align: right;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: rgba(232, 228, 220, 0.95);
