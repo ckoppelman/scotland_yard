@@ -42,7 +42,14 @@ export function PendingTicketPopup({
         if (top + h > window.innerHeight - margin) top = window.innerHeight - h - margin;
         el.style.left = `${left}px`;
         el.style.top = `${top}px`;
-    }, [anchor.x, anchor.y, tickets.length, tickets.join(","), destinationNode]);
+    }, [
+        anchor.x,
+        anchor.y,
+        tickets.length,
+        tickets.join(","),
+        destinationNode,
+        ticketBalances.double,
+    ]);
 
     return (
         <>
@@ -57,7 +64,25 @@ export function PendingTicketPopup({
                 onClick={(e) => e.stopPropagation()}
             >
                 <p id="pending-ticket-popup-title" className="pending-ticket-popup__title">
-                    Ticket to station <strong>{destinationNode}</strong>
+                    <span>Ticket to station <strong>{destinationNode}</strong></span>
+                    {ticketBalances.double > 0 && (
+                        <button
+                            type="button"
+                            className="pending-ticket-popup__twox"
+                            aria-label="2x move — not available yet"
+                            title="Coming soon"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                        >
+                            <span className="pending-ticket-popup__icon" aria-hidden>
+                                🔂
+                            </span>
+                            <span className="pending-ticket-popup__label">2x</span>
+                            <span className="pending-ticket-popup__count">{ticketBalances.double}</span>
+                        </button>
+                    )}
                 </p>
                 <div className="pending-ticket-popup__buttons" role="group" aria-label="Ticket type">
                     {tickets.map((t) => (

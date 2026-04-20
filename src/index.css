@@ -26,6 +26,9 @@
   --shadow-soft: 0 2px 8px rgba(28, 25, 21, 0.06);
   --shadow-lift: 0 8px 28px rgba(28, 25, 21, 0.08);
 
+  --double-ticket-color: #eea159;
+  --double-ticket-color-hover: #f9be70;
+
   font-family: var(--font-ui);
   line-height: 1.5;
   color: var(--ink);
@@ -635,6 +638,10 @@ body {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink);
+  width: 100%;
+  justify-content: space-between;
+  display: inline-flex;
+  align-items: center;
 }
 
 .pending-ticket-popup__buttons {
@@ -686,6 +693,41 @@ body {
   color: var(--ink-muted);
   min-width: 1.15rem;
   text-align: right;
+}
+
+.pending-ticket-popup__twox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.3rem;
+  min-width: 5rem;
+  box-sizing: border-box;
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--line-strong);
+  background: var(--double-ticket-color);
+  cursor: default;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  color: rgb(255, 255, 255);
+  font-weight: 800;
+}
+
+.pending-ticket-popup__twox:hover {
+  background: var(--double-ticket-color-hover);
+  border-color: var(--line);
+}
+
+.pending-ticket-popup__twox .pending-ticket-popup__label {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.pending-ticket-popup__twox .pending-ticket-popup__count {
+  color: white;
+  font-weight: 800;
 }
 
 .pending-ticket-popup__cancel {
