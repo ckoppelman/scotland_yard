@@ -183,7 +183,14 @@ export function tryPlayNode(state: GameState, node: number): PlayResult {
 
     const winner = getWinner(newState);
     if (winner !== null) {
-        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } as GameState };
+        const gameover =
+            winner.isDetective
+                ? { winner: "detective" as const, captureBy: winner.name }
+                : {
+                      winner: "mrX" as const,
+                      detectiveLossReason: `All ${newState.turns.length} rounds are played without a capture — ${winner.name} gets away.`,
+                  };
+        return { ok: true, state: { ...newState, gameover } as GameState };
     }
 
     return { ok: true, state: { ...newState, gameover: null } as GameState };

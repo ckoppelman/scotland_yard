@@ -39,6 +39,7 @@ import {
     pixelCoords,
     sortedConnectionEndpoints,
 } from "./map/mapLayout";
+import { GameOverModal } from "./modals/GameOverModal";
 import { GameIntroModal } from "./modals/GameIntroModal";
 import { PrivacyTurnModal } from "./modals/PrivacyTurnModal";
 import { NewGameSettingsModal } from "./modals/NewGameSettingsModal";
@@ -93,6 +94,7 @@ export function GameBoard({
     const [introFromMenu, setIntroFromMenu] = useState(false);
     const [rulesModalOpen, setRulesModalOpen] = useState(false);
     const [newGameSettingsOpen, setNewGameSettingsOpen] = useState(false);
+    const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -126,6 +128,10 @@ export function GameBoard({
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [menuOpen]);
+
+    useEffect(() => {
+        if (gameover === null) setGameOverModalDismissed(false);
+    }, [gameover]);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -185,6 +191,26 @@ export function GameBoard({
 
     const onNewGameSettingsModalComplete = useCallback(() => {
         setNewGameSettingsOpen(false);
+    }, []);
+
+    const showGameOverModal = gameover !== null && !gameOverModalDismissed;
+    const completeGameOverModalDismiss = useCallback(() => {
+        setGameOverModalDismissed(true);
+    }, []);
+    const gameOverFade = usePrivacyModalFade(showGameOverModal, completeGameOverModalDismiss);
+
+    useEffect(() => {
+        if (!showGameOverModal) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") gameOverFade.requestClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [gameOverFade.requestClose, showGameOverModal]);
+
+    const openNewGameSettingsFromGameOver = useCallback(() => {
+        setGameOverModalDismissed(true);
+        setNewGameSettingsOpen(true);
     }, []);
 
     const mrXPrivacyFade = usePrivacyModalFade(showMrXPrivacyModal, completeMrXPrivacyDismiss);
@@ -582,6 +608,15 @@ export function GameBoard({
                 onOpenRules={() => setRulesModalOpen(true)}
                 onOpenNewGameSettings={openNewGameSettingsFromIntro}
             />
+            {gameover !== null && gameOverFade.mounted && (
+                <GameOverModal
+                    fade={gameOverFade}
+                    gameover={gameover}
+                    onViewMap={gameOverFade.requestClose}
+                    onNewGame={handleNewGame}
+                    onNewGameWithSettings={openNewGameSettingsFromGameOver}
+                />
+            )}
             {newGameSettingsFade.mounted && (
                 <NewGameSettingsModal fade={newGameSettingsFade} onConfirm={confirmNewGameWithSettings} />
             )}

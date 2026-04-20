@@ -48,4 +48,8 @@ export const COLOR_TO_BORDER: Record<Color, string> = {
 export type Ticket = "taxi" | "bus" | "underground" | "black" | "double";
 export type GameOver = {
   winner: "detective" | "mrX";
+  /** Detective who shares Mr. X’s station when the detectives win. */
+  captureBy?: string;
+  /** Shown when Mr. X wins — why the detectives did not prevail. */
+  detectiveLossReason?: string;
 };

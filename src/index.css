@@ -1612,6 +1612,117 @@ body {
   margin-top: 0;
 }
 
+/* Game over — compact result panel */
+.privacy-turn-modal--game-over {
+  z-index: 10008;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.privacy-turn-modal__panel--game-over {
+  width: min(20rem, calc(100% - 1.5rem));
+  max-width: 100%;
+  padding: 1.2rem 1.15rem 1.05rem;
+  text-align: center;
+  background: linear-gradient(175deg, #fefefc 0%, #eef2f9 58%, #e2e8f0 100%);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 12px 32px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 #fff;
+}
+
+.game-over-modal__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.game-over-modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.game-over-modal__detail {
+  margin: 0 0 1rem;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.game-over-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.game-over-modal__btn {
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.game-over-modal__btn--primary {
+  background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
+  color: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.65);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
+.game-over-modal__btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.game-over-modal__btn--primary:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.game-over-modal__btn--secondary {
+  background: #fff;
+  color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.game-over-modal__btn--secondary:hover {
+  background: #f8fafc;
+}
+
+.game-over-modal__btn--secondary:focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
+}
+
+.game-over-modal__btn--link {
+  background: transparent;
+  color: #1d4ed8;
+  border: none;
+  padding: 0.4rem 0.5rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.game-over-modal__btn--link:hover {
+  color: #1e40af;
+}
+
+.game-over-modal__btn--link:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
 /* New game with settings modal */
 .new-game-settings {
   width: 100%;
