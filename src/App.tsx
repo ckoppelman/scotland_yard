@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { GameBoard } from "./game-board";
 import { initialState, type GameState, type NewGameSettings } from "./game/gameState";
 import { Ticket } from "./constants";
-import { getPlayableTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/gameRules";
+import {
+  getPlayableTicketsBetweenNodes,
+  tryCancelDoubleMove,
+  tryPlayDoubleMove,
+  tryPlayMoveToAdjacent,
+  tryPlayNode,
+  tryPlayTicket,
+} from "./game/gameRules";
 import { DEFAULT_GAME_MAP_ID } from "./game/mapIds";
 import { getMapGraph } from "./game/mapRegistry";
 import { useToast } from "./toast";
@@ -34,6 +41,8 @@ export default function App() {
   const [pendingMoveNode, setPendingMoveNode] = useState<number | null>(null);
   /** Screen coords for the “which ticket?” popup after a drag-drop. */
   const [pendingTicketAnchor, setPendingTicketAnchor] = useState<{ x: number; y: number } | null>(null);
+  /** Mirrors game double-move intent for this drag popup (set when user commits 2x; cleared with pending move). */
+  const [pendingDoubleMove, setPendingDoubleMove] = useState(false);
 
   const pendingValidTickets = useMemo(() => {
     if (state === null || pendingMoveNode === null) return null;
@@ -46,6 +55,17 @@ export default function App() {
     return <main className="app-shell app-shell--boot" aria-busy="true" />;
   }
 
+  const handlePendingDoubleMove = () => {
+    if (pendingMoveNode === null) return;
+    const result = tryPlayDoubleMove(state);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    setState(result.state);
+    setPendingDoubleMove(true);
+  };
+
   const handleTicketClick = (ticket: Ticket) => {
     if (pendingMoveNode !== null) {
       const result = tryPlayMoveToAdjacent(state, pendingMoveNode, ticket);
@@ -56,6 +76,7 @@ export default function App() {
       setState(result.state);
       setPendingMoveNode(null);
       setPendingTicketAnchor(null);
+      setPendingDoubleMove(false);
       return;
     }
     const result = tryPlayTicket(state, ticket);
@@ -98,6 +119,9 @@ export default function App() {
     }
     setPendingMoveNode(node);
     if (clientDrop) setPendingTicketAnchor({ x: clientDrop.x, y: clientDrop.y });
+    if (state.currentTurn.doubleMovePart == null) {
+      setPendingDoubleMove(false);
+    }
   };
 
   return (
@@ -109,6 +133,7 @@ export default function App() {
         onReset={(settings?: NewGameSettings) => {
           setPendingMoveNode(null);
           setPendingTicketAnchor(null);
+          setPendingDoubleMove(false);
           clearPersistedGameState();
           setState(
             settings !== undefined
@@ -121,12 +146,21 @@ export default function App() {
         }}
         pendingMoveNode={pendingMoveNode}
         pendingTicketAnchor={pendingTicketAnchor}
+        pendingDoubleMove={pendingDoubleMove}
         onCancelPendingMove={() => {
+          if (state.currentTurn.doubleMovePart === 1) {
+            const undone = tryCancelDoubleMove(state);
+            if (undone.ok) {
+              setState(undone.state);
+            }
+          }
           setPendingMoveNode(null);
           setPendingTicketAnchor(null);
+          setPendingDoubleMove(false);
         }}
         onPlayerDragToStation={handlePlayerDragToStation}
         pendingValidTickets={pendingValidTickets}
+        onPendingDoubleMove={handlePendingDoubleMove}
       />
     </main>
   );

@@ -1,0 +1,118 @@
+/* --- Right edge: tab rail + slide-in panels (does not shrink the map) --- */
+
+.side-dock {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.side-dock > * {
+  pointer-events: auto;
+}
+
+.side-dock__sheet {
+  width: min(26rem, calc(100vw - 3.25rem));
+  max-width: 100%;
+  background: var(--surface-raised);
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--map-paper));
+  border-left: none;
+  box-shadow: -2px 0 12px rgba(28, 25, 21, 0.06);
+  overflow: hidden auto;
+  transform: translateX(100%);
+  transition: transform 0.24s ease;
+}
+
+.side-dock__sheet--open {
+  transform: translateX(0);
+}
+
+.side-dock__sheet:not(.side-dock__sheet--open) {
+  pointer-events: none;
+}
+
+.side-dock__sheet-inner {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.side-dock__tabs {
+  flex-shrink: 0;
+  width: 2.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0.25rem 0;
+  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 88%, var(--map-paper));
+  border-left: none;
+  box-shadow: none;
+}
+
+.side-dock__tab {
+  flex: 0 0 auto;
+  min-height: 4.5rem;
+  margin: 0;
+  padding: 0.4rem 0.15rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+.side-dock__tab:hover {
+  color: var(--ink);
+  background: rgba(28, 25, 21, 0.04);
+}
+
+.side-dock__tab--active {
+  color: var(--accent);
+  background: rgba(124, 45, 58, 0.06);
+  border-left-color: rgba(124, 45, 58, 0.35);
+}
+
+.side-dock__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* --- Status --- */
+
+.game-status {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-left: none;
+  box-shadow: none;
+}
+
+.game-status--over {
+  color: var(--ink-muted);
+}
+

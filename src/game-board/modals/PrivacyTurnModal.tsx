@@ -55,14 +55,14 @@ export function PrivacyTurnModal({ variant, fade, criminalLabel, mrXPlayers, det
                         </p>
                         <p id={titleId} className="privacy-turn-modal__text">
                             Thank you, detectives. Now it&apos;s time for the {criminalLabel} to take their turn. Please
-                            turn away and let them enter their {criminalLabel === "criminal" ? "move" : "moves"}.
+                            turn away and let them enter their {criminalLabel === "fugitive" ? "move" : "moves"}.
                         </p>
                         <button
                             type="button"
                             className="privacy-turn-modal__btn privacy-turn-modal__btn--mrx"
                             onClick={fade.requestClose}
                         >
-                            Ok, {criminalLabel === "criminal" ? "Fugitive" : "Fugitives"} are ready.
+                            Ok, {criminalLabel === "fugitive" ? "Fugitive" : "Fugitives"} are ready.
                         </button>
                     </>
                 ) : (
@@ -70,7 +70,7 @@ export function PrivacyTurnModal({ variant, fade, criminalLabel, mrXPlayers, det
                         <div className="privacy-turn-modal__two-groups">
                             <div>
                                 <p className="privacy-turn-modal__eyebrow privacy-turn-modal__eyebrow--detectives">
-                                    {criminalLabel === "criminal" ? "Fugitive" : "Fugitives"}
+                                    {criminalLabel === "fugitive" ? "Fugitive" : "Fugitives"}
                                 </p>
                                 <div className="privacy-turn-modal__icon-row" aria-hidden>
                                     {mrXPlayers.map((p) => (

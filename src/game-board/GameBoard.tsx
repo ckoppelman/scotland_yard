@@ -56,9 +56,11 @@ export function GameBoard({
     onReset,
     pendingMoveNode,
     pendingTicketAnchor,
+    pendingDoubleMove,
     onCancelPendingMove,
     onPlayerDragToStation,
     pendingValidTickets,
+    onPendingDoubleMove,
 }: GameBoardProps) {
     const { players, mapGraph, gameover, currentTurn, turns, turnLog } = state;
 
@@ -144,7 +146,7 @@ export function GameBoard({
     }, [menuOpen]);
 
     const mrXCount = useMemo(() => players.filter((p) => !p.description.isDetective).length, [players]);
-    const criminalLabel = mrXCount === 1 ? "criminal" : "criminals";
+    const criminalLabel = mrXCount === 1 ? "fugitive" : "fugitives";
 
     const detectives = useMemo(() => players.filter((p) => p.description.isDetective), [players]);
     const mrXPlayers = useMemo(() => players.filter((p) => !p.description.isDetective), [players]);
@@ -661,7 +663,9 @@ export function GameBoard({
                     pendingMoveNode={pendingMoveNode}
                     pendingTicketAnchor={pendingTicketAnchor}
                     pendingValidTickets={pendingValidTickets}
+                    pendingDoubleMove={pendingDoubleMove}
                     onTicketClick={onTicketClick}
+                    onPendingDoubleMove={onPendingDoubleMove}
                     onCancelPendingMove={onCancelPendingMove}
                     activeMarkerDragBindings={activeMarkerDragBindings}
                     tokenDragging={tokenDragging}

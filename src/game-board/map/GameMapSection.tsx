@@ -58,7 +58,9 @@ type Props = {
     pendingMoveNode: number | null;
     pendingTicketAnchor: { x: number; y: number } | null;
     pendingValidTickets: Ticket[] | null;
+    pendingDoubleMove: boolean;
     onTicketClick: (ticket: Ticket) => void;
+    onPendingDoubleMove: () => void;
     onCancelPendingMove: () => void;
     activeMarkerDragBindings: MarkerDragBindings | undefined;
     tokenDragging: boolean;
@@ -100,7 +102,9 @@ export function GameMapSection({
     pendingMoveNode,
     pendingTicketAnchor,
     pendingValidTickets,
+    pendingDoubleMove,
     onTicketClick,
+    onPendingDoubleMove,
     onCancelPendingMove,
     activeMarkerDragBindings,
     tokenDragging,
@@ -200,7 +204,10 @@ export function GameMapSection({
                             destinationNode={pendingMoveNode}
                             tickets={pendingValidTickets}
                             ticketBalances={activePlayer.tickets}
+                            doubleMovePart={currentTurn.doubleMovePart}
+                            pendingDoubleMove={pendingDoubleMove}
                             onPick={onTicketClick}
+                            onPlayDoubleMove={onPendingDoubleMove}
                             onCancel={onCancelPendingMove}
                         />
                     )}

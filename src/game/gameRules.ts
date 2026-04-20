@@ -128,6 +128,51 @@ export function hasPlayableMoveWithTicket(state: GameState, ticket: Ticket): boo
     return false;
 }
 
+export function tryPlayDoubleMove(state: GameState): PlayResult {
+    if (state.gameover) return { ok: false, message: "The game is over." };
+    if (state.currentTurn.ticket !== null) return { ok: false, message: "You have already selected a ticket." };
+    if (state.currentTurn.doubleMovePart != null) return { ok: false, message: "You are already in a double move." };
+    const playerOrdinal = state.currentTurn.playerOrdinal;
+    const player = state.players[playerOrdinal];
+    if (player === undefined) return { ok: false, message: "Invalid turn." };
+    if (player.tickets.double === 0) return { ok: false, message: "You don't have a double ticket." };
+    const players = state.players.map((p, i) =>
+        i === playerOrdinal ? { ...p, tickets: { ...p.tickets, double: p.tickets.double - 1 } } : p,
+    );
+    return {
+        ok: true,
+        state: {
+            ...state,
+            players,
+            currentTurn: { ...state.currentTurn, doubleMovePart: 1 },
+        },
+    };
+}
+
+/** Undoes {@link tryPlayDoubleMove}: refund double ticket and clear part 1 before any leg is completed. */
+export function tryCancelDoubleMove(state: GameState): PlayResult {
+    if (state.gameover) return { ok: false, message: "The game is over." };
+    if (state.currentTurn.doubleMovePart !== 1) {
+        return { ok: false, message: "Not in part 1 of a double move." };
+    }
+    const playerOrdinal = state.currentTurn.playerOrdinal;
+    const players = state.players.map((p, i) =>
+        i === playerOrdinal ? { ...p, tickets: { ...p.tickets, double: p.tickets.double + 1 } } : p,
+    );
+    return {
+        ok: true,
+        state: {
+            ...state,
+            players,
+            currentTurn: {
+                ...state.currentTurn,
+                ticket: null,
+                doubleMovePart: undefined,
+            },
+        },
+    };
+}
+
 /**
  * Select a ticket and move to an adjacent station in one step (for drag-and-drop flow).
  * Fails atomically if the move is illegal.
@@ -210,6 +255,15 @@ export function initPlayer(state: GameState, playerOrdinal: number, node: number
     return { ok: true, state: { ...state, players: [...state.players.map((p, ix) => ix === playerOrdinal ? player : p)], turnLog: [...state.turnLog, turnLogEntry] } };
 }
 
+function getPlayerOrdinalAfterMove(state: GameState): number {
+    const playerOrdinal = state.currentTurn.playerOrdinal;
+    if (state.currentTurn.doubleMovePart === 1) {
+        return playerOrdinal;
+    } else {
+        return (playerOrdinal + 1) % state.players.length;
+    }
+}
+
 function movePlayer(state: GameState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
     let player = state.players[playerOrdinal];
     if (player.position === node) return { ok: false, message: "You are already on that station." };
@@ -223,6 +277,9 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
         };
     }
     player.tickets[ticket]--;
+    if (state.currentTurn.doubleMovePart === 1) {
+        player.tickets.double--;
+    }
     player.position = node;
 
     const newPlayers: PlayerState[] = state.players.map((p, ix): PlayerState => {
@@ -240,6 +297,7 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
         playerOrdinal: playerOrdinal,
         ticket: ticket,
         position: node,
+        doubleMovePart: state.currentTurn.doubleMovePart,
     } as TurnLogEntry;
 
     return { ok: true, state: {
@@ -247,7 +305,8 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
         currentTurn: {
             ...state.currentTurn,
             ticket: null,
-            playerOrdinal: (playerOrdinal + 1) % state.players.length
+            playerOrdinal: getPlayerOrdinalAfterMove(state),
+            doubleMovePart: state.currentTurn.doubleMovePart === 1 ? 2 : undefined,
         },
         players: newPlayers,
         turnLog: [...state.turnLog, turnLogEntry],

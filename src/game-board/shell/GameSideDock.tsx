@@ -84,7 +84,7 @@ export function GameSideDock({
                 )}
                 {sidePanel === "mrx" && (
                     <div className="side-dock__sheet-inner">
-                        <p className="mrx-section__label">Mr. X round log</p>
+                        <p className="mrx-section__label">Mr. X turns</p>
                         {state.players.map((player) =>
                             player.description.isDetective ? null : (
                                 <MrXBoard key={player.description.id} state={state} player={player} />

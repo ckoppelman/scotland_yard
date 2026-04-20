@@ -28,6 +28,7 @@ export type CurrentTurn = {
   playerOrdinal: number;
   ticket: Ticket | null;
   turnNumber: number;
+  doubleMovePart?: 1 | 2;
 };
 
 export type GameState = {
@@ -71,6 +72,7 @@ export type TurnLogEntry = {
   playerOrdinal: number;
   ticket: Ticket | null;
   position: number;
+  doubleMovePart?: 1 | 2;
 };
 
 export type TurnLog = TurnLogEntry[];

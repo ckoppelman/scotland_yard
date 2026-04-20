@@ -16,4 +16,8 @@ export type GameBoardProps = {
     pendingValidTickets: Ticket[] | null;
     /** Screen position of the drop; when set with a pending move, the map popup is shown. */
     pendingTicketAnchor: { x: number; y: number } | null;
+    /** Set when the user commits 2x for this drag popup; cleared with the pending move. */
+    pendingDoubleMove: boolean;
+    /** After drag, user may commit a double (2x) move from the popup; keeps popup open on success. */
+    onPendingDoubleMove: () => void;
 };

@@ -1,11 +1,5 @@
 import { COLOR_TO_BORDER } from "../../constants";
-import type {
-    CurrentTurn,
-    GameState,
-    PlayerState,
-    TurnLogEntry,
-    TurnState,
-} from "../../game/gameState";
+import type { CurrentTurn, GameState, PlayerState, TurnLogEntry } from "../../game/gameState";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
 
@@ -122,10 +116,6 @@ export function MrXCard({
                     <span>Black</span>
                     <span>{player.tickets.black}</span>
                 </div>
-                <div className="mr-x-card-tickets__row">
-                    <span>Double</span>
-                    <span>{player.tickets.double}</span>
-                </div>
             </div>
         </article>
     );
@@ -133,34 +123,51 @@ export function MrXCard({
 
 export function MrXTurn({
     turnNumber,
-    turn,
+    isShowMrXTurn,
     turnLogEntry,
-    isMyTurn,
+    isFugitiveTurn,
+    hasDoubleMovePart1,
+    hasDoubleMovePart2,
 }: {
     turnNumber: number;
-    turn: TurnState;
+    isShowMrXTurn: boolean;
     turnLogEntry: TurnLogEntry | null;
-    isMyTurn: boolean;
+    isFugitiveTurn: boolean;
+    /** From {@link TurnLogEntry.doubleMovePart} for this round (both can be set after a full double). */
+    hasDoubleMovePart1: boolean;
+    hasDoubleMovePart2: boolean;
 }) {
+    const showMrXPosition = isFugitiveTurn && isShowMrXTurn;
+
     const ticketClass = turnLogEntry?.ticket ? `${turnLogEntry.ticket}-ticket` : "no-ticket";
+    const doubleOutlineClass = [
+        hasDoubleMovePart1 ? "double-move-part-1" : "",
+        hasDoubleMovePart2 ? "double-move-part-2" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
     return (
-        <div className={`mr-x-turn ${turn.showMrX ? "show-mr-x" : "hide-mr-x"}`} key={`mr-x-turn-${turnNumber}`}>
-            <span className="mr-x-turn-number">{turnNumber}</span>
+        <div
+            className={`mr-x-turn ${isShowMrXTurn ? "show-mr-x" : "hide-mr-x"} ${doubleOutlineClass}`.trim()}
+        >
+            <span className="mr-x-turn-number">{turnNumber + 1}</span>
             <span className={`mr-x-turn-ticket ${ticketClass}`}>{turnLogEntry?.ticket?.toUpperCase() ?? "—"}</span>
-            <span className="mr-x-turn-position">{isMyTurn ? (turnLogEntry?.position ?? "") : "???"}</span>
+            <span className="mr-x-turn-position">{showMrXPosition ? (turnLogEntry?.position ?? "") : "???"}</span>
         </div>
     );
 }
 
 export function MrXBoard({ state, player }: { state: GameState; player: PlayerState }) {
     const { currentTurn, turnLog, turns } = state;
-    const myTurnLogMap = new Map<number, TurnLogEntry>();
-    for (const turnLogEntry of turnLog.filter(
-        (entry) => entry.ticket !== null && entry.playerOrdinal === player.description.order,
-    )) {
-        myTurnLogMap.set(turnLogEntry.turnNumber, turnLogEntry);
+    /** Same round index can have two Mr. X moves (double); keep all legs for outline + last for display. */
+    const mrXLogByRound = new Map<number, TurnLogEntry[]>();
+    for (const entry of turnLog) {
+        if (entry.ticket === null || entry.playerOrdinal !== player.description.order) continue;
+        const list = mrXLogByRound.get(entry.turnNumber) ?? [];
+        list.push(entry);
+        mrXLogByRound.set(entry.turnNumber, list);
     }
-    const isMyTurn = currentTurn.playerOrdinal === player.description.order;
+    const isFugitiveTurn = state.players[currentTurn.playerOrdinal]?.description.isDetective ?? false;
     return (
         <div
             className="mr-x-board-wrap"
@@ -176,15 +183,24 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
                 <span className="mr-x-board__player-name">{player.description.name}</span>
             </div>
             <div className="mr-x-board">
-                {turns.map((turn, turnNumber) => (
-                    <MrXTurn
-                        key={`${turnNumber}-${player.description.order}`}
-                        turnNumber={turnNumber}
-                        turn={turn}
-                        turnLogEntry={myTurnLogMap.get(turnNumber) ?? null}
-                        isMyTurn={isMyTurn}
-                    />
-                ))}
+                {turns.map((turn, roundIndex) => {
+                    const entries = mrXLogByRound.get(roundIndex) ?? [];
+                    const primary = entries[entries.length - 1] ?? null;
+                    const hasDoubleMovePart1 = entries.some((e) => e.doubleMovePart === 1);
+                    const hasDoubleMovePart2 = entries.some((e) => e.doubleMovePart === 2);
+                    const isShowMrXTurn = turn.showMrX ?? false;
+                    return (
+                        <MrXTurn
+                            key={`${roundIndex}-${player.description.order}`}
+                            turnNumber={roundIndex}
+                            isShowMrXTurn={isShowMrXTurn}
+                            turnLogEntry={primary}
+                            isFugitiveTurn={isFugitiveTurn}
+                            hasDoubleMovePart1={hasDoubleMovePart1}
+                            hasDoubleMovePart2={hasDoubleMovePart2}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

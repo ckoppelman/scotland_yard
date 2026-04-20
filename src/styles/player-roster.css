@@ -1,0 +1,155 @@
+/* --- Player roster --- */
+
+.player-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.player-roster__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.player-roster__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.player-card {
+  flex: 1 1 140px;
+  min-width: 130px;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+  user-select: none;
+}
+
+.player-card.my-turn {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+  opacity: 1;
+}
+
+.player-card:not(.my-turn) {
+  opacity: 0.88;
+}
+
+.player-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.player-card__pawn {
+  flex-shrink: 0;
+  color: var(--ink);
+  filter: drop-shadow(0 1px 2px rgba(28, 25, 21, 0.12));
+}
+
+.player-card__head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-card__head-text .player-card__name {
+  margin-bottom: 0.2rem;
+}
+
+.player-card__head-text .player-card__meta {
+  margin-bottom: 0;
+}
+
+.player-card__head-text:not(:has(.player-card__meta)) .player-card__name {
+  margin-bottom: 0;
+}
+
+.player-card__name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+  color: var(--ink);
+}
+
+.player-card__meta {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin: 0 0 0.5rem;
+  text-transform: capitalize;
+}
+
+.player-card__station {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 0.5rem;
+  color: var(--ink);
+}
+
+.player-card__tickets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.player-card__tickets dt {
+  margin: 0;
+  font-weight: 500;
+}
+
+.player-card__tickets dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-align: right;
+}
+
+.mr-x-card.player-card {
+  border-style: dashed;
+}
+
+.mr-x-card .player-card__name {
+  letter-spacing: 0.02em;
+}
+
+.mr-x-card-position {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.mr-x-card-tickets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+}
+
+.mr-x-card-tickets__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.mr-x-card-tickets__row span:last-child {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+

@@ -1,0 +1,332 @@
+/* --- Map SVG --- */
+
+.board-map-toolbar {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.65rem;
+  margin-bottom: 0.3rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+}
+
+.board-zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.board-zoom-btn:hover {
+  background: var(--surface);
+  border-color: var(--line-strong);
+}
+
+.board-zoom-btn:active {
+  transform: translateY(1px);
+}
+
+.board-zoom-btn--text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: auto;
+  padding: 0 0.65rem;
+}
+
+.board-map-toolbar__zoom {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 3rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.board-map-toolbar__hint {
+  flex: 1 1 140px;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+@media (max-width: 520px) {
+  .board-map-toolbar__hint {
+    flex-basis: 100%;
+  }
+}
+
+.board-wrap {
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.board-svg {
+  display: block;
+  border-radius: 0;
+}
+
+.board-svg--pannable {
+  touch-action: none;
+  cursor: grab;
+}
+
+.board-svg--pannable:active {
+  cursor: grabbing;
+}
+
+/* Stroke color comes from each edge’s `stroke` attribute (ticket type).
+   Hide vector edges when the printed board art already shows routes; show them on schematic maps (no image). */
+.board-svg:not(.board-svg--no-board-image) .connection-line {
+  display: none;
+}
+
+.board-svg .connection-line {
+  stroke-linecap: round;
+}
+
+.board-svg .board-node {
+  cursor: pointer;
+}
+
+/* Ticket-first move: legal destinations for the selected ticket */
+.board-svg .board-node.board-node--move-target .board-node-part {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.95));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .board-svg .board-node.board-node--move-target .board-node-part {
+    animation: board-node-move-target-pulse 1.35s ease-in-out infinite;
+  }
+
+  .board-svg .board-node.board-node--move-target:hover .board-node-part {
+    animation: none;
+    filter: drop-shadow(0 0 15px rgba(37, 99, 235, 1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-svg .board-node.board-node--move-target .board-node-part {
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.88));
+  }
+
+  .board-svg .board-node.board-node--move-target:hover .board-node-part {
+    filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.95));
+  }
+}
+
+@keyframes board-node-move-target-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 7px rgba(59, 130, 246, 0.82));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(37, 99, 235, 0.98));
+  }
+}
+
+/*
+ * Station = three pieces (classic board): top cap, wide middle, bottom cap.
+ * Top: green if bus, else yellow. Middle: red if underground, else yellow. Bottom: yellow.
+ */
+.board-svg .board-node-part {
+  stroke-width: 2;
+  paint-order: stroke fill;
+  transition:
+    fill 0.15s ease,
+    filter 0.15s ease;
+}
+
+.board-svg .board-node-part-top--green {
+  fill: #6bc94a;
+  stroke: #1f4d1a;
+}
+
+.board-svg .board-node:hover .board-node-part-top--green {
+  fill: #7dd45c;
+}
+
+.board-svg .board-node-part-top--yellow {
+  fill: #fff3c2;
+  stroke: #8a7200;
+}
+
+.board-svg .board-node:hover .board-node-part-top--yellow {
+  fill: #ffe88a;
+}
+
+.board-svg .board-node-part-mid--red {
+  fill: #e53935;
+  stroke: #6b0f0f;
+}
+
+.board-svg .board-node:hover .board-node-part-mid--red {
+  fill: #ef5350;
+}
+
+.board-svg .board-node-part-mid--yellow {
+  fill: #fff3c2;
+  stroke: #8a7200;
+}
+
+.board-svg .board-node:hover .board-node-part-mid--yellow {
+  fill: #ffe88a;
+}
+
+.board-svg .board-node-part-bot--yellow {
+  fill: #fff3c2;
+  stroke: #8a7200;
+}
+
+.board-svg .board-node:hover .board-node-part-bot--yellow {
+  fill: #ffe88a;
+}
+
+.board-svg .board-node:active .board-node-part {
+  filter: brightness(0.97);
+}
+
+.board-svg .board-node-text {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  fill: #14110d;
+  paint-order: stroke fill;
+  /* Light halo so digits stay readable on yellow / cream middle */
+  stroke: rgba(255, 252, 245, 0.92);
+  stroke-width: 2.25px;
+  stroke-linejoin: round;
+  user-select: none;
+  dominant-baseline: central;
+}
+
+.board-svg .board-node-text--on-red {
+  fill: #fffefb;
+  stroke: rgba(20, 5, 5, 0.55);
+  stroke-width: 1.75px;
+  stroke-linejoin: round;
+}
+
+.board-svg .player-marker {
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  transition: transform 0.42s cubic-bezier(0.25, 0.82, 0.25, 1);
+}
+
+.board-svg .player-marker--dragging {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-svg .player-marker {
+    transition: none;
+  }
+}
+
+/* Softer pawns when it’s not their turn */
+.board-svg .player-marker:not(.player-marker--active-turn) {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35)) brightness(0.88) saturate(0.88);
+}
+
+.board-svg .player-marker--active-turn {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35)) brightness(1.14) saturate(1.14) contrast(1.02);
+}
+
+.board-svg .player-marker--active-turn.player-marker--interactive.player-marker--dragging {
+  cursor: grabbing;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)) brightness(1.1) saturate(1.12);
+}
+
+.board-svg .player-marker--interactive {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.board-svg .player-marker--interactive.player-marker--dragging:not(.player-marker--active-turn) {
+  cursor: grabbing;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+/* Extra separation vs station band colors (red/green/yellow). */
+.board-svg .player-marker--detective .detective-marker-icon {
+  filter:
+    drop-shadow(0 0 1px rgba(255, 254, 252, 1))
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.85))
+    drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+}
+
+.board-svg .player-marker-label {
+  font-family: var(--font-ui);
+  letter-spacing: 0.02em;
+}
+
+.board-svg .player-marker-station {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.board-svg .player-marker-station--active-turn {
+  fill: #0d0b08;
+  stroke: #fffef9;
+  stroke-width: 2.1px;
+}
+
+@keyframes player-marker-halo-pulse {
+  0% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.board-svg .player-marker__halo {
+  animation: player-marker-halo-pulse 0.9s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-svg .player-marker__halo {
+    animation: player-marker-halo-pulse-reduced 0.2s ease-out 1 forwards;
+  }
+}
+
+@keyframes player-marker-halo-pulse-reduced {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.45;
+  }
+}
+

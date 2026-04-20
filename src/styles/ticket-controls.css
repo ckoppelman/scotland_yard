@@ -1,0 +1,139 @@
+/* --- Ticket controls --- */
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.control-panel__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.control-panel__pending-hint {
+  margin: 0;
+}
+
+.control-panel__cancel-move {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.control-panel__cancel-move:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.control-panel__player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.control-panel__player-info-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.control-panel__player-info .player-card--control-embed {
+  flex: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.ticket-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ticket-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 6.75rem;
+  padding: 0.45rem 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.ticket-btn:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--ink-muted);
+}
+
+.ticket-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ticket-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ticket-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ticket-btn__icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ticket-btn__name {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.ticket-btn__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--ink-muted);
+  min-width: 1.15rem;
+  text-align: right;
+}
+
+.ticket-hint {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 500;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+

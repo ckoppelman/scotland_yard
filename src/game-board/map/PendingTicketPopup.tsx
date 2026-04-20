@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import type { Ticket } from "../../constants";
-import type { PlayerState } from "../../game/gameState";
+import type { CurrentTurn, PlayerState } from "../../game/gameState";
 
 const TICKET_POPUP_UI: Record<Ticket, { icon: string; label: string }> = {
     taxi: { icon: "🚕", label: "Taxi" },
@@ -15,17 +15,28 @@ export function PendingTicketPopup({
     destinationNode,
     tickets,
     ticketBalances,
+    doubleMovePart,
+    pendingDoubleMove,
     onPick,
+    onPlayDoubleMove,
     onCancel,
 }: {
     anchor: { x: number; y: number };
     destinationNode: number;
     tickets: Ticket[];
     ticketBalances: PlayerState["tickets"];
+    doubleMovePart: CurrentTurn["doubleMovePart"];
+    /** App-local: user committed 2x for this drag (mirrors {@link pendingMoveNode}). */
+    pendingDoubleMove: boolean;
     onPick: (ticket: Ticket) => void;
+    onPlayDoubleMove: () => void;
     onCancel: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
+    const inDoubleMove = pendingDoubleMove || doubleMovePart != null;
+    const canStartDouble =
+        !pendingDoubleMove && doubleMovePart == null && ticketBalances.double > 0;
+    const showDoubleSlot = canStartDouble || doubleMovePart != null;
 
     useLayoutEffect(() => {
         const el = ref.current;
@@ -49,6 +60,10 @@ export function PendingTicketPopup({
         tickets.join(","),
         destinationNode,
         ticketBalances.double,
+        doubleMovePart,
+        pendingDoubleMove,
+        inDoubleMove,
+        showDoubleSlot,
     ]);
 
     return (
@@ -56,34 +71,52 @@ export function PendingTicketPopup({
             <div className="pending-ticket-popup__backdrop" role="presentation" onClick={onCancel} />
             <div
                 ref={ref}
-                className="pending-ticket-popup"
+                className={`pending-ticket-popup${inDoubleMove ? " pending-ticket-popup--double-move" : ""}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="pending-ticket-popup-title"
                 style={{ position: "fixed", left: 0, top: 0, zIndex: 4001 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <p id="pending-ticket-popup-title" className="pending-ticket-popup__title">
-                    <span>Ticket to station <strong>{destinationNode}</strong></span>
-                    {ticketBalances.double > 0 && (
-                        <button
-                            type="button"
-                            className="pending-ticket-popup__twox"
-                            aria-label="2x move — not available yet"
-                            title="Coming soon"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }}
-                        >
-                            <span className="pending-ticket-popup__icon" aria-hidden>
-                                🔂
-                            </span>
-                            <span className="pending-ticket-popup__label">2x</span>
-                            <span className="pending-ticket-popup__count">{ticketBalances.double}</span>
-                        </button>
-                    )}
-                </p>
+                <div className="pending-ticket-popup__header">
+                    <p id="pending-ticket-popup-title" className="pending-ticket-popup__title-text">
+                        Ticket to station <strong>{destinationNode}</strong>
+                    </p>
+                    {showDoubleSlot &&
+                        (canStartDouble ? (
+                            <button
+                                type="button"
+                                className="pending-ticket-popup__twox pending-ticket-popup__twox--start"
+                                aria-label="Start double move — use two tickets this turn"
+                                title="Double move"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onPlayDoubleMove();
+                                }}
+                            >
+                                <span className="pending-ticket-popup__icon" aria-hidden>
+                                    🔂
+                                </span>
+                                <span className="pending-ticket-popup__label">2x</span>
+                                <span className="pending-ticket-popup__count">{ticketBalances.double}</span>
+                            </button>
+                        ) : (
+                            <div
+                                className="pending-ticket-popup__twox pending-ticket-popup__twox--leg"
+                                role="status"
+                                aria-live="polite"
+                                aria-label={doubleMovePart === 1 ? "Double move: part 1" : "Double move: part 2"}
+                            >
+                                <span className="pending-ticket-popup__icon" aria-hidden>
+                                    🔂
+                                </span>
+                                <span className="pending-ticket-popup__label">
+                                    {doubleMovePart === 1 ? "Part 1" : "Part 2"}
+                                </span>
+                            </div>
+                        ))}
+                </div>
                 <div className="pending-ticket-popup__buttons" role="group" aria-label="Ticket type">
                     {tickets.map((t) => (
                         <button
@@ -100,8 +133,13 @@ export function PendingTicketPopup({
                         </button>
                     ))}
                 </div>
-                <button type="button" className="pending-ticket-popup__cancel" onClick={onCancel}>
-                    Cancel
+                <button
+                    type="button"
+                    className="pending-ticket-popup__cancel"
+                    onClick={onCancel}
+                    aria-label={pendingDoubleMove || doubleMovePart === 1 ? "Cancel double move" : "Cancel"}
+                >
+                    {pendingDoubleMove || doubleMovePart === 1 ? "Cancel Double Move" : "Cancel"}
                 </button>
             </div>
         </>

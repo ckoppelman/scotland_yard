@@ -1,0 +1,166 @@
+/* --- Pending ticket popup (drag-drop to adjacent station) --- */
+
+.pending-ticket-popup__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3999;
+  background: rgba(28, 25, 21, 0.14);
+}
+
+.pending-ticket-popup {
+  width: min(280px, calc(100vw - 24px));
+  padding: 0.65rem 0.75rem 0.5rem;
+  font-family: var(--font-ui);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+}
+
+.pending-ticket-popup--double-move {
+  background: color-mix(in srgb, var(--double-ticket-color) 32%, var(--surface-raised));
+  border: 2px solid #0d0d0d;
+  box-shadow: var(--shadow-lift);
+}
+
+.pending-ticket-popup--double-move .pending-ticket-popup__title-text {
+  color: #0d0d0d;
+}
+
+.pending-ticket-popup__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.6rem;
+  margin: 0 0 0.5rem;
+}
+
+.pending-ticket-popup__title-text {
+  margin: 0;
+  flex: 1 1 8rem;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pending-ticket-popup__header .pending-ticket-popup__twox {
+  flex-shrink: 0;
+  min-width: 5.25rem;
+  align-self: center;
+}
+
+.pending-ticket-popup__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.pending-ticket-popup__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.3rem;
+  min-width: 7rem;
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.pending-ticket-popup__btn:hover {
+  background: var(--map-paper);
+  border-color: var(--accent);
+}
+
+.pending-ticket-popup__icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pending-ticket-popup__label {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.pending-ticket-popup__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--ink-muted);
+  min-width: 1.15rem;
+  text-align: right;
+}
+
+.pending-ticket-popup__twox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.3rem;
+  min-width: 7rem;
+  box-sizing: border-box;
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid #0d0d0d;
+  background: var(--double-ticket-color);
+  color: #0d0d0d;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.pending-ticket-popup__twox--start {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.pending-ticket-popup__twox--start:hover {
+  background: var(--double-ticket-color-hover);
+}
+
+.pending-ticket-popup__twox--leg {
+  cursor: default;
+  font-weight: 800;
+}
+
+.pending-ticket-popup__twox .pending-ticket-popup__label {
+  flex: 1 1 auto;
+  text-align: left;
+  font-weight: 800;
+}
+
+.pending-ticket-popup__twox--start .pending-ticket-popup__count {
+  font-variant-numeric: tabular-nums;
+  color: rgba(13, 13, 13, 0.85);
+}
+
+.pending-ticket-popup__cancel {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.3rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.pending-ticket-popup__cancel:hover {
+  color: var(--ink);
+  background: rgba(28, 25, 21, 0.06);
+}
+
