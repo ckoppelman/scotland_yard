@@ -1,6 +1,6 @@
 import type { Ticket } from "../constants";
 
-export const STROKE_WIDTH = 4;
+export const STROKE_WIDTH = 2;
 
 export const CONNECTION_TO_COLOR_AND_OFFSET: Record<Ticket, { color: string; offset: number }> = {
     taxi: { color: "#f5cc00", offset: -STROKE_WIDTH / 2 },
@@ -10,21 +10,31 @@ export const CONNECTION_TO_COLOR_AND_OFFSET: Record<Ticket, { color: string; off
     double: { color: "#c45c26", offset: 0 },
 };
 
-export const GRID_TO_PX = 90;
-export const PX_PAD = 15;
+export const GRID_TO_PX = 30;
+export const PX_PAD = 5;
 
 /** Space around the map so player tokens (which extend past node centers) are not clipped. */
-export const MAP_GUTTER = 36;
+export const MAP_GUTTER = 0;
 
 export const MIN_MAP_ZOOM = 0.6;
 export const MAX_MAP_ZOOM = 3.5;
 export const MAP_ZOOM_STEP = 1.18;
 
+/** Neutral map view before privacy modals so pan/zoom doesn’t leak between teams. */
+export const PRIVACY_MODAL_MAP_ZOOM = 1;
+export const PRIVACY_MODAL_MAP_PAN: { x: number; y: number } = { x: 0, y: 0 };
+
+/** Intro modal: official publisher site (Scotland Yard and related games). */
+export const RAVENSBURGER_HOME_URL = "https://www.ravensburger.com/en-US";
+
+/** Copyright year in the intro footer. */
+export const APP_COPYRIGHT_YEAR = 2026;
+
 /** Rough radius around a station center for drop hit-testing (SVG units). */
-export const NODE_DROP_HIT_R = 38;
+export const NODE_DROP_HIT_R = 15;
 
 /** Horizontal spread when multiple pieces share a station. */
-export const TOKEN_STACK_SPREAD = 36;
+export const TOKEN_STACK_SPREAD = 15;
 
 /** Pawn art on sidebar cards (smaller than map markers; fits 48×48 viewBox). */
 export const CARD_ICON_DETECTIVE_SCALE = 0.085;

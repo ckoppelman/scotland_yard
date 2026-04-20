@@ -1,24 +1,50 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GameBoard } from "./game-board";
-import { initialState, type GameState } from "./game/gameState";
+import { initialState, type GameState, type NewGameSettings } from "./game/gameState";
 import { Ticket } from "./constants";
-import { getTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/gameRules";
+import { getPlayableTicketsBetweenNodes, tryPlayMoveToAdjacent, tryPlayNode, tryPlayTicket } from "./game/gameRules";
+import { DEFAULT_GAME_MAP_ID } from "./game/mapIds";
+import { getMapGraph } from "./game/mapRegistry";
 import { useToast } from "./toast";
-import { interestingMapGraph } from "./game/defaultMapGraph";
+import {
+  clearPersistedGameState,
+  loadPersistedGameState,
+  saveGameState,
+} from "./game/persistGameState";
 
 export default function App() {
   const { showToast } = useToast();
-  const [state, setState] = useState<GameState>(() => initialState(interestingMapGraph, 2, 1));
+  const [state, setState] = useState<GameState | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadPersistedGameState().then((loaded) => {
+      if (cancelled) return;
+      setState(loaded ?? initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (state === null) return;
+    void saveGameState(state);
+  }, [state]);
   const [pendingMoveNode, setPendingMoveNode] = useState<number | null>(null);
   /** Screen coords for the “which ticket?” popup after a drag-drop. */
   const [pendingTicketAnchor, setPendingTicketAnchor] = useState<{ x: number; y: number } | null>(null);
 
   const pendingValidTickets = useMemo(() => {
-    if (pendingMoveNode === null) return null;
+    if (state === null || pendingMoveNode === null) return null;
     const p = state.players[state.currentTurn.playerOrdinal];
     if (p.position === null) return [];
-    return getTicketsBetweenNodes(state, p.position, pendingMoveNode).filter((t) => p.tickets[t] > 0);
+    return getPlayableTicketsBetweenNodes(state, p.position, pendingMoveNode);
   }, [pendingMoveNode, state]);
+
+  if (state === null) {
+    return <main className="app-shell app-shell--boot" aria-busy="true" />;
+  }
 
   const handleTicketClick = (ticket: Ticket) => {
     if (pendingMoveNode !== null) {
@@ -65,7 +91,7 @@ export default function App() {
       showToast("Finish or change your ticket selection first.", "error");
       return;
     }
-    const playable = getTicketsBetweenNodes(state, p.position, node).filter((t) => p.tickets[t] > 0);
+    const playable = getPlayableTicketsBetweenNodes(state, p.position, node);
     if (playable.length === 0) {
       showToast("Drop on an adjacent station you can reach with a ticket you still have.", "error");
       return;
@@ -76,18 +102,22 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <h1 className="app-title">Scotland Yard</h1>
-      <p className="app-tagline">
-        Drag your pawn to an adjacent station, then pick a ticket — or choose a ticket and click the map.
-      </p>
       <GameBoard
         state={state}
         onTicketClick={handleTicketClick}
         onNodeClick={handleNodeClick}
-        onReset={() => {
+        onReset={(settings?: NewGameSettings) => {
           setPendingMoveNode(null);
           setPendingTicketAnchor(null);
-          setState(initialState(interestingMapGraph, 2, 1));
+          clearPersistedGameState();
+          setState(
+            settings !== undefined
+              ? initialState(settings.mapId, getMapGraph(settings.mapId), settings.numDetectives, settings.numFugitives, {
+                  detective: settings.detectiveTickets,
+                  fugitive: settings.fugitiveTickets,
+                })
+              : initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1),
+          );
         }}
         pendingMoveNode={pendingMoveNode}
         pendingTicketAnchor={pendingTicketAnchor}

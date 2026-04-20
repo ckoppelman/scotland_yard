@@ -36,6 +36,99 @@ export function getTicketsBetweenNodes(state: GameState, node1: number | null, n
 }
 
 /**
+ * Tickets the current player may spend for a move along this edge (includes black as a wildcard when stocked).
+ */
+export function getPlayableTicketsBetweenNodes(state: GameState, node1: number | null, node2: number | null): Ticket[] {
+    const player = state.players[state.currentTurn.playerOrdinal];
+    const edgeTickets = connectionTicketTypes(state, node1, node2);
+    if (edgeTickets.length === 0) return [];
+    const playable = new Set<Ticket>();
+    for (const t of edgeTickets) {
+        if (player.tickets[t] > 0) playable.add(t);
+    }
+    if (player.tickets.black > 0) playable.add("black");
+    return [...playable];
+}
+
+/** Whether spending `played` is legal for an edge that supports `edgeTickets`. Black is a wildcard for any link. */
+function ticketAllowsEdge(played: Ticket, edgeTickets: Ticket[]): boolean {
+    if (edgeTickets.length === 0) return false;
+    if (played === "black") return true;
+    return edgeTickets.includes(played);
+}
+
+function neighborStationIds(state: GameState, from: number): number[] {
+    const out = new Set<number>();
+    for (const conn of state.mapGraph.connections) {
+        if (!conn.nodes.has(from)) continue;
+        for (const n of conn.nodes) {
+            if (n !== from) out.add(n);
+        }
+    }
+    return [...out];
+}
+
+/**
+ * Stations the current player can legally move to using the already-selected ticket (ticket-first flow).
+ * Mirrors `tryPlayNode` + occupier rules from `movePlayer`.
+ */
+export function getReachableNodesForSelectedTicket(state: GameState): number[] {
+    if (state.gameover || state.currentTurn.ticket === null) return [];
+    const player = state.players[state.currentTurn.playerOrdinal];
+    if (player.position === null) return [];
+    const from = player.position;
+    const t = state.currentTurn.ticket;
+    const reachable: number[] = [];
+    for (const node of neighborStationIds(state, from)) {
+        const validTickets = connectionTicketTypes(state, from, node);
+        if (!ticketAllowsEdge(t, validTickets)) continue;
+        const occupier = state.players.find((p) => p.description.isDetective && p.position === node);
+        if (occupier !== undefined) continue;
+        reachable.push(node);
+    }
+    return reachable;
+}
+
+/**
+ * Stations the current player could drop onto after a drag, using any ticket they still hold on a valid edge.
+ * (Preview while dragging before a ticket is chosen.)
+ */
+export function getReachableNodesForDragPreview(state: GameState): number[] {
+    if (state.gameover) return [];
+    const player = state.players[state.currentTurn.playerOrdinal];
+    if (player.position === null) return [];
+    const from = player.position;
+    const reachable: number[] = [];
+    for (const node of neighborStationIds(state, from)) {
+        const validTickets = connectionTicketTypes(state, from, node);
+        const canAffordSomeEdge =
+            validTickets.some((ticket) => player.tickets[ticket] > 0) ||
+            (player.tickets.black > 0 && validTickets.length > 0);
+        if (!canAffordSomeEdge) continue;
+        const occupier = state.players.find((p) => p.description.isDetective && p.position === node);
+        if (occupier !== undefined) continue;
+        reachable.push(node);
+    }
+    return reachable;
+}
+
+/** True if the current player can legally start a move using this ticket (has stock, edge exists, target not blocked). */
+export function hasPlayableMoveWithTicket(state: GameState, ticket: Ticket): boolean {
+    if (state.gameover) return false;
+    const player = state.players[state.currentTurn.playerOrdinal];
+    if (player.position === null || player.tickets[ticket] <= 0) return false;
+    const from = player.position;
+    for (const node of neighborStationIds(state, from)) {
+        const validTickets = connectionTicketTypes(state, from, node);
+        if (!ticketAllowsEdge(ticket, validTickets)) continue;
+        const occupier = state.players.find((p) => p.description.isDetective && p.position === node);
+        if (occupier !== undefined) continue;
+        return true;
+    }
+    return false;
+}
+
+/**
  * Select a ticket and move to an adjacent station in one step (for drag-and-drop flow).
  * Fails atomically if the move is illegal.
  */
@@ -74,11 +167,11 @@ export function tryPlayNode(state: GameState, node: number): PlayResult {
     if (validTickets.length === 0) {
         return { ok: false, message: "There is no direct route to that station." };
     }
-    if (!validTickets.includes(state.currentTurn.ticket)) {
+    if (!ticketAllowsEdge(state.currentTurn.ticket, validTickets)) {
         const need = validTickets.map(ticketLabel).join(" or ");
         return {
             ok: false,
-            message: `That connection needs a ${need} ticket, not ${ticketLabel(state.currentTurn.ticket)}.`,
+            message: `That connection needs a ${need} ticket (or black as a wildcard), not ${ticketLabel(state.currentTurn.ticket)}.`,
         };
     }
 

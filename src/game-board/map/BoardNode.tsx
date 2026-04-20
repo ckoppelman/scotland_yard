@@ -4,7 +4,7 @@ import {
     STATION_CAP_SAGITTA,
     STATION_MID_H,
     STATION_MID_W,
-} from "./constants";
+} from "../constants";
 import type { StationBoardLook } from "./mapLayout";
 
 type StationLayout = {
@@ -63,15 +63,21 @@ type BoardNodeProps = {
     coords: { x: number; y: number };
     stationLook: StationBoardLook;
     onNodeClick: (node: number) => void;
+    /** True when this station is a legal destination for the currently selected ticket. */
+    highlightReachable?: boolean;
 };
 
-function BoardNodeInner({ nodeId, coords, stationLook, onNodeClick }: BoardNodeProps) {
+function BoardNodeInner({ nodeId, coords, stationLook, onNodeClick, highlightReachable }: BoardNodeProps) {
     const cx = coords.x;
     const cy = coords.y;
     const layout = stationLayout(cx, cy);
 
     return (
-        <g className="board-node" onClick={() => onNodeClick(nodeId)} role="presentation">
+        <g
+            className={`board-node${highlightReachable ? " board-node--move-target" : ""}`}
+            onClick={() => onNodeClick(nodeId)}
+            role="presentation"
+        >
             <StationPartsColored layout={layout} look={stationLook} />
             <text
                 x={cx}

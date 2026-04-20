@@ -1,8 +1,8 @@
-import { COLOR_TO_BORDER } from "../constants";
-import type { PlayerState } from "../game/gameState";
-import { DetectiveMarkerIcon } from "../DetectiveMarkerIcon";
-import { MrXMarkerIcon } from "../MrXMarkerIcon";
-import { CARD_ICON_DETECTIVE_SCALE, CARD_ICON_MRX_SCALE } from "./constants";
+import { COLOR_TO_BORDER } from "../../constants";
+import type { PlayerState } from "../../game/gameState";
+import { DetectiveMarkerIcon } from "../../DetectiveMarkerIcon";
+import { MrXMarkerIcon } from "../../MrXMarkerIcon";
+import { CARD_ICON_DETECTIVE_SCALE, CARD_ICON_MRX_SCALE } from "../constants";
 
 export function PlayerCardPawnIcon({ player }: { player: PlayerState }) {
     const fill = COLOR_TO_BORDER[player.description.color];

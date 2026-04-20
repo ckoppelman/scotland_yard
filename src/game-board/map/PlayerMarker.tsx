@@ -1,8 +1,8 @@
 import { memo, type PointerEvent } from "react";
-import { COLOR_TO_BORDER } from "../constants";
-import type { PlayerState } from "../game/gameState";
-import { DetectiveMarkerIcon } from "../DetectiveMarkerIcon";
-import { MrXMarkerIcon } from "../MrXMarkerIcon";
+import { COLOR_TO_BORDER } from "../../constants";
+import type { PlayerState } from "../../game/gameState";
+import { DetectiveMarkerIcon } from "../../DetectiveMarkerIcon";
+import { MrXMarkerIcon } from "../../MrXMarkerIcon";
 
 type PlayerMarkerProps = {
     player: PlayerState;
@@ -21,6 +21,11 @@ type PlayerMarkerProps = {
     isDragging?: boolean;
     /** Current turn — token is visually emphasized on the map. */
     isActiveTurn?: boolean;
+    /**
+     * Increments when the matching player card is clicked so the map token can pulse.
+     * Omit or leave 0 when no pulse is requested.
+     */
+    boardPulseKey?: number;
 };
 
 function PlayerMarkerInner({
@@ -32,6 +37,7 @@ function PlayerMarkerInner({
     dragBindings,
     isDragging,
     isActiveTurn = false,
+    boardPulseKey = 0,
 }: PlayerMarkerProps) {
     const fill = COLOR_TO_BORDER[player.description.color];
     const stationY = 44;
@@ -42,7 +48,7 @@ function PlayerMarkerInner({
     return (
         <g
             className={`player-marker ${player.description.isDetective ? "player-marker--detective" : "player-marker--mrx"}${interactive ? " player-marker--interactive" : ""}${isDragging ? " player-marker--dragging" : ""}${isActiveTurn ? " player-marker--active-turn" : ""}`}
-            transform={`translate(${nx}, ${ny})`}
+            style={{ transform: `matrix(1, 0, 0, 1, ${nx}, ${ny})` }}
             pointerEvents={interactive ? "auto" : "none"}
             aria-hidden={!interactive}
             aria-grabbed={interactive ? isDragging : undefined}
@@ -52,6 +58,18 @@ function PlayerMarkerInner({
             onPointerCancel={dragBindings?.onPointerCancel}
             id={`player-marker-${player.description.id}`}
         >
+            {boardPulseKey > 0 && (
+                <ellipse
+                    key={boardPulseKey}
+                    className="player-marker__halo"
+                    cx={0}
+                    cy={-4}
+                    rx={40}
+                    ry={32}
+                    fill="rgba(255, 210, 90, 0.55)"
+                    pointerEvents="none"
+                />
+            )}
             {player.description.isDetective ? (
                 <DetectiveMarkerIcon fill={fill} />
             ) : (

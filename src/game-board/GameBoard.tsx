@@ -1,32 +1,52 @@
 import {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
     type MouseEvent,
     type PointerEvent,
 } from "react";
-import { CONNECTION_TO_COLOR_AND_OFFSET, MAP_ZOOM_STEP, NODE_DROP_HIT_R } from "./constants";
-import { BoardNode } from "./BoardNode";
-import { ConnectionEdge } from "./ConnectionEdge";
-import { ControlPanel } from "./ControlPanel";
+import { type Ticket } from "../constants";
+import {
+    getReachableNodesForDragPreview,
+    getReachableNodesForSelectedTicket,
+    hasPlayableMoveWithTicket,
+} from "../game/gameRules";
+import type { NewGameSettings, PlayerState } from "../game/gameState";
+import { resolveMapLayout } from "../game/resolveMapLayout";
+import {
+    CONNECTION_TO_COLOR_AND_OFFSET,
+    MAP_ZOOM_STEP,
+    NODE_DROP_HIT_R,
+    PRIVACY_MODAL_MAP_PAN,
+    PRIVACY_MODAL_MAP_ZOOM,
+} from "./constants";
+import { getGameStatusText } from "./gameStatusText";
+import { BoardNode } from "./map/BoardNode";
+import { ConnectionEdge } from "./map/ConnectionEdge";
+import { GameMapSection } from "./map/GameMapSection";
 import {
     buildNodePixelPositions,
     buildNodeStationBoardLook,
     clampMapPan,
     clampMapZoom,
     clientToSvgPoint,
+    mapBoardBackgroundRect,
     mapSvgFrame,
     parallelConnectionEndpoints,
     pixelCoords,
     sortedConnectionEndpoints,
-    stackDxForPlayer,
-} from "./mapLayout";
-import { MrXBoard, MrXCard, PlayerCard } from "./playerCards";
-import { PendingTicketPopup } from "./PendingTicketPopup";
-import { PlayerMarker } from "./PlayerMarker";
+} from "./map/mapLayout";
+import { GameIntroModal } from "./modals/GameIntroModal";
+import { PrivacyTurnModal } from "./modals/PrivacyTurnModal";
+import { NewGameSettingsModal } from "./modals/NewGameSettingsModal";
+import { QuickRulesModal } from "./modals/QuickRulesModal";
 import type { GameBoardProps } from "./types";
+import { usePrivacyModalFade } from "./modals/usePrivacyModalFade";
+import { AppGameMenu } from "./shell/AppGameMenu";
+import { GameSideDock } from "./shell/GameSideDock";
 
 export function GameBoard({
     state,
@@ -39,18 +59,210 @@ export function GameBoard({
     onPlayerDragToStation,
     pendingValidTickets,
 }: GameBoardProps) {
-    const { players, mapGraph, gameover, currentTurn, turns } = state;
+    const { players, mapGraph, gameover, currentTurn, turns, turnLog } = state;
 
-    const nodePixelPositions = useMemo(() => buildNodePixelPositions(mapGraph), [mapGraph]);
+    const activePlayer = state.players[state.currentTurn.playerOrdinal];
+
+    const mrXPrivacyTurnKey = useMemo(() => {
+        if (gameover) return null;
+        const p = players[currentTurn.playerOrdinal];
+        if (p.description.isDetective) return null;
+        const lastEntry = turnLog[turnLog.length - 1];
+        if (lastEntry === undefined) return null;
+        const lastMover = players[lastEntry.playerOrdinal];
+        if (!lastMover.description.isDetective) return null;
+        return `${currentTurn.turnNumber}-fugitives`;
+    }, [gameover, players, currentTurn.turnNumber, turnLog]);
+
+    const [dismissedMrXPrivacyKey, setDismissedMrXPrivacyKey] = useState<string | null>(null);
+
+    const detectivePrivacyTurnKey = useMemo(() => {
+        if (gameover) return null;
+        if (currentTurn.playerOrdinal !== 0) return null;
+        if (!players[0].description.isDetective) return null;
+        const lastEntry = turnLog[turnLog.length - 1];
+        if (lastEntry === undefined) return null;
+        const lastMover = players[lastEntry.playerOrdinal];
+        if (lastMover.description.isDetective) return null;
+        if (lastEntry.playerOrdinal !== players.length - 1) return null;
+        return `${currentTurn.turnNumber}-detectives`;
+    }, [gameover, currentTurn.playerOrdinal, currentTurn.turnNumber, players, turnLog]);
+
+    const [dismissedDetectivePrivacyKey, setDismissedDetectivePrivacyKey] = useState<string | null>(null);
+    const [dismissedGameIntro, setDismissedGameIntro] = useState(false);
+    const [introFromMenu, setIntroFromMenu] = useState(false);
+    const [rulesModalOpen, setRulesModalOpen] = useState(false);
+    const [newGameSettingsOpen, setNewGameSettingsOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement | null>(null);
+
+    const [sidePanel, setSidePanel] = useState<"control" | "mrx" | "players" | null>(null);
+
+    const toggleSidePanel = useCallback((id: "control" | "mrx" | "players") => {
+        setSidePanel((p) => (p === id ? null : id));
+    }, []);
+
+    const bumpMarkerPulseFromPlayerCard = useCallback((player: PlayerState) => {
+        setMarkerBoardPulseKeyById((prev) => ({
+            ...prev,
+            [player.description.id]: (prev[player.description.id] ?? 0) + 1,
+        }));
+    }, []);
+
+    useEffect(() => {
+        if (sidePanel === null) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setSidePanel(null);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [sidePanel]);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setMenuOpen(false);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [menuOpen]);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onPointerDown = (e: Event) => {
+            if (menuRef.current?.contains(e.target as Node)) return;
+            setMenuOpen(false);
+        };
+        document.addEventListener("pointerdown", onPointerDown, true);
+        return () => document.removeEventListener("pointerdown", onPointerDown, true);
+    }, [menuOpen]);
+
+    const mrXCount = useMemo(() => players.filter((p) => !p.description.isDetective).length, [players]);
+    const criminalLabel = mrXCount === 1 ? "criminal" : "criminals";
+
+    const detectives = useMemo(() => players.filter((p) => p.description.isDetective), [players]);
+    const mrXPlayers = useMemo(() => players.filter((p) => !p.description.isDetective), [players]);
+
+    const handleNewGame = useCallback(() => {
+        setIntroFromMenu(false);
+        setDismissedGameIntro(false);
+        setDismissedMrXPrivacyKey(null);
+        setDismissedDetectivePrivacyKey(null);
+        onReset();
+    }, [onReset]);
+
+    const showGameIntroModal =
+        (!gameover && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
+
+    const showMrXPrivacyModal =
+        mrXPrivacyTurnKey !== null && dismissedMrXPrivacyKey !== mrXPrivacyTurnKey;
+
+    const showDetectivePrivacyModal =
+        detectivePrivacyTurnKey !== null && dismissedDetectivePrivacyKey !== detectivePrivacyTurnKey;
+
+    const completeMrXPrivacyDismiss = useCallback(() => {
+        if (mrXPrivacyTurnKey !== null) setDismissedMrXPrivacyKey(mrXPrivacyTurnKey);
+    }, [mrXPrivacyTurnKey]);
+
+    const completeDetectivePrivacyDismiss = useCallback(() => {
+        if (detectivePrivacyTurnKey !== null) setDismissedDetectivePrivacyKey(detectivePrivacyTurnKey);
+    }, [detectivePrivacyTurnKey]);
+
+    const completeGameIntroDismiss = useCallback(() => {
+        setDismissedGameIntro(true);
+        setIntroFromMenu(false);
+    }, []);
+
+    const openNewGameSettingsFromIntro = useCallback(() => {
+        setDismissedGameIntro(true);
+        setIntroFromMenu(false);
+        setNewGameSettingsOpen(true);
+    }, []);
+
+    const onRulesModalComplete = useCallback(() => {
+        setRulesModalOpen(false);
+    }, []);
+
+    const onNewGameSettingsModalComplete = useCallback(() => {
+        setNewGameSettingsOpen(false);
+    }, []);
+
+    const mrXPrivacyFade = usePrivacyModalFade(showMrXPrivacyModal, completeMrXPrivacyDismiss);
+    const detectivePrivacyFade = usePrivacyModalFade(showDetectivePrivacyModal, completeDetectivePrivacyDismiss);
+    const gameIntroFade = usePrivacyModalFade(showGameIntroModal, completeGameIntroDismiss);
+    const rulesFade = usePrivacyModalFade(rulesModalOpen, onRulesModalComplete);
+    const newGameSettingsFade = usePrivacyModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
+
+    const confirmNewGameWithSettings = useCallback(
+        (settings: NewGameSettings) => {
+            setIntroFromMenu(false);
+            setDismissedGameIntro(false);
+            setDismissedMrXPrivacyKey(null);
+            setDismissedDetectivePrivacyKey(null);
+            onReset(settings);
+            newGameSettingsFade.requestClose();
+        },
+        [newGameSettingsFade.requestClose, onReset],
+    );
+
+    useEffect(() => {
+        if (!newGameSettingsOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") newGameSettingsFade.requestClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [newGameSettingsOpen, newGameSettingsFade.requestClose]);
+
+    const mapLayout = useMemo(() => resolveMapLayout(mapGraph), [mapGraph]);
+    const nodePixelPositions = useMemo(
+        () => buildNodePixelPositions(mapGraph, mapLayout),
+        [mapGraph, mapLayout],
+    );
     const nodeStationLook = useMemo(() => buildNodeStationBoardLook(mapGraph), [mapGraph]);
+    const boardBackgroundRect = useMemo(() => mapBoardBackgroundRect(mapLayout), [mapLayout]);
 
     const { width: contentW, height: contentH, frameTx, frameTy } = useMemo(
-        () => mapSvgFrame(mapGraph, nodePixelPositions),
-        [mapGraph, nodePixelPositions],
+        () => mapSvgFrame(mapGraph, nodePixelPositions, mapLayout),
+        [mapGraph, nodePixelPositions, mapLayout],
     );
+
+    const mapAreaRef = useRef<HTMLDivElement>(null);
+    const [mapAreaPx, setMapAreaPx] = useState(() =>
+        typeof window !== "undefined" ? { w: window.innerWidth, h: window.innerHeight } : { w: 0, h: 0 },
+    );
+
+    useLayoutEffect(() => {
+        const el = mapAreaRef.current;
+        if (!el) return;
+        const read = () => {
+            const r = el.getBoundingClientRect();
+            setMapAreaPx({ w: r.width, h: r.height });
+        };
+        read();
+        const ro = new ResizeObserver(read);
+        ro.observe(el);
+        window.addEventListener("resize", read);
+        return () => {
+            ro.disconnect();
+            window.removeEventListener("resize", read);
+        };
+    }, []);
+
+    const { layoutW, layoutH } = useMemo(() => {
+        const w = mapAreaPx.w;
+        const h = mapAreaPx.h;
+        if (w <= 0 || h <= 0 || contentW <= 0 || contentH <= 0) {
+            return { layoutW: contentW, layoutH: contentH };
+        }
+        const pad = 8;
+        const s = Math.min(1, (w - pad) / contentW, (h - pad) / contentH);
+        return { layoutW: contentW * s, layoutH: contentH * s };
+    }, [mapAreaPx, contentW, contentH]);
 
     const [mapZoom, setMapZoom] = useState(1);
     const [mapPan, setMapPan] = useState({ x: 0, y: 0 });
+    const [markerBoardPulseKeyById, setMarkerBoardPulseKeyById] = useState<Record<string, number>>({});
     const svgRef = useRef<SVGSVGElement | null>(null);
     const suppressClickRef = useRef(false);
     const dragRef = useRef<null | { startClient: { x: number; y: number }; startPan: { x: number; y: number } }>(
@@ -103,6 +315,13 @@ export function GameBoard({
         setMapZoom(1);
         setMapPan({ x: 0, y: 0 });
     }, []);
+
+    useLayoutEffect(() => {
+        if (!showMrXPrivacyModal && !showDetectivePrivacyModal && !showGameIntroModal) return;
+        setMapZoom(PRIVACY_MODAL_MAP_ZOOM);
+        setMapPan(clampMapPan(PRIVACY_MODAL_MAP_PAN, PRIVACY_MODAL_MAP_ZOOM, contentW, contentH));
+        window.scrollTo(0, 0);
+    }, [showDetectivePrivacyModal, showGameIntroModal, showMrXPrivacyModal, contentW, contentH]);
 
     const findNodeAtSvgPoint = useCallback(
         (sx: number, sy: number): number | null => {
@@ -200,6 +419,66 @@ export function GameBoard({
             .sort((a, b) => (a.description.order === ord ? 1 : 0) - (b.description.order === ord ? 1 : 0));
     }, [state.players, state.currentTurn.playerOrdinal]);
 
+    /** Ticket-first move, or drag preview: any station that can legally complete the move from here. */
+    const highlightedMoveTargetNodes = useMemo(() => {
+        const s = new Set<number>();
+        if (gameover) return s;
+        if (pendingMoveNode !== null) return s;
+        if (state.currentTurn.ticket !== null) {
+            for (const n of getReachableNodesForSelectedTicket(state)) s.add(n);
+            return s;
+        }
+        if (tokenDragging) {
+            for (const n of getReachableNodesForDragPreview(state)) s.add(n);
+        }
+        return s;
+    }, [gameover, pendingMoveNode, state, tokenDragging]);
+
+    const mapConnectionElements = useMemo(
+        () =>
+            mapGraph.connections.map((connection) => {
+                const [a, b] = sortedConnectionEndpoints(connection.nodes);
+                const style = CONNECTION_TO_COLOR_AND_OFFSET[connection.ticket];
+                const p1 = pixelCoords(nodePixelPositions, a);
+                const p2 = pixelCoords(nodePixelPositions, b);
+                const line = parallelConnectionEndpoints(p1, p2, style.offset);
+                return (
+                    <ConnectionEdge
+                        key={`${a}-${b}-${connection.ticket}`}
+                        x1={line.x1}
+                        y1={line.y1}
+                        x2={line.x2}
+                        y2={line.y2}
+                        stroke={style.color}
+                    />
+                );
+            }),
+        [mapGraph.connections, nodePixelPositions],
+    );
+
+    const mapBoardNodeElements = useMemo(
+        () =>
+            mapGraph.nodes.map((node) => (
+                <BoardNode
+                    key={`node-${node.id}`}
+                    nodeId={node.id}
+                    coords={pixelCoords(nodePixelPositions, node.id)}
+                    stationLook={nodeStationLook.get(node.id)!}
+                    onNodeClick={onNodeClick}
+                    highlightReachable={highlightedMoveTargetNodes.has(node.id)}
+                />
+            )),
+        [mapGraph.nodes, nodePixelPositions, nodeStationLook, onNodeClick, highlightedMoveTargetNodes],
+    );
+
+    const ticketPlayableFromCurrentNode = useMemo((): Record<Ticket, boolean> => {
+        const r = {} as Record<Ticket, boolean>;
+        (["taxi", "bus", "underground", "black", "double"] as const).forEach((t) => {
+            r[t] = hasPlayableMoveWithTicket(state, t);
+        });
+        return r;
+    }, [state]);
+
     const onMapPointerDown = useCallback(
         (e: PointerEvent<SVGSVGElement>) => {
             const panButton = e.button === 1;
@@ -278,173 +557,98 @@ export function GameBoard({
     const viewBoxH = contentH / mapZoom;
     const viewBox = `${mapPan.x} ${mapPan.y} ${viewBoxW} ${viewBoxH}`;
 
-    let status: string;
-    if (gameover) {
-        status = `Case closed — ${gameover.winner === "detective" ? "the detectives" : "Mr. X"} wins.`;
-    } else {
-        status = `${players[state.currentTurn.playerOrdinal].description.name}'s turn.`;
-        if (turns[currentTurn.turnNumber]?.showMrX ?? false) {
-            status += " Mr. X’s station will be revealed this round.";
-        } else if (turns[currentTurn.turnNumber - 1]?.showMrX ?? false) {
-            status += " Mr. X’s station is revealed!";
-        }
-    }
+    const status = useMemo(() => getGameStatusText(state), [state]);
 
     return (
-        <div className="game-layout">
-            <p className={`game-status ${gameover ? "game-status--over" : ""}`}>{status}</p>
-
-            <div className="game-panels">
-                <section className="panel panel--map" aria-label="Game map">
-                    <div className="board-map-toolbar" role="toolbar" aria-label="Map zoom">
-                        <button type="button" className="board-zoom-btn" onClick={zoomOut} aria-label="Zoom out">
-                            −
-                        </button>
-                        <span className="board-map-toolbar__zoom" aria-live="polite">
-                            {Math.round(mapZoom * 100)}%
-                        </span>
-                        <button type="button" className="board-zoom-btn" onClick={zoomIn} aria-label="Zoom in">
-                            +
-                        </button>
-                        <button type="button" className="board-zoom-btn board-zoom-btn--text" onClick={resetMapView}>
-                            Reset
-                        </button>
-                        <span className="board-map-toolbar__hint">+/− to zoom · scroll to pan map · drag when zoomed</span>
-                    </div>
-                    <div
-                        className="board-wrap"
-                        style={{
-                            width: `${contentW}px`,
-                            height: `${contentH}px`,
-                        }}
-                    >
-                        <svg
-                            ref={svgRef}
-                            className={`board-svg${mapZoom > 1 ? " board-svg--pannable" : ""}`}
-                            width={contentW}
-                            height={contentH}
-                            viewBox={viewBox}
-                            style={{ minWidth: "100%" }}
-                            onPointerDown={onMapPointerDown}
-                            onPointerMove={onMapPointerMove}
-                            onPointerUp={onMapPointerUp}
-                            onPointerCancel={onMapPointerUp}
-                            onLostPointerCapture={endMapDrag}
-                            onClickCapture={onMapClickCapture}
-                        >
-                            <g transform={`translate(${frameTx}, ${frameTy})`}>
-                                {mapGraph.connections.map((connection) => {
-                                    const [a, b] = sortedConnectionEndpoints(connection.nodes);
-                                    const style = CONNECTION_TO_COLOR_AND_OFFSET[connection.ticket];
-                                    const p1 = pixelCoords(nodePixelPositions, a);
-                                    const p2 = pixelCoords(nodePixelPositions, b);
-                                    const line = parallelConnectionEndpoints(p1, p2, style.offset);
-                                    return (
-                                        <ConnectionEdge
-                                            key={`${a}-${b}-${connection.ticket}`}
-                                            x1={line.x1}
-                                            y1={line.y1}
-                                            x2={line.x2}
-                                            y2={line.y2}
-                                            stroke={style.color}
-                                        />
-                                    );
-                                })}
-                                {mapGraph.nodes.map((node) => (
-                                    <BoardNode
-                                        key={`node-${node.id}`}
-                                        nodeId={node.id}
-                                        coords={pixelCoords(nodePixelPositions, node.id)}
-                                        stationLook={nodeStationLook.get(node.id)!}
-                                        onNodeClick={onNodeClick}
-                                    />
-                                ))}
-                                {markersRenderOrder.map((player) => {
-                                    const activePlayer = state.players[state.currentTurn.playerOrdinal];
-                                    const isActive = player.description.order === activePlayer.description.order;
-                                    const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
-                                    if (state.gameover === null &&
-                                        !player.description.isDetective &&
-                                        !shouldShowMrX &&
-                                        activePlayer.description.isDetective) {
-                                        return null;
-                                    }
-                                    return (
-                                        <PlayerMarker
-                                            key={player.description.id}
-                                            player={player}
-                                            stationId={player.position!}
-                                            stackDx={stackDxForPlayer(state.players, player)}
-                                            coords={pixelCoords(nodePixelPositions, player.position!)}
-                                            dragBindings={isActive ? activeMarkerDragBindings : undefined}
-                                            dragNudge={isActive && tokenDragging ? tokenDragVisual : undefined}
-                                            isDragging={isActive && tokenDragging}
-                                            isActiveTurn={isActive}
-                                        />
-                                    );
-                                })}
-                            </g>
-                        </svg>
-                    </div>
-                    {pendingMoveNode !== null &&
-                        pendingTicketAnchor !== null &&
-                        pendingValidTickets !== null &&
-                        pendingValidTickets.length > 0 && (
-                            <PendingTicketPopup
-                                anchor={pendingTicketAnchor}
-                                destinationNode={pendingMoveNode}
-                                tickets={pendingValidTickets}
-                                onPick={onTicketClick}
-                                onCancel={onCancelPendingMove}
-                            />
-                        )}
-                </section>
-
-                <aside className="panel panel--sidebar">
-                    <ControlPanel
-                        players={players}
-                        currentTurn={state.currentTurn}
-                        onClick={onTicketClick}
-                        gameover={!!gameover}
-                        pendingDestinationNode={pendingMoveNode}
-                        pendingValidTickets={pendingValidTickets}
-                        onCancelPendingMove={onCancelPendingMove}
-                        ticketSelectionInMapPopup={pendingMoveNode !== null && pendingTicketAnchor !== null}
-                    />
-
-                    <div>
-                        <p className="mrx-section__label">Mr. X round log</p>
-                        {state.players.map((player) =>
-                            player.description.isDetective ? null : (
-                                <MrXBoard key={player.description.id} state={state} player={player} />
-                            ),
-                        )}
-                    </div>
-
-                    <div className="player-roster">
-                        <p className="player-roster__label">Players</p>
-                        <div className="player-roster__grid">
-                            {state.players.map((player) =>
-                                player.description.isDetective ? (
-                                    <PlayerCard
-                                        key={player.description.id}
-                                        player={player}
-                                        currentTurn={currentTurn}
-                                    />
-                                ) : (
-                                    <MrXCard key={player.description.id} state={state} player={player} />
-                                ),
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="toolbar">
-                        <button type="button" className="btn-secondary" onClick={onReset}>
-                            New game
-                        </button>
-                    </div>
-                </aside>
+        <>
+            <PrivacyTurnModal
+                variant="mrx"
+                fade={mrXPrivacyFade}
+                criminalLabel={criminalLabel}
+                mrXPlayers={mrXPlayers}
+                detectives={detectives}
+            />
+            <PrivacyTurnModal
+                variant="detectives"
+                fade={detectivePrivacyFade}
+                criminalLabel={criminalLabel}
+                mrXPlayers={mrXPlayers}
+                detectives={detectives}
+            />
+            <GameIntroModal
+                fade={gameIntroFade}
+                introFromMenu={introFromMenu}
+                turnLogLength={turnLog.length}
+                onOpenRules={() => setRulesModalOpen(true)}
+                onOpenNewGameSettings={openNewGameSettingsFromIntro}
+            />
+            {newGameSettingsFade.mounted && (
+                <NewGameSettingsModal fade={newGameSettingsFade} onConfirm={confirmNewGameWithSettings} />
+            )}
+            <QuickRulesModal fade={rulesFade} />
+            <AppGameMenu
+                menuRef={menuRef}
+                menuOpen={menuOpen}
+                setMenuOpen={setMenuOpen}
+                onNewGame={handleNewGame}
+                onOpenNewGameSettings={() => setNewGameSettingsOpen(true)}
+                onOpenIntro={() => setIntroFromMenu(true)}
+                onOpenRules={() => setRulesModalOpen(true)}
+            />
+            <div className="game-layout">
+                <GameMapSection
+                    mapAreaRef={mapAreaRef}
+                    svgRef={svgRef}
+                    layoutW={layoutW}
+                    layoutH={layoutH}
+                    mapLayout={mapLayout}
+                    mapZoom={mapZoom}
+                    viewBox={viewBox}
+                    frameTx={frameTx}
+                    frameTy={frameTy}
+                    boardBackgroundRect={boardBackgroundRect}
+                    mapConnectionElements={mapConnectionElements}
+                    mapBoardNodeElements={mapBoardNodeElements}
+                    onMapPointerDown={onMapPointerDown}
+                    onMapPointerMove={onMapPointerMove}
+                    onMapPointerUp={onMapPointerUp}
+                    endMapDrag={endMapDrag}
+                    onMapClickCapture={onMapClickCapture}
+                    zoomOut={zoomOut}
+                    zoomIn={zoomIn}
+                    resetMapView={resetMapView}
+                    markersRenderOrder={markersRenderOrder}
+                    state={state}
+                    turns={turns}
+                    currentTurn={currentTurn}
+                    activePlayer={activePlayer}
+                    nodePixelPositions={nodePixelPositions}
+                    pendingMoveNode={pendingMoveNode}
+                    pendingTicketAnchor={pendingTicketAnchor}
+                    pendingValidTickets={pendingValidTickets}
+                    onTicketClick={onTicketClick}
+                    onCancelPendingMove={onCancelPendingMove}
+                    activeMarkerDragBindings={activeMarkerDragBindings}
+                    tokenDragging={tokenDragging}
+                    tokenDragVisual={tokenDragVisual}
+                    markerBoardPulseKeyById={markerBoardPulseKeyById}
+                />
+                <GameSideDock
+                    sidePanel={sidePanel}
+                    toggleSidePanel={toggleSidePanel}
+                    state={state}
+                    status={status}
+                    activePlayer={activePlayer}
+                    players={players}
+                    bumpMarkerPulseFromPlayerCard={bumpMarkerPulseFromPlayerCard}
+                    onTicketClick={onTicketClick}
+                    pendingMoveNode={pendingMoveNode}
+                    pendingTicketAnchor={pendingTicketAnchor}
+                    pendingValidTickets={pendingValidTickets}
+                    ticketPlayableFromCurrentNode={ticketPlayableFromCurrentNode}
+                    onCancelPendingMove={onCancelPendingMove}
+                />
             </div>
-        </div>
+        </>
     );
 }

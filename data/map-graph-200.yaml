@@ -1,0 +1,1498 @@
+# Auto-generated (scripts/generate-map-200.mjs): 200 nodes, London-style mesh + Thames band.
+# Layout: 20×10 stratified grid with jitter; rows 8–9 are north/south river banks.
+
+nodes:
+  - id: 1
+    position: { x: 5.25, y: 4.35 }
+  - id: 2
+    position: { x: 9.65, y: 5.3 }
+  - id: 3
+    position: { x: 15.4, y: 3.9 }
+  - id: 4
+    position: { x: 21.4, y: 4.25 }
+  - id: 5
+    position: { x: 25.75, y: 3.35 }
+  - id: 6
+    position: { x: 31.5, y: 4.1 }
+  - id: 7
+    position: { x: 38.15, y: 4.6 }
+  - id: 8
+    position: { x: 44.65, y: 5.2 }
+  - id: 9
+    position: { x: 49.5, y: 5.35 }
+  - id: 10
+    position: { x: 55.05, y: 4.25 }
+  - id: 11
+    position: { x: 60, y: 3.8 }
+  - id: 12
+    position: { x: 66.9, y: 5.05 }
+  - id: 13
+    position: { x: 71.4, y: 3.6 }
+  - id: 14
+    position: { x: 77.95, y: 3.35 }
+  - id: 15
+    position: { x: 84, y: 4.8 }
+  - id: 16
+    position: { x: 87.85, y: 4.8 }
+  - id: 17
+    position: { x: 93.05, y: 3.8 }
+  - id: 18
+    position: { x: 99.65, y: 4.85 }
+  - id: 19
+    position: { x: 104.95, y: 4.4 }
+  - id: 20
+    position: { x: 110.65, y: 3.4 }
+  - id: 21
+    position: { x: 5.15, y: 12.4 }
+  - id: 22
+    position: { x: 9.25, y: 11.15 }
+  - id: 23
+    position: { x: 16.85, y: 11.9 }
+  - id: 24
+    position: { x: 20.95, y: 10.1 }
+  - id: 25
+    position: { x: 26.05, y: 11.1 }
+  - id: 26
+    position: { x: 32, y: 11.15 }
+  - id: 27
+    position: { x: 38.65, y: 11.15 }
+  - id: 28
+    position: { x: 43.7, y: 11.6 }
+  - id: 29
+    position: { x: 49.1, y: 11.05 }
+  - id: 30
+    position: { x: 55.2, y: 11.5 }
+  - id: 31
+    position: { x: 59.4, y: 11.25 }
+  - id: 32
+    position: { x: 66.45, y: 11.5 }
+  - id: 33
+    position: { x: 71.05, y: 10.15 }
+  - id: 34
+    position: { x: 77.2, y: 12.4 }
+  - id: 35
+    position: { x: 83.7, y: 12.2 }
+  - id: 36
+    position: { x: 87.4, y: 10.6 }
+  - id: 37
+    position: { x: 95.05, y: 11.15 }
+  - id: 38
+    position: { x: 98.5, y: 10.4 }
+  - id: 39
+    position: { x: 105.6, y: 11.8 }
+  - id: 40
+    position: { x: 110.75, y: 10.4 }
+  - id: 41
+    position: { x: 4.4, y: 18.05 }
+  - id: 42
+    position: { x: 10, y: 19.2 }
+  - id: 43
+    position: { x: 15.35, y: 18.8 }
+  - id: 44
+    position: { x: 20.5, y: 19.25 }
+  - id: 45
+    position: { x: 27.2, y: 17.85 }
+  - id: 46
+    position: { x: 32.6, y: 19.05 }
+  - id: 47
+    position: { x: 38.3, y: 18.7 }
+  - id: 48
+    position: { x: 43.2, y: 18.75 }
+  - id: 49
+    position: { x: 50.4, y: 18.6 }
+  - id: 50
+    position: { x: 55.3, y: 18.1 }
+  - id: 51
+    position: { x: 61, y: 18.5 }
+  - id: 52
+    position: { x: 65.45, y: 19.1 }
+  - id: 53
+    position: { x: 70.5, y: 19.2 }
+  - id: 54
+    position: { x: 78.3, y: 18.1 }
+  - id: 55
+    position: { x: 83.5, y: 17.5 }
+  - id: 56
+    position: { x: 89.6, y: 17.35 }
+  - id: 57
+    position: { x: 93, y: 18.75 }
+  - id: 58
+    position: { x: 99.25, y: 18 }
+  - id: 59
+    position: { x: 105.4, y: 17.4 }
+  - id: 60
+    position: { x: 110.1, y: 17.1 }
+  - id: 61
+    position: { x: 4.3, y: 25.85 }
+  - id: 62
+    position: { x: 9.5, y: 25.55 }
+  - id: 63
+    position: { x: 15.5, y: 24.95 }
+  - id: 64
+    position: { x: 21.85, y: 25.25 }
+  - id: 65
+    position: { x: 27.95, y: 26 }
+  - id: 66
+    position: { x: 32.95, y: 25.05 }
+  - id: 67
+    position: { x: 37.8, y: 26 }
+  - id: 68
+    position: { x: 43.4, y: 25.05 }
+  - id: 69
+    position: { x: 49.05, y: 25.05 }
+  - id: 70
+    position: { x: 55.8, y: 26.25 }
+  - id: 71
+    position: { x: 60.6, y: 26.1 }
+  - id: 72
+    position: { x: 66.9, y: 24.7 }
+  - id: 73
+    position: { x: 71.5, y: 26.15 }
+  - id: 74
+    position: { x: 77, y: 24.4 }
+  - id: 75
+    position: { x: 84, y: 24.85 }
+  - id: 76
+    position: { x: 89.3, y: 24.75 }
+  - id: 77
+    position: { x: 93.7, y: 25.15 }
+  - id: 78
+    position: { x: 99.1, y: 25.1 }
+  - id: 79
+    position: { x: 105.35, y: 26.05 }
+  - id: 80
+    position: { x: 110.2, y: 25.7 }
+  - id: 81
+    position: { x: 3.45, y: 32.45 }
+  - id: 82
+    position: { x: 8.9, y: 33 }
+  - id: 83
+    position: { x: 15.9, y: 31.5 }
+  - id: 84
+    position: { x: 20.9, y: 33 }
+  - id: 85
+    position: { x: 26.85, y: 33.1 }
+  - id: 86
+    position: { x: 32.2, y: 31.45 }
+  - id: 87
+    position: { x: 39.1, y: 32.6 }
+  - id: 88
+    position: { x: 43.9, y: 33.55 }
+  - id: 89
+    position: { x: 49.75, y: 32.85 }
+  - id: 90
+    position: { x: 53.85, y: 31.7 }
+  - id: 91
+    position: { x: 60.9, y: 31.65 }
+  - id: 92
+    position: { x: 66.5, y: 31.85 }
+  - id: 93
+    position: { x: 70.55, y: 33.2 }
+  - id: 94
+    position: { x: 78.4, y: 32.25 }
+  - id: 95
+    position: { x: 83, y: 33.15 }
+  - id: 96
+    position: { x: 89.35, y: 32.55 }
+  - id: 97
+    position: { x: 94.75, y: 33.05 }
+  - id: 98
+    position: { x: 100.5, y: 32.95 }
+  - id: 99
+    position: { x: 106, y: 32.95 }
+  - id: 100
+    position: { x: 110.3, y: 31.2 }
+  - id: 101
+    position: { x: 4.45, y: 39.6 }
+  - id: 102
+    position: { x: 9.9, y: 40.3 }
+  - id: 103
+    position: { x: 14.9, y: 40.25 }
+  - id: 104
+    position: { x: 20.5, y: 39.5 }
+  - id: 105
+    position: { x: 25.8, y: 38.5 }
+  - id: 106
+    position: { x: 31.75, y: 40.05 }
+  - id: 107
+    position: { x: 38.8, y: 38.55 }
+  - id: 108
+    position: { x: 44.75, y: 40.2 }
+  - id: 109
+    position: { x: 49.55, y: 39.55 }
+  - id: 110
+    position: { x: 53.95, y: 40.35 }
+  - id: 111
+    position: { x: 61.45, y: 38.5 }
+  - id: 112
+    position: { x: 65, y: 39.05 }
+  - id: 113
+    position: { x: 72.8, y: 39.1 }
+  - id: 114
+    position: { x: 76.1, y: 39.35 }
+  - id: 115
+    position: { x: 83.95, y: 39.65 }
+  - id: 116
+    position: { x: 89, y: 40.35 }
+  - id: 117
+    position: { x: 94.35, y: 38.55 }
+  - id: 118
+    position: { x: 100.1, y: 40.15 }
+  - id: 119
+    position: { x: 106, y: 40.5 }
+  - id: 120
+    position: { x: 110.65, y: 39.15 }
+  - id: 121
+    position: { x: 3.7, y: 45.4 }
+  - id: 122
+    position: { x: 10.5, y: 45.65 }
+  - id: 123
+    position: { x: 15.25, y: 47.5 }
+  - id: 124
+    position: { x: 22.2, y: 45.65 }
+  - id: 125
+    position: { x: 27.15, y: 47.4 }
+  - id: 126
+    position: { x: 32.75, y: 45.55 }
+  - id: 127
+    position: { x: 39.2, y: 46.1 }
+  - id: 128
+    position: { x: 43.95, y: 47.3 }
+  - id: 129
+    position: { x: 50.15, y: 45.5 }
+  - id: 130
+    position: { x: 54.3, y: 47.5 }
+  - id: 131
+    position: { x: 61.1, y: 47.15 }
+  - id: 132
+    position: { x: 65.9, y: 47.6 }
+  - id: 133
+    position: { x: 71.3, y: 47.55 }
+  - id: 134
+    position: { x: 78.1, y: 46.35 }
+  - id: 135
+    position: { x: 83.4, y: 45.8 }
+  - id: 136
+    position: { x: 89.4, y: 46.2 }
+  - id: 137
+    position: { x: 93.8, y: 45.8 }
+  - id: 138
+    position: { x: 99.85, y: 46.1 }
+  - id: 139
+    position: { x: 104.8, y: 46.15 }
+  - id: 140
+    position: { x: 111.45, y: 46.65 }
+  - id: 141
+    position: { x: 5.45, y: 52.65 }
+  - id: 142
+    position: { x: 9.85, y: 54.6 }
+  - id: 143
+    position: { x: 15.1, y: 53.75 }
+  - id: 144
+    position: { x: 20.65, y: 53.05 }
+  - id: 145
+    position: { x: 27.4, y: 53.6 }
+  - id: 146
+    position: { x: 31.35, y: 53.6 }
+  - id: 147
+    position: { x: 36.9, y: 54.55 }
+  - id: 148
+    position: { x: 44.45, y: 53.35 }
+  - id: 149
+    position: { x: 48.1, y: 53.15 }
+  - id: 150
+    position: { x: 55.3, y: 54.7 }
+  - id: 151
+    position: { x: 60.5, y: 52.4 }
+  - id: 152
+    position: { x: 66.8, y: 52.85 }
+  - id: 153
+    position: { x: 70.8, y: 54.1 }
+  - id: 154
+    position: { x: 77.2, y: 53.15 }
+  - id: 155
+    position: { x: 83.45, y: 52.55 }
+  - id: 156
+    position: { x: 89.6, y: 53.9 }
+  - id: 157
+    position: { x: 93.8, y: 54.25 }
+  - id: 158
+    position: { x: 100.15, y: 53.4 }
+  - id: 159
+    position: { x: 105, y: 53.5 }
+  - id: 160
+    position: { x: 110.55, y: 54.45 }
+  - id: 161
+    position: { x: 6.8, y: 58.4 }
+  - id: 162
+    position: { x: 11.1, y: 58.6 }
+  - id: 163
+    position: { x: 16.15, y: 57.7 }
+  - id: 164
+    position: { x: 23, y: 58.15 }
+  - id: 165
+    position: { x: 28.75, y: 58.2 }
+  - id: 166
+    position: { x: 32.2, y: 58.1 }
+  - id: 167
+    position: { x: 38.7, y: 58.2 }
+  - id: 168
+    position: { x: 43.1, y: 58.6 }
+  - id: 169
+    position: { x: 48.3, y: 57.5 }
+  - id: 170
+    position: { x: 54.3, y: 57.75 }
+  - id: 171
+    position: { x: 60.9, y: 58.15 }
+  - id: 172
+    position: { x: 65.85, y: 58.2 }
+  - id: 173
+    position: { x: 71.65, y: 57.45 }
+  - id: 174
+    position: { x: 78.15, y: 58.25 }
+  - id: 175
+    position: { x: 83.35, y: 57.7 }
+  - id: 176
+    position: { x: 90.05, y: 58.55 }
+  - id: 177
+    position: { x: 94.55, y: 57.45 }
+  - id: 178
+    position: { x: 101.65, y: 57.95 }
+  - id: 179
+    position: { x: 108.1, y: 58.15 }
+  - id: 180
+    position: { x: 112.5, y: 57.9 }
+  - id: 181
+    position: { x: 7.95, y: 64.85 }
+  - id: 182
+    position: { x: 11.55, y: 65.1 }
+  - id: 183
+    position: { x: 17, y: 65.25 }
+  - id: 184
+    position: { x: 22.95, y: 65.5 }
+  - id: 185
+    position: { x: 28, y: 65.25 }
+  - id: 186
+    position: { x: 32.5, y: 64.9 }
+  - id: 187
+    position: { x: 39.3, y: 65.6 }
+  - id: 188
+    position: { x: 44.65, y: 65.55 }
+  - id: 189
+    position: { x: 48.45, y: 65 }
+  - id: 190
+    position: { x: 54.15, y: 65.25 }
+  - id: 191
+    position: { x: 60.7, y: 65.15 }
+  - id: 192
+    position: { x: 67, y: 65.6 }
+  - id: 193
+    position: { x: 71.8, y: 64.6 }
+  - id: 194
+    position: { x: 78.3, y: 64.8 }
+  - id: 195
+    position: { x: 82.6, y: 65.1 }
+  - id: 196
+    position: { x: 90.1, y: 65.1 }
+  - id: 197
+    position: { x: 95.2, y: 65.4 }
+  - id: 198
+    position: { x: 100.95, y: 65.3 }
+  - id: 199
+    position: { x: 106.75, y: 64.8 }
+  - id: 200
+    position: { x: 113.9, y: 64.85 }
+
+connections:
+  - between: [1, 2]
+    ticket: taxi
+  - between: [1, 3]
+    ticket: bus
+  - between: [1, 3]
+    ticket: taxi
+  - between: [1, 21]
+    ticket: taxi
+  - between: [1, 22]
+    ticket: taxi
+  - between: [1, 41]
+    ticket: underground
+  - between: [1, 161]
+    ticket: underground
+  - between: [2, 3]
+    ticket: taxi
+  - between: [2, 21]
+    ticket: taxi
+  - between: [2, 22]
+    ticket: taxi
+  - between: [3, 4]
+    ticket: taxi
+  - between: [3, 5]
+    ticket: bus
+  - between: [3, 23]
+    ticket: taxi
+  - between: [3, 24]
+    ticket: taxi
+  - between: [4, 5]
+    ticket: taxi
+  - between: [4, 6]
+    ticket: bus
+  - between: [4, 24]
+    ticket: taxi
+  - between: [4, 25]
+    ticket: taxi
+  - between: [5, 6]
+    ticket: taxi
+  - between: [5, 24]
+    ticket: taxi
+  - between: [5, 25]
+    ticket: taxi
+  - between: [6, 7]
+    ticket: taxi
+  - between: [6, 25]
+    ticket: taxi
+  - between: [6, 26]
+    ticket: taxi
+  - between: [7, 8]
+    ticket: taxi
+  - between: [7, 27]
+    ticket: taxi
+  - between: [7, 28]
+    ticket: taxi
+  - between: [8, 9]
+    ticket: taxi
+  - between: [8, 10]
+    ticket: bus
+  - between: [8, 28]
+    ticket: taxi
+  - between: [8, 29]
+    ticket: taxi
+  - between: [9, 10]
+    ticket: taxi
+  - between: [9, 29]
+    ticket: taxi
+  - between: [9, 30]
+    ticket: taxi
+  - between: [10, 11]
+    ticket: taxi
+  - between: [10, 30]
+    ticket: taxi
+  - between: [10, 31]
+    ticket: taxi
+  - between: [11, 12]
+    ticket: taxi
+  - between: [11, 30]
+    ticket: taxi
+  - between: [11, 31]
+    ticket: taxi
+  - between: [12, 13]
+    ticket: taxi
+  - between: [12, 32]
+    ticket: taxi
+  - between: [12, 33]
+    ticket: taxi
+  - between: [13, 14]
+    ticket: taxi
+  - between: [13, 32]
+    ticket: taxi
+  - between: [13, 33]
+    ticket: taxi
+  - between: [14, 15]
+    ticket: taxi
+  - between: [14, 16]
+    ticket: bus
+  - between: [14, 33]
+    ticket: taxi
+  - between: [14, 34]
+    ticket: bus
+  - between: [14, 34]
+    ticket: taxi
+  - between: [15, 16]
+    ticket: taxi
+  - between: [15, 17]
+    ticket: bus
+  - between: [15, 35]
+    ticket: taxi
+  - between: [15, 36]
+    ticket: taxi
+  - between: [15, 95]
+    ticket: black
+  - between: [16, 17]
+    ticket: taxi
+  - between: [16, 35]
+    ticket: taxi
+  - between: [16, 36]
+    ticket: taxi
+  - between: [17, 18]
+    ticket: taxi
+  - between: [17, 37]
+    ticket: taxi
+  - between: [17, 38]
+    ticket: taxi
+  - between: [18, 19]
+    ticket: taxi
+  - between: [18, 20]
+    ticket: taxi
+  - between: [18, 37]
+    ticket: taxi
+  - between: [18, 38]
+    ticket: taxi
+  - between: [19, 20]
+    ticket: taxi
+  - between: [19, 39]
+    ticket: taxi
+  - between: [19, 40]
+    ticket: taxi
+  - between: [20, 39]
+    ticket: taxi
+  - between: [20, 40]
+    ticket: taxi
+  - between: [20, 81]
+    ticket: underground
+  - between: [20, 100]
+    ticket: underground
+  - between: [20, 140]
+    ticket: underground
+  - between: [21, 22]
+    ticket: taxi
+  - between: [21, 41]
+    ticket: taxi
+  - between: [21, 42]
+    ticket: taxi
+  - between: [22, 23]
+    ticket: taxi
+  - between: [22, 41]
+    ticket: taxi
+  - between: [23, 24]
+    ticket: taxi
+  - between: [23, 25]
+    ticket: bus
+  - between: [23, 43]
+    ticket: taxi
+  - between: [24, 25]
+    ticket: taxi
+  - between: [24, 44]
+    ticket: bus
+  - between: [25, 26]
+    ticket: taxi
+  - between: [25, 45]
+    ticket: taxi
+  - between: [26, 27]
+    ticket: taxi
+  - between: [26, 46]
+    ticket: taxi
+  - between: [27, 28]
+    ticket: taxi
+  - between: [27, 29]
+    ticket: bus
+  - between: [27, 47]
+    ticket: taxi
+  - between: [28, 29]
+    ticket: taxi
+  - between: [28, 48]
+    ticket: taxi
+  - between: [29, 30]
+    ticket: taxi
+  - between: [29, 31]
+    ticket: bus
+  - between: [29, 49]
+    ticket: taxi
+  - between: [30, 31]
+    ticket: taxi
+  - between: [30, 50]
+    ticket: taxi
+  - between: [31, 32]
+    ticket: taxi
+  - between: [31, 50]
+    ticket: taxi
+  - between: [31, 51]
+    ticket: taxi
+  - between: [32, 33]
+    ticket: taxi
+  - between: [32, 52]
+    ticket: taxi
+  - between: [33, 34]
+    ticket: taxi
+  - between: [33, 53]
+    ticket: bus
+  - between: [34, 35]
+    ticket: taxi
+  - between: [34, 36]
+    ticket: bus
+  - between: [34, 54]
+    ticket: taxi
+  - between: [34, 55]
+    ticket: taxi
+  - between: [35, 36]
+    ticket: taxi
+  - between: [35, 55]
+    ticket: taxi
+  - between: [36, 37]
+    ticket: taxi
+  - between: [36, 56]
+    ticket: taxi
+  - between: [37, 38]
+    ticket: taxi
+  - between: [38, 39]
+    ticket: taxi
+  - between: [38, 58]
+    ticket: taxi
+  - between: [39, 40]
+    ticket: taxi
+  - between: [39, 59]
+    ticket: taxi
+  - between: [39, 60]
+    ticket: taxi
+  - between: [40, 60]
+    ticket: taxi
+  - between: [41, 42]
+    ticket: taxi
+  - between: [41, 61]
+    ticket: taxi
+  - between: [41, 121]
+    ticket: underground
+  - between: [42, 43]
+    ticket: taxi
+  - between: [42, 62]
+    ticket: taxi
+  - between: [42, 63]
+    ticket: taxi
+  - between: [42, 118]
+    ticket: black
+  - between: [43, 44]
+    ticket: taxi
+  - between: [43, 63]
+    ticket: taxi
+  - between: [44, 45]
+    ticket: taxi
+  - between: [44, 63]
+    ticket: taxi
+  - between: [44, 64]
+    ticket: taxi
+  - between: [45, 46]
+    ticket: taxi
+  - between: [45, 65]
+    ticket: taxi
+  - between: [46, 47]
+    ticket: taxi
+  - between: [46, 66]
+    ticket: taxi
+  - between: [47, 48]
+    ticket: taxi
+  - between: [47, 67]
+    ticket: taxi
+  - between: [47, 68]
+    ticket: taxi
+  - between: [48, 49]
+    ticket: taxi
+  - between: [48, 68]
+    ticket: taxi
+  - between: [49, 50]
+    ticket: taxi
+  - between: [49, 69]
+    ticket: taxi
+  - between: [50, 51]
+    ticket: taxi
+  - between: [50, 52]
+    ticket: bus
+  - between: [51, 52]
+    ticket: taxi
+  - between: [51, 53]
+    ticket: bus
+  - between: [51, 71]
+    ticket: taxi
+  - between: [51, 91]
+    ticket: underground
+  - between: [51, 131]
+    ticket: underground
+  - between: [51, 200]
+    ticket: underground
+  - between: [52, 53]
+    ticket: taxi
+  - between: [52, 72]
+    ticket: taxi
+  - between: [53, 54]
+    ticket: taxi
+  - between: [53, 72]
+    ticket: taxi
+  - between: [53, 73]
+    ticket: taxi
+  - between: [54, 55]
+    ticket: taxi
+  - between: [54, 74]
+    ticket: taxi
+  - between: [55, 56]
+    ticket: taxi
+  - between: [55, 57]
+    ticket: bus
+  - between: [55, 75]
+    ticket: taxi
+  - between: [56, 57]
+    ticket: taxi
+  - between: [56, 58]
+    ticket: bus
+  - between: [56, 76]
+    ticket: taxi
+  - between: [57, 58]
+    ticket: taxi
+  - between: [57, 76]
+    ticket: taxi
+  - between: [57, 77]
+    ticket: taxi
+  - between: [58, 59]
+    ticket: taxi
+  - between: [58, 78]
+    ticket: taxi
+  - between: [59, 60]
+    ticket: taxi
+  - between: [59, 79]
+    ticket: taxi
+  - between: [60, 80]
+    ticket: taxi
+  - between: [60, 100]
+    ticket: underground
+  - between: [60, 131]
+    ticket: underground
+  - between: [61, 62]
+    ticket: taxi
+  - between: [61, 81]
+    ticket: taxi
+  - between: [61, 82]
+    ticket: taxi
+  - between: [62, 63]
+    ticket: taxi
+  - between: [62, 81]
+    ticket: taxi
+  - between: [62, 82]
+    ticket: taxi
+  - between: [63, 64]
+    ticket: taxi
+  - between: [63, 83]
+    ticket: taxi
+  - between: [63, 145]
+    ticket: black
+  - between: [64, 65]
+    ticket: taxi
+  - between: [64, 83]
+    ticket: taxi
+  - between: [64, 84]
+    ticket: taxi
+  - between: [65, 66]
+    ticket: taxi
+  - between: [65, 67]
+    ticket: bus
+  - between: [65, 85]
+    ticket: taxi
+  - between: [65, 86]
+    ticket: taxi
+  - between: [66, 67]
+    ticket: taxi
+  - between: [66, 68]
+    ticket: bus
+  - between: [66, 86]
+    ticket: taxi
+  - between: [67, 68]
+    ticket: taxi
+  - between: [67, 87]
+    ticket: taxi
+  - between: [68, 69]
+    ticket: taxi
+  - between: [69, 70]
+    ticket: taxi
+  - between: [69, 89]
+    ticket: taxi
+  - between: [69, 90]
+    ticket: taxi
+  - between: [70, 71]
+    ticket: taxi
+  - between: [70, 90]
+    ticket: taxi
+  - between: [70, 91]
+    ticket: taxi
+  - between: [71, 72]
+    ticket: taxi
+  - between: [71, 91]
+    ticket: taxi
+  - between: [72, 73]
+    ticket: taxi
+  - between: [72, 74]
+    ticket: bus
+  - between: [72, 92]
+    ticket: taxi
+  - between: [72, 93]
+    ticket: bus
+  - between: [73, 74]
+    ticket: taxi
+  - between: [73, 93]
+    ticket: taxi
+  - between: [74, 75]
+    ticket: taxi
+  - between: [74, 94]
+    ticket: taxi
+  - between: [75, 76]
+    ticket: taxi
+  - between: [75, 77]
+    ticket: bus
+  - between: [75, 95]
+    ticket: taxi
+  - between: [76, 77]
+    ticket: taxi
+  - between: [76, 78]
+    ticket: bus
+  - between: [76, 96]
+    ticket: taxi
+  - between: [77, 78]
+    ticket: taxi
+  - between: [77, 97]
+    ticket: taxi
+  - between: [78, 79]
+    ticket: taxi
+  - between: [78, 98]
+    ticket: taxi
+  - between: [79, 80]
+    ticket: taxi
+  - between: [79, 99]
+    ticket: taxi
+  - between: [79, 100]
+    ticket: taxi
+  - between: [80, 99]
+    ticket: taxi
+  - between: [80, 100]
+    ticket: taxi
+  - between: [81, 82]
+    ticket: taxi
+  - between: [81, 101]
+    ticket: taxi
+  - between: [81, 121]
+    ticket: underground
+  - between: [81, 200]
+    ticket: underground
+  - between: [82, 83]
+    ticket: taxi
+  - between: [82, 101]
+    ticket: taxi
+  - between: [82, 102]
+    ticket: taxi
+  - between: [83, 84]
+    ticket: taxi
+  - between: [84, 85]
+    ticket: taxi
+  - between: [84, 104]
+    ticket: taxi
+  - between: [84, 105]
+    ticket: taxi
+  - between: [85, 86]
+    ticket: taxi
+  - between: [85, 105]
+    ticket: taxi
+  - between: [85, 106]
+    ticket: taxi
+  - between: [86, 87]
+    ticket: taxi
+  - between: [87, 88]
+    ticket: taxi
+  - between: [87, 107]
+    ticket: taxi
+  - between: [88, 89]
+    ticket: taxi
+  - between: [88, 90]
+    ticket: bus
+  - between: [88, 107]
+    ticket: taxi
+  - between: [88, 108]
+    ticket: taxi
+  - between: [89, 90]
+    ticket: taxi
+  - between: [89, 109]
+    ticket: taxi
+  - between: [90, 91]
+    ticket: taxi
+  - between: [91, 92]
+    ticket: taxi
+  - between: [91, 93]
+    ticket: bus
+  - between: [91, 111]
+    ticket: taxi
+  - between: [91, 161]
+    ticket: underground
+  - between: [92, 93]
+    ticket: taxi
+  - between: [92, 111]
+    ticket: taxi
+  - between: [92, 112]
+    ticket: taxi
+  - between: [93, 94]
+    ticket: taxi
+  - between: [93, 112]
+    ticket: taxi
+  - between: [93, 113]
+    ticket: taxi
+  - between: [94, 95]
+    ticket: taxi
+  - between: [94, 114]
+    ticket: taxi
+  - between: [95, 96]
+    ticket: taxi
+  - between: [95, 115]
+    ticket: taxi
+  - between: [96, 97]
+    ticket: taxi
+  - between: [96, 116]
+    ticket: taxi
+  - between: [97, 98]
+    ticket: taxi
+  - between: [97, 117]
+    ticket: taxi
+  - between: [98, 99]
+    ticket: taxi
+  - between: [98, 100]
+    ticket: bus
+  - between: [98, 118]
+    ticket: taxi
+  - between: [99, 100]
+    ticket: taxi
+  - between: [99, 119]
+    ticket: taxi
+  - between: [99, 120]
+    ticket: taxi
+  - between: [100, 120]
+    ticket: taxi
+  - between: [101, 102]
+    ticket: taxi
+  - between: [101, 103]
+    ticket: bus
+  - between: [101, 121]
+    ticket: taxi
+  - between: [102, 103]
+    ticket: taxi
+  - between: [102, 121]
+    ticket: taxi
+  - between: [102, 122]
+    ticket: taxi
+  - between: [103, 104]
+    ticket: taxi
+  - between: [103, 122]
+    ticket: taxi
+  - between: [103, 123]
+    ticket: taxi
+  - between: [104, 105]
+    ticket: taxi
+  - between: [104, 124]
+    ticket: taxi
+  - between: [105, 106]
+    ticket: taxi
+  - between: [105, 125]
+    ticket: bus
+  - between: [106, 107]
+    ticket: taxi
+  - between: [106, 126]
+    ticket: taxi
+  - between: [107, 108]
+    ticket: taxi
+  - between: [107, 127]
+    ticket: taxi
+  - between: [108, 109]
+    ticket: taxi
+  - between: [108, 110]
+    ticket: bus
+  - between: [108, 127]
+    ticket: taxi
+  - between: [108, 128]
+    ticket: taxi
+  - between: [109, 110]
+    ticket: taxi
+  - between: [109, 129]
+    ticket: taxi
+  - between: [110, 111]
+    ticket: taxi
+  - between: [110, 129]
+    ticket: taxi
+  - between: [110, 130]
+    ticket: taxi
+  - between: [111, 112]
+    ticket: taxi
+  - between: [112, 113]
+    ticket: taxi
+  - between: [113, 114]
+    ticket: taxi
+  - between: [113, 133]
+    ticket: taxi
+  - between: [114, 115]
+    ticket: taxi
+  - between: [114, 134]
+    ticket: taxi
+  - between: [115, 116]
+    ticket: taxi
+  - between: [115, 117]
+    ticket: bus
+  - between: [115, 135]
+    ticket: taxi
+  - between: [116, 117]
+    ticket: taxi
+  - between: [116, 136]
+    ticket: taxi
+  - between: [116, 137]
+    ticket: taxi
+  - between: [117, 118]
+    ticket: taxi
+  - between: [117, 137]
+    ticket: taxi
+  - between: [118, 119]
+    ticket: taxi
+  - between: [118, 138]
+    ticket: taxi
+  - between: [119, 120]
+    ticket: taxi
+  - between: [119, 139]
+    ticket: taxi
+  - between: [119, 140]
+    ticket: taxi
+  - between: [120, 140]
+    ticket: taxi
+  - between: [121, 122]
+    ticket: taxi
+  - between: [121, 141]
+    ticket: taxi
+  - between: [122, 123]
+    ticket: taxi
+  - between: [122, 142]
+    ticket: bus
+  - between: [123, 124]
+    ticket: taxi
+  - between: [123, 143]
+    ticket: taxi
+  - between: [123, 163]
+    ticket: bus
+  - between: [124, 125]
+    ticket: taxi
+  - between: [124, 144]
+    ticket: taxi
+  - between: [125, 126]
+    ticket: taxi
+  - between: [125, 145]
+    ticket: taxi
+  - between: [125, 146]
+    ticket: taxi
+  - between: [126, 127]
+    ticket: taxi
+  - between: [126, 146]
+    ticket: taxi
+  - between: [127, 128]
+    ticket: taxi
+  - between: [128, 129]
+    ticket: taxi
+  - between: [128, 130]
+    ticket: bus
+  - between: [128, 148]
+    ticket: taxi
+  - between: [128, 149]
+    ticket: taxi
+  - between: [129, 130]
+    ticket: taxi
+  - between: [130, 131]
+    ticket: taxi
+  - between: [130, 150]
+    ticket: taxi
+  - between: [130, 170]
+    ticket: bus
+  - between: [131, 132]
+    ticket: taxi
+  - between: [131, 133]
+    ticket: bus
+  - between: [131, 151]
+    ticket: taxi
+  - between: [131, 152]
+    ticket: taxi
+  - between: [132, 133]
+    ticket: taxi
+  - between: [132, 151]
+    ticket: taxi
+  - between: [132, 152]
+    ticket: taxi
+  - between: [133, 134]
+    ticket: taxi
+  - between: [133, 152]
+    ticket: taxi
+  - between: [133, 153]
+    ticket: taxi
+  - between: [133, 173]
+    ticket: bus
+  - between: [134, 135]
+    ticket: taxi
+  - between: [134, 154]
+    ticket: taxi
+  - between: [135, 136]
+    ticket: taxi
+  - between: [135, 137]
+    ticket: bus
+  - between: [135, 155]
+    ticket: taxi
+  - between: [136, 137]
+    ticket: taxi
+  - between: [136, 138]
+    ticket: bus
+  - between: [136, 156]
+    ticket: taxi
+  - between: [137, 138]
+    ticket: taxi
+  - between: [138, 139]
+    ticket: taxi
+  - between: [138, 158]
+    ticket: taxi
+  - between: [139, 140]
+    ticket: taxi
+  - between: [139, 159]
+    ticket: taxi
+  - between: [140, 160]
+    ticket: taxi
+  - between: [140, 180]
+    ticket: underground
+  - between: [141, 142]
+    ticket: taxi
+  - between: [141, 143]
+    ticket: bus
+  - between: [141, 161]
+    ticket: taxi
+  - between: [141, 162]
+    ticket: taxi
+  - between: [142, 143]
+    ticket: taxi
+  - between: [142, 161]
+    ticket: taxi
+  - between: [142, 162]
+    ticket: taxi
+  - between: [142, 181]
+    ticket: bus
+  - between: [143, 144]
+    ticket: taxi
+  - between: [143, 162]
+    ticket: taxi
+  - between: [143, 163]
+    ticket: taxi
+  - between: [144, 145]
+    ticket: taxi
+  - between: [144, 163]
+    ticket: taxi
+  - between: [144, 164]
+    ticket: taxi
+  - between: [145, 146]
+    ticket: taxi
+  - between: [145, 147]
+    ticket: bus
+  - between: [145, 164]
+    ticket: taxi
+  - between: [145, 165]
+    ticket: taxi
+  - between: [146, 147]
+    ticket: taxi
+  - between: [146, 165]
+    ticket: taxi
+  - between: [146, 166]
+    ticket: taxi
+  - between: [147, 165]
+    ticket: bus
+  - between: [147, 166]
+    ticket: taxi
+  - between: [147, 167]
+    ticket: taxi
+  - between: [147, 168]
+    ticket: taxi
+  - between: [148, 149]
+    ticket: taxi
+  - between: [148, 168]
+    ticket: taxi
+  - between: [148, 169]
+    ticket: taxi
+  - between: [149, 150]
+    ticket: taxi
+  - between: [149, 169]
+    ticket: taxi
+  - between: [150, 151]
+    ticket: taxi
+  - between: [150, 170]
+    ticket: taxi
+  - between: [150, 171]
+    ticket: taxi
+  - between: [151, 152]
+    ticket: taxi
+  - between: [151, 153]
+    ticket: bus
+  - between: [151, 171]
+    ticket: taxi
+  - between: [152, 153]
+    ticket: taxi
+  - between: [152, 154]
+    ticket: bus
+  - between: [152, 172]
+    ticket: taxi
+  - between: [152, 173]
+    ticket: taxi
+  - between: [153, 154]
+    ticket: taxi
+  - between: [153, 172]
+    ticket: taxi
+  - between: [153, 173]
+    ticket: taxi
+  - between: [154, 155]
+    ticket: taxi
+  - between: [154, 174]
+    ticket: taxi
+  - between: [155, 156]
+    ticket: taxi
+  - between: [155, 175]
+    ticket: taxi
+  - between: [156, 157]
+    ticket: taxi
+  - between: [156, 175]
+    ticket: taxi
+  - between: [156, 176]
+    ticket: taxi
+  - between: [156, 177]
+    ticket: taxi
+  - between: [157, 158]
+    ticket: taxi
+  - between: [157, 176]
+    ticket: taxi
+  - between: [157, 177]
+    ticket: taxi
+  - between: [158, 159]
+    ticket: taxi
+  - between: [158, 160]
+    ticket: bus
+  - between: [158, 177]
+    ticket: taxi
+  - between: [158, 178]
+    ticket: taxi
+  - between: [159, 160]
+    ticket: taxi
+  - between: [159, 178]
+    ticket: taxi
+  - between: [159, 179]
+    ticket: taxi
+  - between: [159, 180]
+    ticket: taxi
+  - between: [160, 178]
+    ticket: bus
+  - between: [160, 179]
+    ticket: taxi
+  - between: [160, 180]
+    ticket: taxi
+  - between: [160, 200]
+    ticket: taxi
+  - between: [161, 162]
+    ticket: taxi
+  - between: [161, 163]
+    ticket: bus
+  - between: [161, 181]
+    ticket: black
+  - between: [161, 181]
+    ticket: taxi
+  - between: [161, 182]
+    ticket: taxi
+  - between: [162, 163]
+    ticket: taxi
+  - between: [162, 181]
+    ticket: taxi
+  - between: [162, 182]
+    ticket: black
+  - between: [162, 182]
+    ticket: taxi
+  - between: [162, 183]
+    ticket: taxi
+  - between: [163, 164]
+    ticket: taxi
+  - between: [163, 183]
+    ticket: black
+  - between: [163, 183]
+    ticket: taxi
+  - between: [164, 165]
+    ticket: taxi
+  - between: [164, 166]
+    ticket: bus
+  - between: [164, 184]
+    ticket: black
+  - between: [164, 184]
+    ticket: taxi
+  - between: [165, 166]
+    ticket: taxi
+  - between: [165, 167]
+    ticket: bus
+  - between: [165, 184]
+    ticket: taxi
+  - between: [165, 185]
+    ticket: black
+  - between: [165, 185]
+    ticket: taxi
+  - between: [165, 186]
+    ticket: taxi
+  - between: [166, 167]
+    ticket: taxi
+  - between: [166, 185]
+    ticket: taxi
+  - between: [166, 186]
+    ticket: black
+  - between: [166, 186]
+    ticket: taxi
+  - between: [167, 168]
+    ticket: taxi
+  - between: [167, 169]
+    ticket: bus
+  - between: [167, 187]
+    ticket: black
+  - between: [167, 187]
+    ticket: taxi
+  - between: [168, 169]
+    ticket: taxi
+  - between: [168, 187]
+    ticket: taxi
+  - between: [168, 188]
+    ticket: black
+  - between: [168, 188]
+    ticket: taxi
+  - between: [168, 189]
+    ticket: taxi
+  - between: [169, 170]
+    ticket: taxi
+  - between: [169, 188]
+    ticket: taxi
+  - between: [169, 189]
+    ticket: black
+  - between: [169, 189]
+    ticket: taxi
+  - between: [170, 171]
+    ticket: taxi
+  - between: [170, 190]
+    ticket: black
+  - between: [170, 190]
+    ticket: taxi
+  - between: [171, 172]
+    ticket: taxi
+  - between: [171, 191]
+    ticket: black
+  - between: [171, 191]
+    ticket: taxi
+  - between: [172, 173]
+    ticket: taxi
+  - between: [172, 191]
+    ticket: taxi
+  - between: [172, 192]
+    ticket: black
+  - between: [172, 192]
+    ticket: taxi
+  - between: [172, 193]
+    ticket: taxi
+  - between: [173, 174]
+    ticket: taxi
+  - between: [173, 192]
+    ticket: taxi
+  - between: [173, 193]
+    ticket: black
+  - between: [173, 193]
+    ticket: taxi
+  - between: [174, 175]
+    ticket: taxi
+  - between: [174, 194]
+    ticket: black
+  - between: [174, 194]
+    ticket: taxi
+  - between: [174, 195]
+    ticket: taxi
+  - between: [175, 176]
+    ticket: taxi
+  - between: [175, 194]
+    ticket: taxi
+  - between: [175, 195]
+    ticket: black
+  - between: [175, 195]
+    ticket: taxi
+  - between: [176, 177]
+    ticket: taxi
+  - between: [176, 196]
+    ticket: black
+  - between: [176, 196]
+    ticket: taxi
+  - between: [176, 197]
+    ticket: taxi
+  - between: [177, 178]
+    ticket: taxi
+  - between: [177, 196]
+    ticket: taxi
+  - between: [177, 197]
+    ticket: black
+  - between: [177, 197]
+    ticket: taxi
+  - between: [178, 179]
+    ticket: taxi
+  - between: [178, 198]
+    ticket: black
+  - between: [178, 198]
+    ticket: taxi
+  - between: [178, 199]
+    ticket: taxi
+  - between: [179, 180]
+    ticket: taxi
+  - between: [179, 198]
+    ticket: taxi
+  - between: [179, 199]
+    ticket: black
+  - between: [179, 199]
+    ticket: taxi
+  - between: [179, 200]
+    ticket: taxi
+  - between: [180, 200]
+    ticket: black
+  - between: [180, 200]
+    ticket: taxi
+  - between: [180, 200]
+    ticket: underground
+  - between: [181, 182]
+    ticket: taxi
+  - between: [181, 183]
+    ticket: bus
+  - between: [181, 183]
+    ticket: taxi
+  - between: [182, 183]
+    ticket: taxi
+  - between: [183, 184]
+    ticket: taxi
+  - between: [184, 185]
+    ticket: taxi
+  - between: [184, 186]
+    ticket: bus
+  - between: [185, 186]
+    ticket: taxi
+  - between: [186, 187]
+    ticket: taxi
+  - between: [187, 188]
+    ticket: taxi
+  - between: [187, 189]
+    ticket: bus
+  - between: [188, 189]
+    ticket: taxi
+  - between: [188, 190]
+    ticket: bus
+  - between: [188, 190]
+    ticket: taxi
+  - between: [189, 190]
+    ticket: taxi
+  - between: [190, 191]
+    ticket: taxi
+  - between: [191, 192]
+    ticket: taxi
+  - between: [192, 193]
+    ticket: taxi
+  - between: [193, 194]
+    ticket: taxi
+  - between: [194, 195]
+    ticket: taxi
+  - between: [195, 196]
+    ticket: taxi
+  - between: [196, 197]
+    ticket: taxi
+  - between: [197, 198]
+    ticket: taxi
+  - between: [198, 199]
+    ticket: taxi
+  - between: [199, 200]
+    ticket: taxi
+
+startingPositions: [1, 20, 21, 40, 60, 100, 141]

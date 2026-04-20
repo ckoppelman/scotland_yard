@@ -1,11 +1,11 @@
 import type { Ticket } from "../constants";
-import type { GameState } from "../game/gameState";
+import type { GameState, NewGameSettings } from "../game/gameState";
 
 export type GameBoardProps = {
     state: GameState;
     onTicketClick: (ticket: Ticket) => void;
     onNodeClick: (node: number) => void;
-    onReset: () => void;
+    onReset: (settings?: NewGameSettings) => void;
     /** After drag-drop onto an adjacent station, user must pick a ticket. */
     pendingMoveNode: number | null;
     onCancelPendingMove: () => void;

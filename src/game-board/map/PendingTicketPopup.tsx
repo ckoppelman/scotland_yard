@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
-import type { Ticket } from "../constants";
+import type { Ticket } from "../../constants";
+import type { PlayerState } from "../../game/gameState";
 
 const TICKET_POPUP_UI: Record<Ticket, { icon: string; label: string }> = {
     taxi: { icon: "🚕", label: "Taxi" },
@@ -13,12 +14,14 @@ export function PendingTicketPopup({
     anchor,
     destinationNode,
     tickets,
+    ticketBalances,
     onPick,
     onCancel,
 }: {
     anchor: { x: number; y: number };
     destinationNode: number;
     tickets: Ticket[];
+    ticketBalances: PlayerState["tickets"];
     onPick: (ticket: Ticket) => void;
     onCancel: () => void;
 }) {
@@ -67,7 +70,8 @@ export function PendingTicketPopup({
                             <span className="pending-ticket-popup__icon" aria-hidden>
                                 {TICKET_POPUP_UI[t].icon}
                             </span>
-                            {TICKET_POPUP_UI[t].label}
+                            <span className="pending-ticket-popup__label">{TICKET_POPUP_UI[t].label}</span>
+                            <span className="pending-ticket-popup__count">{ticketBalances[t]}</span>
                         </button>
                     ))}
                 </div>

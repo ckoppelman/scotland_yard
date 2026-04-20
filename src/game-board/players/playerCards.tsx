@@ -1,31 +1,47 @@
-import { COLOR_TO_BORDER } from "../constants";
+import { COLOR_TO_BORDER } from "../../constants";
 import type {
     CurrentTurn,
     GameState,
     PlayerState,
     TurnLogEntry,
     TurnState,
-} from "../game/gameState";
+} from "../../game/gameState";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
 
-function scrollToPlayerMarker(player: PlayerState) {
+export function scrollToPlayerMarker(player: PlayerState) {
     const playerMarker = document.getElementById(`player-marker-${player.description.id}`);
     if (playerMarker) {
         playerMarker.scrollIntoView({ behavior: "smooth" });
     }
 }
 
-export function PlayerCard({ player, currentTurn }: { player: PlayerState; currentTurn: CurrentTurn }) {
+export function PlayerCard({
+    player,
+    currentTurn,
+    variant = "roster",
+    onAfterScrollToMarker,
+}: {
+    player: PlayerState;
+    currentTurn: CurrentTurn;
+    /** `control` is used when the card also appears in the control panel (separate DOM id). */
+    variant?: "roster" | "control";
+    /** Called after scrolling the board to this player’s token (e.g. pulse highlight). */
+    onAfterScrollToMarker?: (player: PlayerState) => void;
+}) {
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
+    const idSuffix = variant === "control" ? "-control" : "";
     return (
         <article
-            className={`player-card ${isMyTurn ? "my-turn" : ""}`}
+            className={`player-card ${isMyTurn ? "my-turn" : ""}${variant === "control" ? " player-card--control-embed" : ""}`}
             style={{
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
-            onClick={() => scrollToPlayerMarker(player)}
-            id={`player-card-${player.description.id}`}
+            onClick={() => {
+                scrollToPlayerMarker(player);
+                onAfterScrollToMarker?.(player);
+            }}
+            id={`player-card-${player.description.id}${idSuffix}`}
         >
             <div className="player-card__head">
                 <PlayerCardPawnIcon player={player} />
@@ -49,18 +65,36 @@ export function PlayerCard({ player, currentTurn }: { player: PlayerState; curre
     );
 }
 
-export function MrXCard({ state, player }: { state: GameState; player: PlayerState }) {
+export function MrXCard({
+    state,
+    player,
+    variant = "roster",
+    onAfterScrollToMarker,
+}: {
+    state: GameState;
+    player: PlayerState;
+    variant?: "roster" | "control";
+    onAfterScrollToMarker?: (player: PlayerState) => void;
+}) {
     const currentTurn = state.currentTurn;
     const shouldShowMrX = state.turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
 
     return (
         <article
-            className={`mr-x-card player-card ${isMyTurn ? "my-turn" : ""}`}
+            className={`mr-x-card player-card ${isMyTurn ? "my-turn" : ""}${variant === "control" ? " player-card--control-embed" : ""}`}
             style={{
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
-            onClick={isMyTurn || shouldShowMrX ? () => scrollToPlayerMarker(player) : () => {}}
+            onClick={
+                isMyTurn || shouldShowMrX
+                    ? () => {
+                          scrollToPlayerMarker(player);
+                          onAfterScrollToMarker?.(player);
+                      }
+                    : () => {}
+            }
+            id={variant === "control" ? `player-card-${player.description.id}-control` : undefined}
         >
             <div className="player-card__head">
                 <PlayerCardPawnIcon player={player} />
@@ -128,16 +162,30 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
     }
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
     return (
-        <div className="mr-x-board" key={`mr-x-board-${player.description.order}`}>
-            {turns.map((turn, turnNumber) => (
-                <MrXTurn
-                    key={`${turnNumber}-${player.description.order}`}
-                    turnNumber={turnNumber}
-                    turn={turn}
-                    turnLogEntry={myTurnLogMap.get(turnNumber) ?? null}
-                    isMyTurn={isMyTurn}
-                />
-            ))}
+        <div
+            className="mr-x-board-wrap"
+            key={`mr-x-board-${player.description.order}`}
+            style={{
+                borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
+            }}
+        >
+            <div className="mr-x-board__header">
+                <div className="mr-x-board__pawn-wrap" aria-hidden>
+                    <PlayerCardPawnIcon player={player} />
+                </div>
+                <span className="mr-x-board__player-name">{player.description.name}</span>
+            </div>
+            <div className="mr-x-board">
+                {turns.map((turn, turnNumber) => (
+                    <MrXTurn
+                        key={`${turnNumber}-${player.description.order}`}
+                        turnNumber={turnNumber}
+                        turn={turn}
+                        turnLogEntry={myTurnLogMap.get(turnNumber) ?? null}
+                        isMyTurn={isMyTurn}
+                    />
+                ))}
+            </div>
         </div>
     );
 }

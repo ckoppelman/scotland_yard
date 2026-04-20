@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { STROKE_WIDTH } from "./constants";
+import { STROKE_WIDTH } from "../constants";
 
 type ConnectionEdgeProps = {
     x1: number;

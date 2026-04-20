@@ -1,8 +1,11 @@
 import { parse } from "yaml";
 import type { Ticket } from "../constants";
 import type { MapConnection, MapGraph } from "./gameState";
+import type { MapLayoutYaml } from "./mapLayoutTypes";
 import demoMapGraphYaml from "../../data/map-graph.yaml?raw";
 import interestingMapGraphYaml from "../../data/map-graph-interesting.yaml?raw";
+import mapGraph200Yaml from "../../data/map-graph-200.yaml?raw";
+import mapGraphClassicYaml from "../../data/map-graph-classic.yaml?raw";
 
 const TICKETS: readonly Ticket[] = [
   "taxi",
@@ -31,6 +34,9 @@ type RawMapGraphYaml = {
   nodes: { id: number; position: { x: number; y: number } }[];
   connections: { between: number[]; ticket: string | string[] }[];
   startingPositions?: number[];
+  layout?: MapLayoutYaml;
+  positionsAreBoardPixels?: boolean;
+  boardImageHref?: string;
 };
 
 
@@ -55,6 +61,9 @@ function hydrateMapGraph(raw: RawMapGraphYaml): MapGraph {
     })),
     connections: raw.connections.map(hydrateConnection).reduce((acc, curr) => acc.concat(curr), [] as MapConnection[]),
     startingPositions: raw.startingPositions ?? raw.nodes.map((n) => n.id),
+    layout: raw.layout,
+    positionsAreBoardPixels: raw.positionsAreBoardPixels,
+    boardImageHref: raw.boardImageHref,
   };
 }
 
@@ -65,3 +74,9 @@ export const demoMapGraph: MapGraph = hydrateMapGraph(
 export const interestingMapGraph: MapGraph = hydrateMapGraph(
   parse(interestingMapGraphYaml) as RawMapGraphYaml,
 );
+
+/** 200-node procedural “London board” layout (see scripts/generate-map-200.mjs). */
+export const mapGraph200: MapGraph = hydrateMapGraph(parse(mapGraph200Yaml) as RawMapGraphYaml);
+
+/** Official 199-station graph + board art (see scripts/build-classic-map-yaml.mjs). */
+export const mapGraphClassic: MapGraph = hydrateMapGraph(parse(mapGraphClassicYaml) as RawMapGraphYaml);

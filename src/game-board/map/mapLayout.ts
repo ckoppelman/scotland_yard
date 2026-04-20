@@ -1,17 +1,7 @@
-import type { Ticket } from "../constants";
-import type { MapGraph, PlayerState } from "../game/gameState";
-import {
-    GRID_TO_PX,
-    MAP_CONTENT_HALO_X,
-    MAP_CONTENT_HALO_Y_BOT,
-    MAP_CONTENT_HALO_Y_TOP,
-    MAP_GUTTER,
-    MAX_MAP_ZOOM,
-    MIN_MAP_ZOOM,
-    PX_PAD,
-    STATION_TICKETS,
-    TOKEN_STACK_SPREAD,
-} from "./constants";
+import type { Ticket } from "../../constants";
+import type { MapGraph, PlayerState } from "../../game/gameState";
+import type { ResolvedMapLayout } from "../../game/mapLayoutTypes";
+import { MAX_MAP_ZOOM, MIN_MAP_ZOOM, STATION_TICKETS, TOKEN_STACK_SPREAD } from "../constants";
 
 /** Physical board rules: top cap green if bus, else yellow; middle red if underground, else yellow; bottom always yellow. */
 export type StationBoardLook = {
@@ -52,12 +42,16 @@ export function clampMapPan(
 }
 
 /** O(n) once per mapGraph; use Map for O(1) lookups when rendering edges and nodes. */
-export function buildNodePixelPositions(mapGraph: MapGraph): ReadonlyMap<number, { x: number; y: number }> {
+export function buildNodePixelPositions(
+    mapGraph: MapGraph,
+    layout: ResolvedMapLayout,
+): ReadonlyMap<number, { x: number; y: number }> {
+    const { positionScaleX, positionScaleY, positionOffset } = layout;
     const m = new Map<number, { x: number; y: number }>();
     for (const node of mapGraph.nodes) {
         m.set(node.id, {
-            x: node.position.x * GRID_TO_PX + PX_PAD,
-            y: node.position.y * GRID_TO_PX + PX_PAD,
+            x: node.position.x * positionScaleX + positionOffset.x,
+            y: node.position.y * positionScaleY + positionOffset.y,
         });
     }
     return m;
@@ -133,13 +127,12 @@ export function parallelConnectionEndpoints(
     };
 }
 
-/**
- * SVG pixel size and inner `<g>` translate so the canvas hugs the graph (tight crop; no empty left/top band).
- */
-export function mapSvgFrame(
+/** Inner bounds in the same coordinate system as `buildNodePixelPositions` (before `<g>` translate). */
+export function mapContentBounds(
     mapGraph: MapGraph,
     positions: ReadonlyMap<number, { x: number; y: number }>,
-): { width: number; height: number; frameTx: number; frameTy: number } {
+    layout: ResolvedMapLayout,
+): { left: number; top: number; innerW: number; innerH: number } | null {
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -153,25 +146,98 @@ export function mapSvgFrame(
         maxY = Math.max(maxY, c.y);
     }
     if (!Number.isFinite(minX)) {
-        return { width: 120, height: 120, frameTx: MAP_GUTTER, frameTy: MAP_GUTTER };
+        return null;
     }
-    const left = minX - MAP_CONTENT_HALO_X;
-    const right = maxX + MAP_CONTENT_HALO_X;
-    const top = minY - MAP_CONTENT_HALO_Y_TOP;
-    const bottom = maxY + MAP_CONTENT_HALO_Y_BOT;
-    const innerW = right - left;
-    const innerH = bottom - top;
+    const h = layout.contentHalo;
+    let left = minX - h.left;
+    let right = maxX + h.right;
+    let top = minY - h.top;
+    let bottom = maxY + h.bottom;
+
+    if (layout.boardImage) {
+        const b = layout.boardImage;
+        left = Math.min(left, b.x);
+        top = Math.min(top, b.y);
+        right = Math.max(right, b.x + b.width);
+        bottom = Math.max(bottom, b.y + b.height);
+    }
+
+    return { left, top, innerW: right - left, innerH: bottom - top };
+}
+
+/** Board artwork placement (same coordinates as nodes). */
+export function mapBoardBackgroundRect(layout: ResolvedMapLayout): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    preserveAspectRatio: string;
+} | null {
+    if (!layout.boardImage) return null;
+    const b = layout.boardImage;
     return {
-        width: innerW + MAP_GUTTER * 2,
-        height: innerH + MAP_GUTTER * 2,
-        frameTx: MAP_GUTTER - left,
-        frameTy: MAP_GUTTER - top,
+        x: b.x,
+        y: b.y,
+        width: b.width,
+        height: b.height,
+        preserveAspectRatio: b.preserveAspectRatio,
     };
 }
 
-export function stackDxForPlayer(players: PlayerState[], player: PlayerState): number {
-    if (player.position === null) return 0;
-    const group = players.filter((p) => p.position !== null && p.position === player.position);
+/**
+ * SVG pixel size and inner `<g>` translate so the canvas hugs the graph (tight crop; no empty left/top band).
+ */
+export function mapSvgFrame(
+    mapGraph: MapGraph,
+    positions: ReadonlyMap<number, { x: number; y: number }>,
+    layout: ResolvedMapLayout,
+): { width: number; height: number; frameTx: number; frameTy: number } {
+    const b = mapContentBounds(mapGraph, positions, layout);
+    const g = layout.gutter;
+    if (b === null) {
+        return { width: 120, height: 120, frameTx: g, frameTy: g };
+    }
+    const { left, top, innerW, innerH } = b;
+    return {
+        width: innerW + g * 2,
+        height: innerH + g * 2,
+        frameTx: g - left,
+        frameTy: g - top,
+    };
+}
+
+/**
+ * Station shown for a map token — while a drag move awaits a ticket, the active pawn stays on the
+ * chosen destination (`pendingMoveNode`) even though game state still has the previous position.
+ */
+export function effectiveTokenStation(
+    player: PlayerState,
+    activePlayer: PlayerState | null,
+    pendingMoveNode: number | null,
+): number | null {
+    if (player.position === null) return null;
+    if (
+        pendingMoveNode !== null &&
+        activePlayer !== null &&
+        player.description.id === activePlayer.description.id
+    ) {
+        return pendingMoveNode;
+    }
+    return player.position;
+}
+
+export function stackDxForPlayer(
+    players: PlayerState[],
+    player: PlayerState,
+    activePlayer: PlayerState | null,
+    pendingMoveNode: number | null,
+): number {
+    const pos = effectiveTokenStation(player, activePlayer, pendingMoveNode);
+    if (pos === null) return 0;
+    const group = players.filter((p) => {
+        const ep = effectiveTokenStation(p, activePlayer, pendingMoveNode);
+        return ep !== null && ep === pos;
+    });
     if (group.length <= 1) return 0;
     const idx = group.findIndex((p) => p.description.id === player.description.id);
     return (idx - (group.length - 1) / 2) * TOKEN_STACK_SPREAD;

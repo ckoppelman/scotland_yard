@@ -1,4 +1,5 @@
 {
     "snyk.advanced.autoSelectOrganization": true,
-    "djlint.showInstallError": false
+    "djlint.showInstallError": false,
+    "specstory.cloudSync.enabled": "never"
 }
