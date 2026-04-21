@@ -3,6 +3,7 @@
 ## Tests!
 
 - Add tests
+- trivial security testing
 
 ## Bugs
 
@@ -30,11 +31,11 @@
     2. How does 2x work?
     3. What is the win condition? All Mr. Xs captured or just one? -- maybe make
        this a setting?
-- Replay history
+- Replay history (and export history)
 - Add 2x button to control panel.
 - Add a mode to swap win conditions -- hidden player wins if they capture shown player.
 - Josh really wants animated cars/buses/subways/ferries.
-- favicon.ico
+- favicon.ico and other `<meta>` stuff.
 - Should detectives be able to see Mr. X history up until the last show point?  Should
     they also be able to see the whole board state?  This should MAAAYBE be an option,
     but kinda ruins part of the fun.
