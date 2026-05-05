@@ -1,6 +1,7 @@
 import { COLOR_TO_BORDER } from "../../constants";
 import type { CurrentTurn, GameState, PlayerState, TurnLogEntry } from "../../game/gameState";
 import { TurnPhase } from "../../game/gameState";
+import { shouldShowMrX } from "../../game/displayLogic";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
 
@@ -72,7 +73,7 @@ export function MrXCard({
     onAfterScrollToMarker?: (player: PlayerState) => void;
 }) {
     const currentTurn = state.currentTurn;
-    const shouldShowMrX = state.turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
+    const showMrX = shouldShowMrX(state);
     const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
 
@@ -83,7 +84,7 @@ export function MrXCard({
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
             onClick={
-                (isMyTurn && !shouldShowPrivacy) || shouldShowMrX
+                (isMyTurn && !shouldShowPrivacy) || showMrX
                     ? () => {
                           scrollToPlayerMarker(player);
                           onAfterScrollToMarker?.(player);
@@ -99,7 +100,7 @@ export function MrXCard({
                 </div>
             </div>
             <p className="mr-x-card-position">
-                Last seen: {(isMyTurn && !shouldShowPrivacy) || shouldShowMrX ? (player.position ?? "—") : "???"}
+                Last seen: {(isMyTurn && !shouldShowPrivacy) || showMrX ? (player.position ?? "—") : "???"}
             </p>
             <div className="mr-x-card-tickets">
                 <div className="mr-x-card-tickets__row">
@@ -127,19 +128,19 @@ export function MrXTurn({
     turnNumber,
     isShowMrXTurn,
     turnLogEntry,
-    isFugitiveTurn,
+    shouldShowMrXPosition,
     hasDoubleMovePart1,
     hasDoubleMovePart2,
 }: {
     turnNumber: number;
     isShowMrXTurn: boolean;
     turnLogEntry: TurnLogEntry | null;
-    isFugitiveTurn: boolean;
+    shouldShowMrXPosition: boolean;
     /** From {@link TurnLogEntry.doubleMovePart} for this round (both can be set after a full double). */
     hasDoubleMovePart1: boolean;
     hasDoubleMovePart2: boolean;
 }) {
-    const showMrXPosition = isFugitiveTurn && isShowMrXTurn;
+    const showMrXPosition = shouldShowMrXPosition && isShowMrXTurn;
 
     const ticketClass = turnLogEntry?.ticket ? `${turnLogEntry.ticket}-ticket` : "no-ticket";
     const doubleOutlineClass = [
@@ -169,7 +170,7 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
         list.push(entry);
         mrXLogByRound.set(entry.turnNumber, list);
     }
-    const isFugitiveTurn = currentTurn.phase === TurnPhase.FUGITIVE;
+    const shouldShowMrXPosition = shouldShowMrX(state);
 
     return (
         <div
@@ -198,7 +199,7 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
                             turnNumber={roundIndex}
                             isShowMrXTurn={isShowMrXTurn}
                             turnLogEntry={primary}
-                            isFugitiveTurn={isFugitiveTurn}
+                            shouldShowMrXPosition={shouldShowMrXPosition}
                             hasDoubleMovePart1={hasDoubleMovePart1}
                             hasDoubleMovePart2={hasDoubleMovePart2}
                         />

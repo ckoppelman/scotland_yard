@@ -38,7 +38,7 @@ export type CurrentTurn = {
   doubleMovePart?: 1 | 2;
   phase: TurnPhase;
   isPaused: boolean;
-  detectivesPassing: Set<number>; // player ordinals of detectives who are passing this turn
+  detectivesPassing: number[]; // player ordinals of detectives who are passing this turn
 };
 
 export type GameState = {
@@ -225,7 +225,7 @@ export function initialState(
       turnNumber: 0,
       phase: TurnPhase.DETECTIVE,
       isPaused: false,
-      detectivesPassing: new Set<number>(),
+      detectivesPassing: [] as number[],
     },
     gameover: null,
     mapGraph: mapGraph,

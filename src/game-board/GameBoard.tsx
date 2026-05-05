@@ -138,9 +138,11 @@ export function GameBoard({
     const showGameIntroModal =
         (!gameover && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
 
-    const showMrXPrivacyModal = state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+    const showMrXPrivacyModal =
+        gameover === null && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
 
-    const showDetectivePrivacyModal = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
+    const showDetectivePrivacyModal =
+        gameover === null && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);

@@ -96,7 +96,7 @@ function initialCurrentTurn(partial: Partial<CurrentTurn>): CurrentTurn {
         ticket: null,
         turnNumber: 1,
         isPaused: false,
-        detectivesPassing: new Set<number>(),
+        detectivesPassing: [],
         phase: TurnPhase.DETECTIVE,
         ...partial,
     } as CurrentTurn;
@@ -114,7 +114,7 @@ function gameState(partial: Omit<Partial<GameState>, "players"> & { players: Pla
             turnNumber: 1,
             phase: TurnPhase.DETECTIVE,
             isPaused: false,
-            detectivesPassing: new Set<number>(),
+            detectivesPassing: [],
             ...ct,
         },
         gameover: null,
@@ -452,7 +452,7 @@ describe("getWinner", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), detective(1, "B", "blue", 2), fugitive(2, 4)],
             currentTurn: initialCurrentTurn({
-                detectivesPassing: new Set([0, 1]),
+                detectivesPassing: [0, 1],
             }),
         });
         const w = getWinner(s);
@@ -514,7 +514,7 @@ describe("passTurn", () => {
         expect(r.ok).toBe(true);
         if (!r.ok) return;
         expect(r.state.currentTurn.playerOrdinal).toBe(1);
-        expect(r.state.currentTurn.detectivesPassing.has(0)).toBe(true);
+        expect(r.state.currentTurn.detectivesPassing.includes(0)).toBe(true);
     });
 
     it("sets Mr. X as winner when all detectives are passing", () => {
@@ -525,14 +525,12 @@ describe("passTurn", () => {
                 fugitive(2, 3),
             ],
             currentTurn: initialCurrentTurn({
-                detectivesPassing: new Set([0]),
+                detectivesPassing: [0],
                 playerOrdinal: 1,
                 phase: TurnPhase.DETECTIVE,
             }),
         });
         const r = passTurn(s);
-
-        console.log(r);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
         expect(r.state.gameover?.winner).toBe("mrX");
@@ -546,7 +544,7 @@ describe("passTurn", () => {
                 fugitive(2, 3),
             ],
             currentTurn: initialCurrentTurn({
-                detectivesPassing: new Set(),
+                detectivesPassing: [],
                 playerOrdinal: 0,
                 phase: TurnPhase.DETECTIVE,
             }),
@@ -688,6 +686,7 @@ describe("tryPlayNode", () => {
         if (!r.ok) return;
         expect(r.state.gameover?.winner).toBe("detective");
         expect(r.state.gameover?.captureBy).toBe("A");
+        expect(r.state.currentTurn.phase).toBe(TurnPhase.GAME_OVER);
     });
 });
 

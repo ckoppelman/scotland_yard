@@ -207,7 +207,7 @@ export function getWinner(state: GameState): PlayerDescription | null {
     const detectives = state.players.filter((player) => player.description.isDetective);
     if (detectives.every((player) => player.position === mrX.position)) return detectives[0].description;
     if (state.currentTurn.turnNumber > state.turns.length) return mrX.description;
-    if (state.currentTurn.detectivesPassing?.size === detectives.length) return mrX.description;
+    if (state.currentTurn.detectivesPassing.length === detectives.length) return mrX.description;
     return null;
 }
 
@@ -217,7 +217,14 @@ export function passTurn(state: GameState): PlayResult {
     if (getPlayerCanMove(state, state.players[playerOrdinal])) return { ok: false, message: "You must move if you can." };
     if (doubleMovePart === 1) return { ok: false, message: "You cannot pass in the middle of a double move." };
     if (phase === TurnPhase.FUGITIVE) {
-        return { ok: true, state: { ...state,  gameover: { winner: "detective", mrXLossReason: "Cannot move without hitting a detective." } } };
+        return {
+            ok: true,
+            state: {
+                ...state,
+                gameover: { winner: "detective", mrXLossReason: "Cannot move without hitting a detective." },
+                currentTurn: { ...state.currentTurn, phase: TurnPhase.GAME_OVER },
+            },
+        };
     }
 
     const newState = {
@@ -225,17 +232,23 @@ export function passTurn(state: GameState): PlayResult {
         currentTurn: {
             ...state.currentTurn,
             playerOrdinal: getPlayerOrdinalAfterMove(state),
-            detectivesPassing: detectivesPassing ? new Set([...detectivesPassing, playerOrdinal]) : new Set([playerOrdinal]),
+            detectivesPassing: detectivesPassing.includes(playerOrdinal) ? detectivesPassing : [...detectivesPassing, playerOrdinal],
             phase: getNextTurnPhase(state),
         },
     } as GameState;
 
     const winner = getWinner(newState);
     if (winner !== null) {
-        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } };
-    } else {
-        return { ok: true, state: { ...newState, gameover: null } };
+        return {
+            ok: true,
+            state: {
+                ...newState,
+                gameover: { winner: winner.isDetective ? "detective" : "mrX" },
+                currentTurn: { ...newState.currentTurn, phase: TurnPhase.GAME_OVER },
+            },
+        };
     }
+    return { ok: true, state: { ...newState, gameover: null } };
 }
 
 export function tryPlayNode(state: GameState, node: number): PlayResult {
@@ -276,7 +289,14 @@ export function tryPlayNode(state: GameState, node: number): PlayResult {
                       winner: "mrX" as const,
                       detectiveLossReason: `All ${newState.turns.length} rounds are played without a capture — ${winner.name} gets away.`,
                   };
-        return { ok: true, state: { ...newState, gameover } as GameState };
+        return {
+            ok: true,
+            state: {
+                ...newState,
+                gameover,
+                currentTurn: { ...newState.currentTurn, phase: TurnPhase.GAME_OVER },
+            } as GameState,
+        };
     }
 
     return { ok: true, state: { ...newState, gameover: null } as GameState };
