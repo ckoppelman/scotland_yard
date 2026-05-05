@@ -52,4 +52,6 @@ export type GameOver = {
   captureBy?: string;
   /** Shown when Mr. X wins — why the detectives did not prevail. */
   detectiveLossReason?: string;
+  /** Shown when the detectives win — why Mr. X did not prevail. */
+  mrXLossReason?: string;
 };

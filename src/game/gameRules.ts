@@ -1,5 +1,5 @@
 import { Ticket } from "../constants";
-import { PlayerDescription, GameState, TurnLogEntry, PlayerState } from "./gameState";
+import { PlayerDescription, GameState, TurnLogEntry, PlayerState, TurnPhase } from "./gameState";
 
 export type PlayOk = { ok: true; state: GameState };
 export type PlayFail = { ok: false; message: string };
@@ -66,6 +66,20 @@ function neighborStationIds(state: GameState, from: number): number[] {
         }
     }
     return [...out];
+}
+
+export function getPlayerCanMove(state: GameState, player: PlayerState): boolean {
+    if (player.position === null) return false;
+    const from = player.position;
+
+    const ticketTypesRemaining = Object.keys(player.tickets).filter((t) => player.tickets[t as Ticket] > 0);
+    for (const node of neighborStationIds(state, from)) {
+        if (ticketTypesRemaining.some((t) => connectionTicketTypes(state, from, node).includes(t as Ticket))) {
+            const occupier = state.players.find((p) => p.description.isDetective && p.position === node);
+            if (occupier === undefined) return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -190,11 +204,38 @@ export function tryPlayMoveToAdjacent(state: GameState, toNode: number, ticket: 
 export function getWinner(state: GameState): PlayerDescription | null {
     const mrX = state.players.find((player) => !player.description.isDetective);
     if (mrX === undefined) return null;
-    for (const player of state.players.filter((player) => player.description.isDetective)) {
-        if (player.position === mrX.position) return player.description;
-    }
+    const detectives = state.players.filter((player) => player.description.isDetective);
+    if (detectives.every((player) => player.position === mrX.position)) return detectives[0].description;
     if (state.currentTurn.turnNumber > state.turns.length) return mrX.description;
+    if (state.currentTurn.detectivesPassing?.size === detectives.length) return mrX.description;
     return null;
+}
+
+export function passTurn(state: GameState): PlayResult {
+    const { playerOrdinal, phase, detectivesPassing, doubleMovePart } = state.currentTurn;
+    if (state.gameover) return { ok: false, message: "The game is over." };
+    if (getPlayerCanMove(state, state.players[playerOrdinal])) return { ok: false, message: "You must move if you can." };
+    if (doubleMovePart === 1) return { ok: false, message: "You cannot pass in the middle of a double move." };
+    if (phase === TurnPhase.FUGITIVE) {
+        return { ok: true, state: { ...state,  gameover: { winner: "detective", mrXLossReason: "Cannot move without hitting a detective." } } };
+    }
+
+    const newState = {
+        ...state,
+        currentTurn: {
+            ...state.currentTurn,
+            playerOrdinal: getPlayerOrdinalAfterMove(state),
+            detectivesPassing: detectivesPassing ? new Set([...detectivesPassing, playerOrdinal]) : new Set([playerOrdinal]),
+            phase: getNextTurnPhase(state),
+        },
+    } as GameState;
+
+    const winner = getWinner(newState);
+    if (winner !== null) {
+        return { ok: true, state: { ...newState, gameover: { winner: winner.isDetective ? "detective" : "mrX" } } };
+    } else {
+        return { ok: true, state: { ...newState, gameover: null } };
+    }
 }
 
 export function tryPlayNode(state: GameState, node: number): PlayResult {
@@ -264,6 +305,42 @@ function getPlayerOrdinalAfterMove(state: GameState): number {
     }
 }
 
+export function clearPrivacy(state: GameState): PlayResult {
+    const newPhase = getNextTurnPhase(state, true);
+    return {
+        ok: true,
+        state: {
+            ...state,
+            currentTurn: { ...state.currentTurn, phase: newPhase },
+        },
+    };
+}
+
+function getNextTurnPhase(state: GameState, clearPrivacy: boolean | null = null): TurnPhase {
+    const { currentTurn, gameover, players } = state;
+    if (gameover) return TurnPhase.GAME_OVER;
+
+    if (currentTurn.doubleMovePart === 1) {
+        return currentTurn.phase;
+    }
+
+    if (currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE && clearPrivacy === true) {
+        return TurnPhase.DETECTIVE;
+    } else if (currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE && clearPrivacy === true) {
+        return TurnPhase.FUGITIVE;
+    }
+
+    const player = players[currentTurn.playerOrdinal];
+    const nextPlayer = players[(currentTurn.playerOrdinal + 1) % players.length];
+
+    if (player.description.isDetective) {
+        if (nextPlayer.description.isDetective) return TurnPhase.DETECTIVE;
+        return TurnPhase.PRIVACY_FUGITIVE;
+    } else if (!nextPlayer.description.isDetective) return TurnPhase.FUGITIVE;
+
+    return TurnPhase.PRIVACY_DETECTIVE;
+}
+
 function movePlayer(state: GameState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
     let player = state.players[playerOrdinal];
     if (player.position === node) return { ok: false, message: "You are already on that station." };
@@ -307,6 +384,7 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
             ticket: null,
             playerOrdinal: getPlayerOrdinalAfterMove(state),
             doubleMovePart: state.currentTurn.doubleMovePart === 1 ? 2 : undefined,
+            phase: getNextTurnPhase(state),
         },
         players: newPlayers,
         turnLog: [...state.turnLog, turnLogEntry],

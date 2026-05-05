@@ -5,6 +5,13 @@ import type { MapLayoutYaml } from "./mapLayoutTypes";
 
 export type { GameMapId } from "./mapIds";
 
+export enum TurnPhase {
+  DETECTIVE = "detective",
+  FUGITIVE = "fugitive",
+  PRIVACY_DETECTIVE = "privacy_detective",
+  PRIVACY_FUGITIVE = "privacy_fugitive",
+  GAME_OVER = "game_over",
+}
 
 export type PlayerDescription = {
   id: string;
@@ -29,6 +36,9 @@ export type CurrentTurn = {
   ticket: Ticket | null;
   turnNumber: number;
   doubleMovePart?: 1 | 2;
+  phase: TurnPhase;
+  isPaused: boolean;
+  detectivesPassing: Set<number>; // player ordinals of detectives who are passing this turn
 };
 
 export type GameState = {
@@ -213,6 +223,9 @@ export function initialState(
       playerOrdinal: 0,
       ticket: null,
       turnNumber: 0,
+      phase: TurnPhase.DETECTIVE,
+      isPaused: false,
+      detectivesPassing: new Set<number>(),
     },
     gameover: null,
     mapGraph: mapGraph,
