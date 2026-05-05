@@ -1,5 +1,5 @@
 import type { Ticket } from "../../constants";
-import type { CurrentTurn, GameState, PlayerState, TurnState } from "../../game/gameState";
+import { CurrentTurn, GameState, PlayerState, TurnPhase, TurnState } from "../../game/gameState";
 import type { ResolvedMapLayout } from "../../game/mapLayoutTypes";
 import {
     type LegacyRef,
@@ -167,6 +167,10 @@ export function GameMapSection({
                             {markersRenderOrder.map((player) => {
                                 const isActive = player.description.order === activePlayer.description.order;
                                 const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
+                                const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+                                if (shouldShowPrivacy) {
+                                    return null;
+                                }
                                 if (
                                     state.gameover === null &&
                                     !player.description.isDetective &&

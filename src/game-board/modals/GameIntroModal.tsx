@@ -1,8 +1,8 @@
 import { APP_COPYRIGHT_YEAR, RAVENSBURGER_HOME_URL } from "../constants";
-import type { PrivacyModalFade } from "./usePrivacyModalFade";
+import type { ModalFade } from "./useModalFade";
 
 type Props = {
-    fade: PrivacyModalFade;
+    fade: ModalFade;
     /** Opened from hamburger vs first visit */
     introFromMenu: boolean;
     turnLogLength: number;

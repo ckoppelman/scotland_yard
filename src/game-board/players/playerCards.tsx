@@ -1,5 +1,6 @@
 import { COLOR_TO_BORDER } from "../../constants";
 import type { CurrentTurn, GameState, PlayerState, TurnLogEntry } from "../../game/gameState";
+import { TurnPhase } from "../../game/gameState";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
 
@@ -72,6 +73,7 @@ export function MrXCard({
 }) {
     const currentTurn = state.currentTurn;
     const shouldShowMrX = state.turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
+    const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
 
     return (
@@ -81,7 +83,7 @@ export function MrXCard({
                 borderTop: `3px solid ${COLOR_TO_BORDER[player.description.color]}`,
             }}
             onClick={
-                isMyTurn || shouldShowMrX
+                (isMyTurn && !shouldShowPrivacy) || shouldShowMrX
                     ? () => {
                           scrollToPlayerMarker(player);
                           onAfterScrollToMarker?.(player);
@@ -97,7 +99,7 @@ export function MrXCard({
                 </div>
             </div>
             <p className="mr-x-card-position">
-                Last seen: {isMyTurn || shouldShowMrX ? (player.position ?? "—") : "???"}
+                Last seen: {(isMyTurn && !shouldShowPrivacy) || shouldShowMrX ? (player.position ?? "—") : "???"}
             </p>
             <div className="mr-x-card-tickets">
                 <div className="mr-x-card-tickets__row">
@@ -167,7 +169,8 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
         list.push(entry);
         mrXLogByRound.set(entry.turnNumber, list);
     }
-    const isFugitiveTurn = state.players[currentTurn.playerOrdinal]?.description.isDetective ?? false;
+    const isFugitiveTurn = currentTurn.phase === TurnPhase.FUGITIVE;
+
     return (
         <div
             className="mr-x-board-wrap"

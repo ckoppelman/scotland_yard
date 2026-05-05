@@ -4,11 +4,13 @@ import { initialState, type GameState, type NewGameSettings } from "./game/gameS
 import { Ticket } from "./constants";
 import {
   getPlayableTicketsBetweenNodes,
+  passTurn,
   tryCancelDoubleMove,
   tryPlayDoubleMove,
   tryPlayMoveToAdjacent,
   tryPlayNode,
   tryPlayTicket,
+  clearPrivacy,
 } from "./game/gameRules";
 import { DEFAULT_GAME_MAP_ID } from "./game/mapIds";
 import { getMapGraph } from "./game/mapRegistry";
@@ -100,6 +102,24 @@ export default function App() {
     setState(result.state);
   };
 
+  const handleDismissPrivacyModal = () => {
+    const result = clearPrivacy(state);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    setState(result.state);
+  };
+
+  const handlePassTurn = () => {
+    const result = passTurn(state);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    setState(result.state);
+  };
+
   const handlePlayerDragToStation = (node: number | null, clientDrop?: { x: number; y: number }) => {
     if (node === null) return;
     const p = state.players[state.currentTurn.playerOrdinal];
@@ -161,6 +181,8 @@ export default function App() {
         onPlayerDragToStation={handlePlayerDragToStation}
         pendingValidTickets={pendingValidTickets}
         onPendingDoubleMove={handlePendingDoubleMove}
+        onDismissPrivacyModal={handleDismissPrivacyModal}
+        onPassTurn={handlePassTurn}
       />
     </main>
   );

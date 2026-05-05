@@ -1,7 +1,7 @@
-import type { PrivacyModalFade } from "./usePrivacyModalFade";
+import type { ModalFade } from "./useModalFade";
 
 type Props = {
-    fade: PrivacyModalFade;
+    fade: ModalFade;
 };
 
 /** Short in-app rules reference (not the full boxed rulebook). */

@@ -1,23 +1,17 @@
-import { useCallback, useEffect, useState, type FormEvent, type TransitionEventHandler } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   DEFAULT_NEW_GAME_SETTINGS,
   type NewGameSettings,
 } from "../../game/gameState";
 import type { GameMapId } from "../../game/mapIds";
 import { getMapGraph, MAP_SELECT_OPTIONS } from "../../game/mapRegistry";
+import type { ModalFade } from "./useModalFade";
 
 const MAX_DETECTIVES = 5;
 const MAX_FUGITIVES = 3;
 
-type FadeApi = {
-  mounted: boolean;
-  openClass: boolean;
-  requestClose: () => void;
-  onBackdropTransitionEnd: TransitionEventHandler<HTMLDivElement>;
-};
-
 type Props = {
-  fade: FadeApi;
+  fade: ModalFade;
   onConfirm: (settings: NewGameSettings) => void;
 };
 

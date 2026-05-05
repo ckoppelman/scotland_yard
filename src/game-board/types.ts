@@ -3,6 +3,7 @@ import type { GameState, NewGameSettings } from "../game/gameState";
 
 export type GameBoardProps = {
     state: GameState;
+    onDismissPrivacyModal: () => void;
     onTicketClick: (ticket: Ticket) => void;
     onNodeClick: (node: number) => void;
     onReset: (settings?: NewGameSettings) => void;
@@ -20,4 +21,6 @@ export type GameBoardProps = {
     pendingDoubleMove: boolean;
     /** After drag, user may commit a double (2x) move from the popup; keeps popup open on success. */
     onPendingDoubleMove: () => void;
+    /** When the current player has no legal move, the UI offers pass — routes here. */
+    onPassTurn: () => void;
 };

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type TransitionEvent } from "
  * Keeps a modal mounted through a fade-out after the user confirms, then runs `onComplete`.
  * `shouldDisplay` is the logical "this modal should be shown" flag from game rules.
  */
-export function usePrivacyModalFade(shouldDisplay: boolean, onComplete: () => void) {
+export function useModalFade(shouldDisplay: boolean, onComplete: () => void) {
     const [exiting, setExiting] = useState(false);
     const [paintOpen, setPaintOpen] = useState(false);
     const completedRef = useRef(false);
@@ -58,5 +58,5 @@ export function usePrivacyModalFade(shouldDisplay: boolean, onComplete: () => vo
     return { mounted, openClass: paintOpen, requestClose, onBackdropTransitionEnd };
 }
 
-/** What `usePrivacyModalFade` returns — pass this into modal components as `fade`. */
-export type PrivacyModalFade = ReturnType<typeof usePrivacyModalFade>;
+/** What `useModalFade` returns — pass this into modal components as `fade`. */
+export type ModalFade = ReturnType<typeof useModalFade>;

@@ -131,7 +131,7 @@
   border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-.privacy-modal__pawn {
+.modal-pawn {
   display: block;
 }
 
@@ -333,6 +333,83 @@
   margin-top: 0;
 }
 
+/* Must pass — no legal moves */
+.privacy-turn-modal--must-pass {
+  z-index: 10007;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.privacy-turn-modal__panel--must-pass {
+  width: min(22rem, calc(100% - 1.5rem));
+  max-width: 100%;
+  padding: 1.2rem 1.15rem 1.05rem;
+  text-align: center;
+  background: linear-gradient(175deg, #fefefc 0%, #eef2f9 58%, #e2e8f0 100%);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 12px 32px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 #fff;
+}
+
+.must-pass-modal__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.must-pass-modal__pawn-row {
+  margin: 0.35rem 0 0.65rem;
+}
+
+.privacy-turn-modal--must-pass .privacy-turn-modal__pawn-cell {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.must-pass-modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.must-pass-modal__body {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #334155;
+  text-align: left;
+}
+
+.must-pass-modal__btn {
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  border: 1px solid rgba(15, 23, 42, 0.65);
+  background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
+  color: #f8fafc;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
+.must-pass-modal__btn:hover {
+  filter: brightness(1.06);
+}
+
+.must-pass-modal__btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* Game over — compact result panel */
 .privacy-turn-modal--game-over {
   z-index: 10008;
@@ -360,6 +437,16 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #64748b;
+}
+
+.game-over-modal__pawn-row {
+  flex-wrap: wrap;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.privacy-turn-modal--game-over .privacy-turn-modal__pawn-cell {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.45);
 }
 
 .game-over-modal__title {

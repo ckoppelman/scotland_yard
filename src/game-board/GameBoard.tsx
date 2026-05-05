@@ -10,11 +10,12 @@ import {
 } from "react";
 import { type Ticket } from "../constants";
 import {
+    getPlayerCanMove,
     getReachableNodesForDragPreview,
     getReachableNodesForSelectedTicket,
     hasPlayableMoveWithTicket,
 } from "../game/gameRules";
-import type { NewGameSettings, PlayerState } from "../game/gameState";
+import { TurnPhase, type NewGameSettings, type PlayerState } from "../game/gameState";
 import { resolveMapLayout } from "../game/resolveMapLayout";
 import {
     CONNECTION_TO_COLOR_AND_OFFSET,
@@ -41,16 +42,18 @@ import {
 } from "./map/mapLayout";
 import { GameOverModal } from "./modals/GameOverModal";
 import { GameIntroModal } from "./modals/GameIntroModal";
+import { MustPassModal } from "./modals/MustPassModal";
 import { PrivacyTurnModal } from "./modals/PrivacyTurnModal";
 import { NewGameSettingsModal } from "./modals/NewGameSettingsModal";
 import { QuickRulesModal } from "./modals/QuickRulesModal";
 import type { GameBoardProps } from "./types";
-import { usePrivacyModalFade } from "./modals/usePrivacyModalFade";
+import { useModalFade } from "./modals/useModalFade";
 import { AppGameMenu } from "./shell/AppGameMenu";
 import { GameSideDock } from "./shell/GameSideDock";
 
 export function GameBoard({
     state,
+    onDismissPrivacyModal,
     onTicketClick,
     onNodeClick,
     onReset,
@@ -61,37 +64,12 @@ export function GameBoard({
     onPlayerDragToStation,
     pendingValidTickets,
     onPendingDoubleMove,
+    onPassTurn,
 }: GameBoardProps) {
     const { players, mapGraph, gameover, currentTurn, turns, turnLog } = state;
 
     const activePlayer = state.players[state.currentTurn.playerOrdinal];
 
-    const mrXPrivacyTurnKey = useMemo(() => {
-        if (gameover) return null;
-        const p = players[currentTurn.playerOrdinal];
-        if (p.description.isDetective) return null;
-        const lastEntry = turnLog[turnLog.length - 1];
-        if (lastEntry === undefined) return null;
-        const lastMover = players[lastEntry.playerOrdinal];
-        if (!lastMover.description.isDetective) return null;
-        return `${currentTurn.turnNumber}-fugitives`;
-    }, [gameover, players, currentTurn.turnNumber, turnLog]);
-
-    const [dismissedMrXPrivacyKey, setDismissedMrXPrivacyKey] = useState<string | null>(null);
-
-    const detectivePrivacyTurnKey = useMemo(() => {
-        if (gameover) return null;
-        if (currentTurn.playerOrdinal !== 0) return null;
-        if (!players[0].description.isDetective) return null;
-        const lastEntry = turnLog[turnLog.length - 1];
-        if (lastEntry === undefined) return null;
-        const lastMover = players[lastEntry.playerOrdinal];
-        if (lastMover.description.isDetective) return null;
-        if (lastEntry.playerOrdinal !== players.length - 1) return null;
-        return `${currentTurn.turnNumber}-detectives`;
-    }, [gameover, currentTurn.playerOrdinal, currentTurn.turnNumber, players, turnLog]);
-
-    const [dismissedDetectivePrivacyKey, setDismissedDetectivePrivacyKey] = useState<string | null>(null);
     const [dismissedGameIntro, setDismissedGameIntro] = useState(false);
     const [introFromMenu, setIntroFromMenu] = useState(false);
     const [rulesModalOpen, setRulesModalOpen] = useState(false);
@@ -154,27 +132,15 @@ export function GameBoard({
     const handleNewGame = useCallback(() => {
         setIntroFromMenu(false);
         setDismissedGameIntro(false);
-        setDismissedMrXPrivacyKey(null);
-        setDismissedDetectivePrivacyKey(null);
         onReset();
     }, [onReset]);
 
     const showGameIntroModal =
         (!gameover && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
 
-    const showMrXPrivacyModal =
-        mrXPrivacyTurnKey !== null && dismissedMrXPrivacyKey !== mrXPrivacyTurnKey;
+    const showMrXPrivacyModal = state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
 
-    const showDetectivePrivacyModal =
-        detectivePrivacyTurnKey !== null && dismissedDetectivePrivacyKey !== detectivePrivacyTurnKey;
-
-    const completeMrXPrivacyDismiss = useCallback(() => {
-        if (mrXPrivacyTurnKey !== null) setDismissedMrXPrivacyKey(mrXPrivacyTurnKey);
-    }, [mrXPrivacyTurnKey]);
-
-    const completeDetectivePrivacyDismiss = useCallback(() => {
-        if (detectivePrivacyTurnKey !== null) setDismissedDetectivePrivacyKey(detectivePrivacyTurnKey);
-    }, [detectivePrivacyTurnKey]);
+    const showDetectivePrivacyModal = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);
@@ -196,10 +162,23 @@ export function GameBoard({
     }, []);
 
     const showGameOverModal = gameover !== null && !gameOverModalDismissed;
+
+    const showMustPassModal =
+        gameover === null &&
+        !showGameIntroModal &&
+        !showMrXPrivacyModal &&
+        !showDetectivePrivacyModal &&
+        pendingMoveNode === null &&
+        activePlayer.position !== null &&
+        state.currentTurn.ticket === null &&
+        state.currentTurn.doubleMovePart !== 1 &&
+        (state.currentTurn.phase === TurnPhase.FUGITIVE || state.currentTurn.phase === TurnPhase.DETECTIVE) &&
+        !getPlayerCanMove(state, activePlayer);
+
     const completeGameOverModalDismiss = useCallback(() => {
         setGameOverModalDismissed(true);
     }, []);
-    const gameOverFade = usePrivacyModalFade(showGameOverModal, completeGameOverModalDismiss);
+    const gameOverFade = useModalFade(showGameOverModal, completeGameOverModalDismiss);
 
     useEffect(() => {
         if (!showGameOverModal) return;
@@ -215,18 +194,16 @@ export function GameBoard({
         setNewGameSettingsOpen(true);
     }, []);
 
-    const mrXPrivacyFade = usePrivacyModalFade(showMrXPrivacyModal, completeMrXPrivacyDismiss);
-    const detectivePrivacyFade = usePrivacyModalFade(showDetectivePrivacyModal, completeDetectivePrivacyDismiss);
-    const gameIntroFade = usePrivacyModalFade(showGameIntroModal, completeGameIntroDismiss);
-    const rulesFade = usePrivacyModalFade(rulesModalOpen, onRulesModalComplete);
-    const newGameSettingsFade = usePrivacyModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
+    const mrXPrivacyFade = useModalFade(showMrXPrivacyModal, onDismissPrivacyModal);
+    const detectivePrivacyFade = useModalFade(showDetectivePrivacyModal, onDismissPrivacyModal);
+    const gameIntroFade = useModalFade(showGameIntroModal, completeGameIntroDismiss);
+    const rulesFade = useModalFade(rulesModalOpen, onRulesModalComplete);
+    const newGameSettingsFade = useModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
 
     const confirmNewGameWithSettings = useCallback(
         (settings: NewGameSettings) => {
             setIntroFromMenu(false);
             setDismissedGameIntro(false);
-            setDismissedMrXPrivacyKey(null);
-            setDismissedDetectivePrivacyKey(null);
             onReset(settings);
             newGameSettingsFade.requestClose();
         },
@@ -614,6 +591,7 @@ export function GameBoard({
                 <GameOverModal
                     fade={gameOverFade}
                     gameover={gameover}
+                    players={players}
                     onViewMap={gameOverFade.requestClose}
                     onNewGame={handleNewGame}
                     onNewGameWithSettings={openNewGameSettingsFromGameOver}
@@ -623,6 +601,7 @@ export function GameBoard({
                 <NewGameSettingsModal fade={newGameSettingsFade} onConfirm={confirmNewGameWithSettings} />
             )}
             <QuickRulesModal fade={rulesFade} />
+            {showMustPassModal && <MustPassModal activePlayer={activePlayer} onPass={onPassTurn} />}
             <AppGameMenu
                 menuRef={menuRef}
                 menuOpen={menuOpen}

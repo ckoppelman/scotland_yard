@@ -1,12 +1,12 @@
 import type { PlayerState } from "../../game/gameState";
-import type { PrivacyModalFade } from "./usePrivacyModalFade";
-import { PrivacyModalPawn } from "./PrivacyModalPawn";
+import { ModalPawn } from "./ModalPawn";
+import type { ModalFade } from "./useModalFade";
 
 export type PrivacyTurnVariant = "mrx" | "detectives";
 
 type Props = {
     variant: PrivacyTurnVariant;
-    fade: PrivacyModalFade;
+    fade: ModalFade;
     criminalLabel: string;
     mrXPlayers: PlayerState[];
     detectives: PlayerState[];
@@ -40,19 +40,19 @@ export function PrivacyTurnModal({ variant, fade, criminalLabel, mrXPlayers, det
                         <div className="privacy-turn-modal__icon-row" aria-hidden>
                             {detectives.map((p: PlayerState) => (
                                 <div key={p.description.id} className="privacy-turn-modal__pawn-cell">
-                                    <PrivacyModalPawn player={p} size="md" />
+                                    <ModalPawn player={p} size="md" />
                                 </div>
                             ))}
                         </div>
-                        <p className="privacy-turn-modal__hero privacy-turn-modal__hero--mrx">
+                        <section className="privacy-turn-modal__hero privacy-turn-modal__hero--mrx">
                             <div className="privacy-turn-modal__icon-row" aria-hidden>
                                 {mrXPlayers.map((p: PlayerState) => (
                                     <div key={p.description.id} className="privacy-turn-modal__pawn-cell">
-                                        <PrivacyModalPawn player={p} size="lg" />
+                                        <ModalPawn player={p} size="lg" />
                                     </div>
                                 ))}
                             </div>
-                        </p>
+                        </section>
                         <p id={titleId} className="privacy-turn-modal__text">
                             Thank you, detectives. Now it&apos;s time for the {criminalLabel} to take their turn. Please
                             turn away and let them enter their {criminalLabel === "fugitive" ? "move" : "moves"}.
@@ -75,7 +75,7 @@ export function PrivacyTurnModal({ variant, fade, criminalLabel, mrXPlayers, det
                                 <div className="privacy-turn-modal__icon-row" aria-hidden>
                                     {mrXPlayers.map((p) => (
                                         <div key={p.description.id} className="privacy-turn-modal__pawn-cell">
-                                            <PrivacyModalPawn player={p} size="md" />
+                                            <ModalPawn player={p} size="md" />
                                         </div>
                                     ))}
                                 </div>
@@ -87,7 +87,7 @@ export function PrivacyTurnModal({ variant, fade, criminalLabel, mrXPlayers, det
                                 <div className="privacy-turn-modal__icon-row" aria-hidden>
                                     {detectives.map((p) => (
                                         <div key={p.description.id} className="privacy-turn-modal__pawn-cell">
-                                            <PrivacyModalPawn player={p} size="lg" />
+                                            <ModalPawn player={p} size="lg" />
                                         </div>
                                     ))}
                                 </div>
