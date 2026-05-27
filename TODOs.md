@@ -7,12 +7,10 @@
 
 ## Bugs
 
-- Mr. X fades in before privacy screen appears.
 - Make sure 2x increments turn number.
 
 ## Highest priority features
 
-- Actually count the number of tiles Mr. X starts with.
 - Implement trapped detectives and trapped lose condition
 
 ## Features
