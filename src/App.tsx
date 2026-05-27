@@ -120,6 +120,20 @@ export default function App() {
     setState(result.state);
   };
 
+  const handlePause = () => {
+    setState((s) => {
+      if (s === null) return s;
+      return { ...s, currentTurn: { ...s.currentTurn, isPaused: true } };
+    });
+  };
+
+  const handleResumePause = () => {
+    setState((s) => {
+      if (s === null) return s;
+      return { ...s, currentTurn: { ...s.currentTurn, isPaused: false } };
+    });
+  };
+
   const handlePlayerDragToStation = (node: number | null, clientDrop?: { x: number; y: number }) => {
     if (node === null) return;
     const p = state.players[state.currentTurn.playerOrdinal];
@@ -183,6 +197,8 @@ export default function App() {
         onPendingDoubleMove={handlePendingDoubleMove}
         onDismissPrivacyModal={handleDismissPrivacyModal}
         onPassTurn={handlePassTurn}
+        onPause={handlePause}
+        onResumePause={handleResumePause}
       />
     </main>
   );

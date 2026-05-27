@@ -8,9 +8,15 @@ type Props = {
     onOpenNewGameSettings: () => void;
     onOpenIntro: () => void;
     onOpenRules: () => void;
+    /** Grey out Pause when the game has ended or is already paused. */
+    pauseDisabled: boolean;
+    /** Grey out Resume when not paused or game has ended. */
+    resumeDisabled: boolean;
+    onPause: () => void;
+    onResumePause: () => void;
 };
 
-/** Top-left hamburger: new game, intro, rules. */
+/** Top-left hamburger: new game, intro, pause/resume, rules. */
 export function AppGameMenu({
     menuRef,
     menuOpen,
@@ -19,6 +25,10 @@ export function AppGameMenu({
     onOpenNewGameSettings,
     onOpenIntro,
     onOpenRules,
+    pauseDisabled,
+    resumeDisabled,
+    onPause,
+    onResumePause,
 }: Props) {
     return (
         <div className="app-menu" ref={menuRef}>
@@ -72,6 +82,32 @@ export function AppGameMenu({
                         }}
                     >
                         Introduction
+                    </button>
+                    <button
+                        type="button"
+                        className="app-menu__item"
+                        role="menuitem"
+                        disabled={pauseDisabled}
+                        aria-disabled={pauseDisabled}
+                        onClick={() => {
+                            onPause();
+                            setMenuOpen(false);
+                        }}
+                    >
+                        Pause
+                    </button>
+                    <button
+                        type="button"
+                        className="app-menu__item"
+                        role="menuitem"
+                        disabled={resumeDisabled}
+                        aria-disabled={resumeDisabled}
+                        onClick={() => {
+                            onResumePause();
+                            setMenuOpen(false);
+                        }}
+                    >
+                        Resume
                     </button>
                     <button
                         type="button"

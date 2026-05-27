@@ -43,6 +43,7 @@ import {
 import { GameOverModal } from "./modals/GameOverModal";
 import { GameIntroModal } from "./modals/GameIntroModal";
 import { MustPassModal } from "./modals/MustPassModal";
+import { PauseModal } from "./modals/PauseModal";
 import { PrivacyTurnModal } from "./modals/PrivacyTurnModal";
 import { NewGameSettingsModal } from "./modals/NewGameSettingsModal";
 import { QuickRulesModal } from "./modals/QuickRulesModal";
@@ -65,6 +66,8 @@ export function GameBoard({
     pendingValidTickets,
     onPendingDoubleMove,
     onPassTurn,
+    onPause,
+    onResumePause,
 }: GameBoardProps) {
     const { players, mapGraph, winner, currentTurn, turns, turnLog } = state;
 
@@ -138,11 +141,15 @@ export function GameBoard({
     const showGameIntroModal =
         (winner === null && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
 
+    const isPaused = state.currentTurn.isPaused;
+
+    const showPauseModal = winner === null && isPaused;
+
     const showMrXPrivacyModal =
-        winner === null && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+        winner === null && !isPaused && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
 
     const showDetectivePrivacyModal =
-        winner === null && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
+        winner === null && !isPaused && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);
@@ -167,6 +174,7 @@ export function GameBoard({
 
     const showMustPassModal =
         winner === null &&
+        !isPaused &&
         !showGameIntroModal &&
         !showMrXPrivacyModal &&
         !showDetectivePrivacyModal &&
@@ -198,6 +206,7 @@ export function GameBoard({
 
     const mrXPrivacyFade = useModalFade(showMrXPrivacyModal, onDismissPrivacyModal);
     const detectivePrivacyFade = useModalFade(showDetectivePrivacyModal, onDismissPrivacyModal);
+    const pauseFade = useModalFade(showPauseModal, onResumePause);
     const gameIntroFade = useModalFade(showGameIntroModal, completeGameIntroDismiss);
     const rulesFade = useModalFade(rulesModalOpen, onRulesModalComplete);
     const newGameSettingsFade = useModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
@@ -324,11 +333,20 @@ export function GameBoard({
     }, []);
 
     useLayoutEffect(() => {
-        if (!showMrXPrivacyModal && !showDetectivePrivacyModal && !showGameIntroModal) return;
+        if (!showMrXPrivacyModal && !showDetectivePrivacyModal && !showGameIntroModal && !showPauseModal) return;
         setMapZoom(PRIVACY_MODAL_MAP_ZOOM);
         setMapPan(clampMapPan(PRIVACY_MODAL_MAP_PAN, PRIVACY_MODAL_MAP_ZOOM, contentW, contentH));
         window.scrollTo(0, 0);
-    }, [showDetectivePrivacyModal, showGameIntroModal, showMrXPrivacyModal, contentW, contentH]);
+    }, [showDetectivePrivacyModal, showGameIntroModal, showMrXPrivacyModal, showPauseModal, contentW, contentH]);
+
+    useEffect(() => {
+        if (!showPauseModal) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") pauseFade.requestClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [pauseFade.requestClose, showPauseModal]);
 
     const findNodeAtSvgPoint = useCallback(
         (sx: number, sy: number): number | null => {
@@ -604,6 +622,7 @@ export function GameBoard({
             )}
             <QuickRulesModal fade={rulesFade} />
             {showMustPassModal && <MustPassModal activePlayer={activePlayer} onPass={onPassTurn} />}
+            <PauseModal fade={pauseFade} currentPlayer={activePlayer} />
             <AppGameMenu
                 menuRef={menuRef}
                 menuOpen={menuOpen}
@@ -612,6 +631,10 @@ export function GameBoard({
                 onOpenNewGameSettings={() => setNewGameSettingsOpen(true)}
                 onOpenIntro={() => setIntroFromMenu(true)}
                 onOpenRules={() => setRulesModalOpen(true)}
+                pauseDisabled={winner !== null || isPaused}
+                resumeDisabled={winner !== null || !isPaused}
+                onPause={onPause}
+                onResumePause={onResumePause}
             />
             <div className="game-layout">
                 <GameMapSection

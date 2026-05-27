@@ -23,4 +23,7 @@ export type GameBoardProps = {
     onPendingDoubleMove: () => void;
     /** When the current player has no legal move, the UI offers pass — routes here. */
     onPassTurn: () => void;
+    /** Pause overlays a privacy modal; resume clears {@link GameState.currentTurn.isPaused}. */
+    onPause: () => void;
+    onResumePause: () => void;
 };

@@ -168,7 +168,7 @@ export function GameMapSection({
                                 const isActive = player.description.order === activePlayer.description.order;
                                 const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
                                 const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
-                                if (shouldShowPrivacy) {
+                                if (shouldShowPrivacy || state.currentTurn.isPaused) {
                                     return null;
                                 }
                                 if (
