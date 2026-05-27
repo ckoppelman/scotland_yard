@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import type { Color } from "../constants";
-import type { Ticket } from "../constants";
+import { type Color, type Ticket, FUGITIVE_ESCAPE_WIN_REASON, FUGITIVES_ARE_TRAPPED_WIN_REASON } from "../constants";
+import { DEFAULT_GAME_RULES } from "./gameState";
 import type { CurrentTurn, GameState, MapGraph, PlayerState } from "./gameState";
 import { TurnPhase } from "./gameState";
 import { DEFAULT_GAME_MAP_ID } from "./mapIds";
@@ -97,6 +97,7 @@ function initialCurrentTurn(partial: Partial<CurrentTurn>): CurrentTurn {
         turnNumber: 1,
         isPaused: false,
         detectivesPassing: [],
+        fugitivesPassing: [],
         phase: TurnPhase.DETECTIVE,
         ...partial,
     } as CurrentTurn;
@@ -115,11 +116,13 @@ function gameState(partial: Omit<Partial<GameState>, "players"> & { players: Pla
             phase: TurnPhase.DETECTIVE,
             isPaused: false,
             detectivesPassing: [],
+            fugitivesPassing: [],
             ...ct,
         },
-        gameover: null,
+        winner: null,
         turns: TURNS_24,
         turnLog: [],
+        gameRules: DEFAULT_GAME_RULES,
         ...rest,
     };
 }
@@ -128,7 +131,7 @@ describe("tryPlayTicket", () => {
     it("rejects when the game is over", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-            gameover: { winner: "mrX", detectiveLossReason: "test" },
+            winner: { winner: "mrX", fugitiveWinReason: FUGITIVE_ESCAPE_WIN_REASON },
         });
         const r = tryPlayTicket(s, "taxi");
         expect(r.ok).toBe(false);
@@ -156,21 +159,15 @@ describe("tryPlayTicket", () => {
 
 describe("getTicketsBetweenNodes", () => {
     it("returns ticket types for each edge between adjacent stations", () => {
-        const s = gameState({
-            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-        });
-        expect(getTicketsBetweenNodes(s, 1, 2)).toEqual(["taxi"]);
-        expect(getTicketsBetweenNodes(s, 2, 3)).toEqual(["bus"]);
-        const oneThree = getTicketsBetweenNodes(s, 1, 3).slice().sort();
+        expect(getTicketsBetweenNodes(triangleGraph(), 1, 2)).toEqual(["taxi"]);
+        expect(getTicketsBetweenNodes(triangleGraph(), 2, 3)).toEqual(["bus"]);
+        const oneThree = getTicketsBetweenNodes(triangleGraph(), 1, 3).slice().sort();
         expect(oneThree).toEqual(["underground"]);
     });
 
     it("returns empty when nodes are not adjacent or null", () => {
-        const s = gameState({
-            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-        });
-        expect(getTicketsBetweenNodes(s, 1, 4)).toEqual([]);
-        expect(getTicketsBetweenNodes(s, null, 2)).toEqual([]);
+        expect(getTicketsBetweenNodes(triangleGraph(), 1, 4)).toEqual([]);
+        expect(getTicketsBetweenNodes(triangleGraph(), null, 2)).toEqual([]);
     });
 });
 
@@ -284,7 +281,7 @@ describe("getReachableNodesForDragPreview", () => {
     it("returns empty when game is over", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-            gameover: { winner: "detective", captureBy: "A" },
+            winner: { winner: "detective", captureBy: "A" },
         });
         expect(getReachableNodesForDragPreview(s)).toEqual([]);
     });
@@ -294,7 +291,7 @@ describe("hasPlayableMoveWithTicket", () => {
     it("is false when the game has ended", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-            gameover: { winner: "detective", captureBy: "A" },
+            winner: { winner: "detective", captureBy: "A" },
         });
         expect(hasPlayableMoveWithTicket(s, "taxi")).toBe(false);
     });
@@ -435,7 +432,7 @@ describe("getWinner", () => {
         });
         const w = getWinner(s);
         expect(w).not.toBeNull();
-        expect(w!.isDetective).toBe(true);
+        expect(w!.winner).toBe("detective");
     });
 
     it("returns Mr X when the round counter is past the configured rounds", () => {
@@ -445,7 +442,7 @@ describe("getWinner", () => {
         });
         const w = getWinner(s);
         expect(w).not.toBeNull();
-        expect(w!.isDetective).toBe(false);
+        expect(w!.winner).toBe("mrX");
     });
 
     it("returns Mr X when all detectives are passing", () => {
@@ -457,7 +454,7 @@ describe("getWinner", () => {
         });
         const w = getWinner(s);
         expect(w).not.toBeNull();
-        expect(w!.isDetective).toBe(false);
+        expect(w!.winner).toBe("mrX");
     });
 
     it("returns null mid-game with no capture or exhaustion condition", () => {
@@ -498,8 +495,10 @@ describe("passTurn", () => {
         const r = passTurn(s);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
-        expect(r.state.gameover?.winner).toBe("detective");
-        expect(r.state.gameover?.mrXLossReason).toBeDefined();
+        expect(r.state.currentTurn.fugitivesPassing).toHaveLength(1);
+        expect(r.state.currentTurn.fugitivesPassing.includes(1)).toBe(true);
+        expect(r.state.winner?.winner).toBe("detective");
+        expect(r.state.winner?.detectiveWinReason).toBe(FUGITIVES_ARE_TRAPPED_WIN_REASON);
     });
 
     it("advances turn when a detective passes with no moves", () => {
@@ -533,7 +532,7 @@ describe("passTurn", () => {
         const r = passTurn(s);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
-        expect(r.state.gameover?.winner).toBe("mrX");
+        expect(r.state.winner?.winner).toBe("mrX");
     });
 
     it("sets no winner when only one detective is passing", () => {
@@ -545,6 +544,7 @@ describe("passTurn", () => {
             ],
             currentTurn: initialCurrentTurn({
                 detectivesPassing: [],
+                fugitivesPassing: [],
                 playerOrdinal: 0,
                 phase: TurnPhase.DETECTIVE,
             }),
@@ -552,7 +552,7 @@ describe("passTurn", () => {
         const r = passTurn(s);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
-        expect(r.state.gameover).toBeNull();
+        expect(r.state.winner).toBeNull();
     });
 
 });
@@ -591,7 +591,7 @@ describe("tryPlayNode", () => {
     it("rejects when game is already over", () => {
         let s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
-            gameover: { winner: "mrX", detectiveLossReason: "time" },
+            winner: { winner: "mrX", fugitiveWinReason: FUGITIVE_ESCAPE_WIN_REASON },
             currentTurn: initialCurrentTurn({ ticket: "taxi" as Ticket }),
         });
         const r = tryPlayNode(s, 2);
@@ -676,6 +676,7 @@ describe("tryPlayNode", () => {
     it("declares detective win on capture", () => {
         let s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 2)],
+            gameRules: DEFAULT_GAME_RULES,
         });
         const t = tryPlayTicket(s, "taxi");
         expect(t.ok).toBe(true);
@@ -684,8 +685,8 @@ describe("tryPlayNode", () => {
         const r = tryPlayNode(s, 2);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
-        expect(r.state.gameover?.winner).toBe("detective");
-        expect(r.state.gameover?.captureBy).toBe("A");
+        expect(r.state.winner?.winner).toBe("detective");
+        expect(r.state.winner?.captureBy).toBe("A");
         expect(r.state.currentTurn.phase).toBe(TurnPhase.GAME_OVER);
     });
 });

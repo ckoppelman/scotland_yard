@@ -1,4 +1,4 @@
-import { Color, Ticket, GameOver } from "../constants";
+import { Color, Ticket, Winner } from "../constants";
 import { defaultTurns } from "./defaultTurns";
 import { DEFAULT_GAME_MAP_ID, type GameMapId } from "./mapIds";
 import type { MapLayoutYaml } from "./mapLayoutTypes";
@@ -39,6 +39,7 @@ export type CurrentTurn = {
   phase: TurnPhase;
   isPaused: boolean;
   detectivesPassing: number[]; // player ordinals of detectives who are passing this turn
+  fugitivesPassing: number[];
 };
 
 export type GameState = {
@@ -46,10 +47,24 @@ export type GameState = {
   mapId: GameMapId;
   players: PlayerState[];
   currentTurn: CurrentTurn;
-  gameover: GameOver | null;
+  winner: Winner | null;
   mapGraph: MapGraph;
   turns: TurnState[];
   turnLog: TurnLog;
+  gameRules: GameRules;
+};
+
+export type GameRules = {
+  /* these are not implemented yet */
+  fugitivesCanPassDetective: boolean;
+  fugitivesLoseIfCaptured: "any" | "all";
+  allowUndo: boolean;
+};
+
+export const DEFAULT_GAME_RULES: GameRules = {
+  fugitivesCanPassDetective: true,
+  fugitivesLoseIfCaptured: "any",
+  allowUndo: false,
 };
 
 export type MapConnection = {
@@ -226,10 +241,12 @@ export function initialState(
       phase: TurnPhase.DETECTIVE,
       isPaused: false,
       detectivesPassing: [] as number[],
+      fugitivesPassing: [] as number[],
     },
-    gameover: null,
+    winner: null,
     mapGraph: mapGraph,
     turns: defaultTurns,
     turnLog: [] as TurnLog,
+    gameRules: DEFAULT_GAME_RULES,
   };
 }

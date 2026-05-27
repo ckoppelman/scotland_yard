@@ -46,12 +46,15 @@ export const COLOR_TO_BORDER: Record<Color, string> = {
 };
 
 export type Ticket = "taxi" | "bus" | "underground" | "black" | "double";
-export type GameOver = {
+export type Winner = {
   winner: "detective" | "mrX";
   /** Detective who shares Mr. X’s station when the detectives win. */
   captureBy?: string;
-  /** Shown when Mr. X wins — why the detectives did not prevail. */
-  detectiveLossReason?: string;
-  /** Shown when the detectives win — why Mr. X did not prevail. */
-  mrXLossReason?: string;
+  detectiveWinReason?: string;
+  fugitiveWinReason?: string;
 };
+
+export const DETECTIVE_CAPTURE_X_WIN_REASON = "Mr. X has been apprehended and will be taken to jail.";
+export const FUGITIVE_ESCAPE_WIN_REASON = "Mr. X has evaded the detectives and continues his crime spree.";
+export const DETECTIVES_ARE_TRAPPED_WIN_REASON = "All detectives are trapped at their stations.  Mr. X has escaped.";
+export const FUGITIVES_ARE_TRAPPED_WIN_REASON = "Mr. X has been surrounded and will be taken into custody.";

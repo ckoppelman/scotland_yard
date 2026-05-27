@@ -8,9 +8,9 @@ import type { GameMapId } from "./mapIds";
 import { GAME_MAP_IDS } from "./mapIds";
 import { getMapGraph } from "./mapRegistry";
 
-const STORAGE_V1 = "scotland-yard:game:v1";
+const STORAGE_KEY = "scotland-yard:game";
 /** Raw AES-256 key material; kept out of localStorage so saved ciphertext stays opaque there. */
-const SESSION_KEY_B64 = "scotland-yard:mrx-key:v1";
+const SESSION_KEY_B64 = "scotland-yard:mrx-key";
 
 function isPersistedMapId(value: string): value is GameMapId {
   return (GAME_MAP_IDS as readonly string[]).includes(value);
@@ -21,7 +21,7 @@ function isMrXPlayer(players: PlayerState[], ordinal: number): boolean {
   return p !== undefined && !p.description.isDetective;
 }
 
-type MrXSecretV1 = {
+type MrXSecret = {
   v: 1;
   /** Non-detective player ordinal → station id */
   playerPositions: Record<number, number | null>;
@@ -29,18 +29,36 @@ type MrXSecretV1 = {
   turnLogPositions: Record<number, number>;
 };
 
-type PersistedPayloadV1 = {
+type PersistedPayload = {
   v: 1;
   mapId: GameMapId;
   players: PlayerState[];
   currentTurn: GameState["currentTurn"];
-  gameover: GameState["gameover"];
+  winner: GameState["winner"];
+  gameRules: GameState["gameRules"];
   turns: GameState["turns"];
   /** Mr X rows use position -1 as a sentinel; filled from ciphertext after decrypt */
   turnLog: TurnLog;
   /** AES-GCM(iv || ciphertext), base64 */
   mrxCipher: string;
 };
+
+function isPersistedPayload(value: unknown): value is PersistedPayload {
+  if (!value || typeof value !== "object") return false;
+  const p = value as PersistedPayload;
+  return (
+    p.v === 1 &&
+    typeof p.mrxCipher === "string" &&
+    typeof p.mapId === "string" &&
+    isPersistedMapId(p.mapId) &&
+    Array.isArray(p.players) &&
+    p.currentTurn != null &&
+    p.winner !== undefined &&
+    p.gameRules != null &&
+    Array.isArray(p.turns) &&
+    Array.isArray(p.turnLog)
+  );
+}
 
 function uint8ToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -70,7 +88,7 @@ async function getOrCreateAesKey(): Promise<CryptoKey> {
     crypto.getRandomValues(raw);
     sessionStorage.setItem(SESSION_KEY_B64, uint8ToBase64(raw));
   }
-  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, [
+  return crypto.subtle.importKey("raw", raw.buffer as unknown as ArrayBuffer, { name: "AES-GCM" }, false, [
     "encrypt",
     "decrypt",
   ]);
@@ -107,7 +125,7 @@ async function decryptJson<T>(key: CryptoKey, b64: string): Promise<T | null> {
 
 const SENTINEL_MRX = -1;
 
-function buildSecretFromState(state: GameState): MrXSecretV1 {
+function buildSecretFromState(state: GameState): MrXSecret {
   const playerPositions: Record<number, number | null> = {};
   for (let i = 0; i < state.players.length; i++) {
     if (!isMrXPlayer(state.players, i)) continue;
@@ -122,7 +140,7 @@ function buildSecretFromState(state: GameState): MrXSecretV1 {
   return { v: 1, playerPositions, turnLogPositions };
 }
 
-function stripForStorage(state: GameState): Omit<PersistedPayloadV1, "mrxCipher"> {
+function stripForStorage(state: GameState): Omit<PersistedPayload, "mrxCipher"> {
   const players = state.players.map((p) =>
     p.description.isDetective
       ? p
@@ -138,15 +156,16 @@ function stripForStorage(state: GameState): Omit<PersistedPayloadV1, "mrxCipher"
     mapId: state.mapId,
     players,
     currentTurn: state.currentTurn,
-    gameover: state.gameover,
+    winner: state.winner,
+    gameRules: state.gameRules,
     turns: state.turns,
     turnLog,
   };
 }
 
 function applySecret(
-  base: Omit<PersistedPayloadV1, "mrxCipher">,
-  secret: MrXSecretV1,
+  base: Omit<PersistedPayload, "mrxCipher">,
+  secret: MrXSecret,
 ): GameState {
   const mapGraph = getMapGraph(base.mapId);
   const players = base.players.map((p, i) => {
@@ -164,7 +183,8 @@ function applySecret(
     mapId: base.mapId,
     players,
     currentTurn: base.currentTurn,
-    gameover: base.gameover,
+    winner: base.winner,
+    gameRules: base.gameRules,
     mapGraph,
     turns: base.turns,
     turnLog,
@@ -175,32 +195,31 @@ export async function saveGameState(state: GameState): Promise<void> {
   const key = await getOrCreateAesKey();
   const secret = buildSecretFromState(state);
   const mrxCipher = await encryptJson(key, secret);
-  const payload: PersistedPayloadV1 = {
+  const payload: PersistedPayload = {
     ...stripForStorage(state),
     mrxCipher,
   };
   try {
-    localStorage.setItem(STORAGE_V1, JSON.stringify(payload));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch {
     // ignore quota / private mode
   }
 }
 
 export async function loadPersistedGameState(): Promise<GameState | null> {
-  const raw = localStorage.getItem(STORAGE_V1);
+  const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
-  let parsed: PersistedPayloadV1;
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(raw) as PersistedPayloadV1;
+    parsed = JSON.parse(raw);
   } catch {
     return null;
   }
-  if (parsed.v !== 1 || !parsed.mrxCipher || !parsed.mapId) return null;
-  if (!isPersistedMapId(parsed.mapId)) return null;
+  if (!isPersistedPayload(parsed)) return null;
 
   const { mrxCipher, ...rest } = parsed;
   const key = await getOrCreateAesKey();
-  const secret = await decryptJson<MrXSecretV1>(key, mrxCipher);
+  const secret = await decryptJson<MrXSecret>(key, mrxCipher);
   if (!secret || secret.v !== 1) {
     // Missing or wrong session key (e.g. new tab): leave localStorage so another tab can still load.
     return null;
@@ -210,7 +229,7 @@ export async function loadPersistedGameState(): Promise<GameState | null> {
 
 export function clearPersistedGameState(): void {
   try {
-    localStorage.removeItem(STORAGE_V1);
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
     /* ignore */
   }
