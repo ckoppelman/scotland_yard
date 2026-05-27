@@ -76,6 +76,7 @@ export function MrXCard({
     const showMrX = shouldShowMrX(state);
     const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
     const isMyTurn = currentTurn.playerOrdinal === player.description.order;
+    const positionToShow = (isMyTurn && !shouldShowPrivacy) || showMrX ? (player.position ?? "—") : "???";
 
     return (
         <article
@@ -100,7 +101,7 @@ export function MrXCard({
                 </div>
             </div>
             <p className="mr-x-card-position">
-                Last seen: {(isMyTurn && !shouldShowPrivacy) || showMrX ? (player.position ?? "—") : "???"}
+                Last seen: {positionToShow}
             </p>
             <div className="mr-x-card-tickets">
                 <div className="mr-x-card-tickets__row">
@@ -140,7 +141,14 @@ export function MrXTurn({
     hasDoubleMovePart1: boolean;
     hasDoubleMovePart2: boolean;
 }) {
-    const showMrXPosition = shouldShowMrXPosition && isShowMrXTurn;
+    let positionToShow: string;
+    if (isShowMrXTurn || shouldShowMrXPosition) {
+        positionToShow = turnLogEntry?.position?.toString() ?? "";
+    } else if (turnLogEntry?.position === null) {
+        positionToShow = "";
+    } else {
+        positionToShow = "???";
+    }
 
     const ticketClass = turnLogEntry?.ticket ? `${turnLogEntry.ticket}-ticket` : "no-ticket";
     const doubleOutlineClass = [
@@ -155,13 +163,13 @@ export function MrXTurn({
         >
             <span className="mr-x-turn-number">{turnNumber + 1}</span>
             <span className={`mr-x-turn-ticket ${ticketClass}`}>{turnLogEntry?.ticket?.toUpperCase() ?? "—"}</span>
-            <span className="mr-x-turn-position">{showMrXPosition ? (turnLogEntry?.position ?? "") : "???"}</span>
+            <span className="mr-x-turn-position">{positionToShow}</span>
         </div>
     );
 }
 
 export function MrXBoard({ state, player }: { state: GameState; player: PlayerState }) {
-    const { currentTurn, turnLog, turns } = state;
+    const { turnLog, turns } = state;
     /** Same round index can have two Mr. X moves (double); keep all legs for outline + last for display. */
     const mrXLogByRound = new Map<number, TurnLogEntry[]>();
     for (const entry of turnLog) {

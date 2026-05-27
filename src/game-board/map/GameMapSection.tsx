@@ -172,7 +172,7 @@ export function GameMapSection({
                                     return null;
                                 }
                                 if (
-                                    state.gameover === null &&
+                                    state.winner === null &&
                                     !player.description.isDetective &&
                                     !shouldShowMrX &&
                                     activePlayer.description.isDetective

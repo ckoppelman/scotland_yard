@@ -37,7 +37,7 @@ export function GameSideDock({
     ticketPlayableFromCurrentNode,
     onCancelPendingMove,
 }: Props) {
-    const { gameover, currentTurn } = state;
+    const { winner, currentTurn } = state;
 
     return (
         <div className="side-dock">
@@ -50,7 +50,7 @@ export function GameSideDock({
             >
                 {sidePanel === "control" && (
                     <div className="side-dock__sheet-inner">
-                        <p className={`game-status${gameover ? " game-status--over" : ""}`}>{status}</p>
+                        <p className={`game-status${winner !== null ? " game-status--over" : ""}`}>{status}</p>
                         <div className="control-panel__player-info">
                             <p className="control-panel__player-info-label">Player info</p>
                             {activePlayer.description.isDetective ? (
@@ -73,7 +73,7 @@ export function GameSideDock({
                             players={players}
                             currentTurn={state.currentTurn}
                             onClick={onTicketClick}
-                            gameover={!!gameover}
+                            hasWinner={winner !== null}
                             pendingDestinationNode={pendingMoveNode}
                             pendingValidTickets={pendingValidTickets}
                             ticketPlayableFromCurrentNode={ticketPlayableFromCurrentNode}

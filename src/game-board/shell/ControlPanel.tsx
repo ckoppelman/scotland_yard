@@ -1,5 +1,6 @@
 import type { Ticket } from "../../constants";
 import type { CurrentTurn, PlayerState } from "../../game/gameState";
+import type { Winner } from "../../constants";
 
 function ticketAllowedForPending(ticket: Ticket, pendingValidTickets: Ticket[] | null): boolean {
     if (pendingValidTickets === null) return true;
@@ -8,14 +9,14 @@ function ticketAllowedForPending(ticket: Ticket, pendingValidTickets: Ticket[] |
 
 function ticketButtonDisabled(args: {
     ticket: Ticket;
-    gameover: boolean;
+    hasWinner: boolean;
     pending: boolean;
     pendingValidTickets: Ticket[] | null;
     count: number;
     playableFromNode: Record<Ticket, boolean>;
 }): boolean {
-    const { ticket, gameover, pending, pendingValidTickets, count, playableFromNode } = args;
-    if (gameover) return true;
+    const { ticket, hasWinner, pending, pendingValidTickets, count, playableFromNode } = args;
+    if (hasWinner) return true;
     if (count <= 0) return true;
     if (pending) {
         return pendingValidTickets === null || !ticketAllowedForPending(ticket, pendingValidTickets);
@@ -27,7 +28,7 @@ export function ControlPanel({
     players,
     currentTurn,
     onClick,
-    gameover,
+    hasWinner,
     pendingDestinationNode,
     pendingValidTickets,
     ticketPlayableFromCurrentNode,
@@ -37,7 +38,7 @@ export function ControlPanel({
     players: PlayerState[];
     currentTurn: CurrentTurn;
     onClick: (ticket: Ticket) => void;
-    gameover: boolean;
+    hasWinner: boolean;
     pendingDestinationNode: number | null;
     pendingValidTickets: Ticket[] | null;
     /** When not in a pending drag move, each ticket is enabled only if there is a legal connection from the current station. */
@@ -51,7 +52,7 @@ export function ControlPanel({
     const showSidebarTickets = !pending || !ticketSelectionInMapPopup;
 
     const baseOpts = {
-        gameover,
+        hasWinner,
         pending,
         pendingValidTickets,
         playableFromNode: ticketPlayableFromCurrentNode,

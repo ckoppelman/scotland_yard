@@ -4,11 +4,15 @@ import type { GameState } from "../game/gameState";
  * One sentence for the control panel header: who goes now, or who won.
  * Pure function — easy to test and to read without scrolling through JSX.
  */
-export function getGameStatusText(state: Pick<GameState, "gameover" | "players" | "currentTurn" | "turns">): string {
-    const { gameover, players, currentTurn, turns } = state;
+export function getGameStatusText(state: GameState): string {
+    const { winner, players, currentTurn, turns } = state;
 
-    if (gameover) {
-        return `Case closed — ${gameover.winner === "detective" ? "the detectives" : "Mr. X"} wins.`;
+    if (winner) {
+        if (winner.winner === "detective") {
+            return `The city's biggest criminal has been taken to justice!`;
+        } else {
+            return `Mr. X foils Scotland Yard, launching a city-wide crime spree!`;
+        }
     }
 
     let status = `${players[currentTurn.playerOrdinal].description.name}'s turn.`;

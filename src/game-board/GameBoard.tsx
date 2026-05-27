@@ -66,7 +66,7 @@ export function GameBoard({
     onPendingDoubleMove,
     onPassTurn,
 }: GameBoardProps) {
-    const { players, mapGraph, gameover, currentTurn, turns, turnLog } = state;
+    const { players, mapGraph, winner, currentTurn, turns, turnLog } = state;
 
     const activePlayer = state.players[state.currentTurn.playerOrdinal];
 
@@ -110,8 +110,8 @@ export function GameBoard({
     }, [menuOpen]);
 
     useEffect(() => {
-        if (gameover === null) setGameOverModalDismissed(false);
-    }, [gameover]);
+        if (winner === null) setGameOverModalDismissed(false);
+    }, [winner]);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -136,13 +136,13 @@ export function GameBoard({
     }, [onReset]);
 
     const showGameIntroModal =
-        (!gameover && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
+        (winner === null && turnLog.length === 0 && !dismissedGameIntro) || introFromMenu;
 
     const showMrXPrivacyModal =
-        gameover === null && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+        winner === null && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
 
     const showDetectivePrivacyModal =
-        gameover === null && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
+        winner === null && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);
@@ -163,10 +163,10 @@ export function GameBoard({
         setNewGameSettingsOpen(false);
     }, []);
 
-    const showGameOverModal = gameover !== null && !gameOverModalDismissed;
+    const showGameOverModal = winner !== null && !gameOverModalDismissed;
 
     const showMustPassModal =
-        gameover === null &&
+        winner === null &&
         !showGameIntroModal &&
         !showMrXPrivacyModal &&
         !showDetectivePrivacyModal &&
@@ -354,7 +354,7 @@ export function GameBoard({
     const [tokenDragging, setTokenDragging] = useState(false);
 
     const activeMarkerDragBindings = useMemo(() => {
-        if (gameover || pendingMoveNode !== null || state.currentTurn.ticket !== null) return undefined;
+        if (winner !== null || pendingMoveNode !== null || state.currentTurn.ticket !== null) return undefined;
         return {
             onPointerDown(e: PointerEvent<SVGGElement>) {
                 e.stopPropagation();
@@ -410,7 +410,7 @@ export function GameBoard({
             },
         };
     }, [
-        gameover,
+        winner,
         pendingMoveNode,
         state.currentTurn.ticket,
         contentW,
@@ -429,7 +429,7 @@ export function GameBoard({
     /** Ticket-first move, or drag preview: any station that can legally complete the move from here. */
     const highlightedMoveTargetNodes = useMemo(() => {
         const s = new Set<number>();
-        if (gameover) return s;
+        if (winner !== null) return s;
         if (pendingMoveNode !== null) return s;
         if (state.currentTurn.ticket !== null) {
             for (const n of getReachableNodesForSelectedTicket(state)) s.add(n);
@@ -439,7 +439,7 @@ export function GameBoard({
             for (const n of getReachableNodesForDragPreview(state)) s.add(n);
         }
         return s;
-    }, [gameover, pendingMoveNode, state, tokenDragging]);
+    }, [winner, pendingMoveNode, state, tokenDragging]);
 
     const mapConnectionElements = useMemo(
         () =>
@@ -589,10 +589,10 @@ export function GameBoard({
                 onOpenRules={() => setRulesModalOpen(true)}
                 onOpenNewGameSettings={openNewGameSettingsFromIntro}
             />
-            {gameover !== null && gameOverFade.mounted && (
+            {winner !== null && gameOverFade.mounted && (
                 <GameOverModal
                     fade={gameOverFade}
-                    gameover={gameover}
+                    winner={winner}
                     players={players}
                     onViewMap={gameOverFade.requestClose}
                     onNewGame={handleNewGame}

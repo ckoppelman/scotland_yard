@@ -1,11 +1,11 @@
-import type { GameOver } from "../../constants";
+import type { Winner } from "../../constants";
 import type { PlayerState } from "../../game/gameState";
 import { ModalPawn } from "./ModalPawn";
 import type { ModalFade } from "./useModalFade";
 
 type Props = {
     fade: ModalFade;
-    gameover: GameOver;
+    winner: Winner;
     players: PlayerState[];
     onViewMap: () => void;
     onNewGame: () => void;
@@ -14,29 +14,30 @@ type Props = {
 
 export function GameOverModal({
     fade,
-    gameover,
+    winner,
     players,
     onViewMap,
     onNewGame,
     onNewGameWithSettings,
 }: Props) {
     if (!fade.mounted) return null;
+    if (!winner) return null;
 
     const winningPlayers =
-        gameover.winner === "detective"
+        winner.winner === "detective"
             ? players.filter((p) => p.description.isDetective)
             : players.filter((p) => !p.description.isDetective);
     const pawnSize = winningPlayers.length <= 1 ? "lg" : "md";
 
     const detail =
-        gameover.winner === "detective"
-            ? gameover.captureBy !== undefined
-                ? `${gameover.captureBy} moved onto the fugitive’s station.`
-                : "A detective reached the fugitive’s station."
-            : gameover.detectiveLossReason ?? gameover.mrXLossReason ?? "Every round was played without a capture.";
+        winner.winner === "detective"
+            ? winner.captureBy !== undefined
+                ? `${winner.captureBy} moved onto the fugitive’s station.`
+                : winner.detectiveWinReason ?? "A detective reached the fugitive’s station."
+            : winner.fugitiveWinReason ?? "Every round was played without a capture.";
 
     const title =
-        gameover.winner === "detective"
+        winner.winner === "detective"
             ? "Scotland Yard"
             : "Fugitive";
 
