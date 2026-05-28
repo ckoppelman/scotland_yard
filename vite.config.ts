@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import { defineConfig } from "vitest/config";
+import { musicManifestPlugin } from "./vite/musicManifestPlugin";
 import { sfxManifestPlugin } from "./vite/sfxManifestPlugin";
 
 export default defineConfig({
@@ -8,6 +9,7 @@ export default defineConfig({
     react(),
     svgr(), // or svgr({ svgrOptions: { icon: true } }) etc.
     sfxManifestPlugin(),
+    musicManifestPlugin(),
   ],
   test: {
     environment: "jsdom",

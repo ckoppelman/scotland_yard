@@ -1,6 +1,7 @@
 import type { MusicMode, MusicThemeId } from "../audio/musicTracks";
 import type { Ticket } from "../constants";
 import type { DetectiveTurnIntro } from "../game/detectiveTurnIntro";
+import type { FugitivePoofBurst } from "./animations/fugitivePoof";
 import type { GameState, NewGameSettings } from "../game/gameState";
 
 export type GameBoardProps = {
@@ -43,6 +44,6 @@ export type GameBoardProps = {
     onAnimationsEnabledChange: (enabled: boolean) => void;
     /** Blocks map/ticket input while a turn handoff sound is playing. */
     interactionLocked?: boolean;
-    fugitivePoof?: { mode: "in" | "out"; key: number } | null;
+    fugitivePoof?: FugitivePoofBurst | null;
     detectiveTurnIntro?: DetectiveTurnIntro | null;
 };

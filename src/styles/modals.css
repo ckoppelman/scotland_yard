@@ -297,6 +297,45 @@
   color: #44403c;
 }
 
+.privacy-turn-modal__ack-body {
+  max-height: min(52vh, 24rem);
+  overflow-y: auto;
+  padding-right: 0.15rem;
+}
+
+.privacy-turn-modal__ack-section {
+  margin: 0 0 1.25rem;
+}
+
+.privacy-turn-modal__ack-section:last-child {
+  margin-bottom: 0;
+}
+
+.privacy-turn-modal__ack-heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f1d1d;
+}
+
+.privacy-turn-modal__ack-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.privacy-turn-modal__ack-list li {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.privacy-turn-modal__ack-list li:last-child {
+  margin-bottom: 0;
+}
+
 .privacy-turn-modal__copyright {
   margin-top: 0.75rem;
   margin-bottom: 0;

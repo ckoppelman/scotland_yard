@@ -31,6 +31,15 @@ Progress is **saved in the browser**: refreshing the page usually **resumes** th
 
 Mr. X’s exact location is hidden from detectives except on reveal rounds (see in-game status and the Mr. X round log).
 
+Use the game **menu → Acknowledgements** for in-app credits (music, sound effects, fonts, and game trademarks).
+
+## Documentation
+
+| Doc | Contents |
+|-----|----------|
+| [`docs/fugitive-cutscene.md`](docs/fugitive-cutscene.md) | Fugitive round-end cutscene: timing, stagger, audio, and related source files |
+| [`public/audio/ATTRIBUTION.md`](public/audio/ATTRIBUTION.md) | Music, SFX, font, and trademark attribution for shipped assets |
+
 ## Project layout
 
 | Path | Role |
@@ -48,6 +57,8 @@ Mr. X’s exact location is hidden from detectives except on reveal rounds (see 
 | [`src/game/gameRules.ts`](src/game/gameRules.ts) | Pure moves: `tryPlayTicket`, `tryPlayNode`, `tryPlayMoveToAdjacent`, adjacency / ticket checks |
 | [`src/game/persistGameState.ts`](src/game/persistGameState.ts) | Save/load game + encrypted Mr. X payload (`localStorage` / `sessionStorage`) |
 | [`src/game-board/`](src/game-board/) | Board UI: [`GameBoard.tsx`](src/game-board/GameBoard.tsx), [`shell/`](src/game-board/shell/) (menu, side dock), [`map/`](src/game-board/map/) (SVG, markers, ticket popup), [`modals/`](src/game-board/modals/), [`players/`](src/game-board/players/) — see [`index.ts`](src/game-board/index.ts) |
+| [`src/content/acknowledgements.ts`](src/content/acknowledgements.ts) | Copy for the in-game Acknowledgements modal |
+| [`src/audio/`](src/audio/) | Music, SFX, cutscene intro (`playDetectivePhaseStartIntro.ts`), handoff rules (`fugitiveVisibilitySfx.ts`) |
 | [`src/App.tsx`](src/App.tsx) | Wires state, persistence, toasts, drag-to-move flow |
 | [`src/constants.ts`](src/constants.ts) | Tickets, colors, game-over shape |
 

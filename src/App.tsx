@@ -11,6 +11,7 @@ import {
   saveSfxEnabled,
   saveSfxVolume,
 } from "./audio/appPreferences";
+import { loadMusicTracks } from "./audio/musicTracks";
 import { syncSfxEnabled, syncSfxVolume, loadSfxTracks } from "./audio/sfx";
 import {
   playImmediateGameSfx,
@@ -51,12 +52,12 @@ import {
 } from "./game/persistGameState";
 import { loadAnimationsEnabled, syncAnimationsEnabled } from "./displayPreferences";
 import { TransportEmojiOverlay } from "./game-board/animations/TransportEmojiOverlay";
+import { GAMEPLAY_ANIMATION_MS } from "./game/cutsceneTiming";
+import { createFugitivePoofBurst, type FugitivePoofBurst } from "./game-board/animations/fugitivePoof";
 import {
   createTransportAnimationBurst,
-  createFugitivePoofBurst,
   type TransportAnimationBurst,
 } from "./game-board/animations/playTransportAnimation";
-import { GAMEPLAY_ANIMATION_MS, type FugitivePoofBurst } from "./game-board/animations/fugitivePoof";
 
 export default function App() {
   const { showToast } = useToast();
@@ -105,6 +106,7 @@ export default function App() {
 
   useEffect(() => {
     void loadSfxTracks();
+    void loadMusicTracks();
   }, []);
 
   useEffect(() => {
@@ -112,22 +114,6 @@ export default function App() {
   }, [animationsEnabled]);
 
   useBackgroundMusic(state === null ? "ambient" : gameMusicMode, musicEnabled, musicVolume, musicThemeId);
-
-  useEffect(() => {
-    let cancelled = false;
-    void loadPersistedGameState().then((loaded) => {
-      if (cancelled) return;
-      const initial =
-        loaded ?? initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1);
-      if (initial.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
-        resumeFugitiveCutsceneRef.current = true;
-      }
-      setState(initial);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (state === null) return;
@@ -142,8 +128,8 @@ export default function App() {
   const [transportAnimation, setTransportAnimation] = useState<TransportAnimationBurst | null>(null);
   const [fugitivePoof, setFugitivePoof] = useState<FugitivePoofBurst | null>(null);
   const [detectiveTurnIntro, setDetectiveTurnIntro] = useState<DetectiveTurnIntro | null>(null);
-  const resumeFugitiveCutsceneRef = useRef(false);
   const cutsceneInProgressRef = useRef(false);
+  const privacyDismissPendingRef = useRef(false);
 
   const moveFeedbackHandlers = useMemo<MoveFeedbackHandlers>(
     () => ({
@@ -165,15 +151,12 @@ export default function App() {
       onDetectiveTurnIntroEnd: () => {
         setDetectiveTurnIntro(null);
       },
-      onMusicModeOverride: () => {
-        setGameMusicMode("fugitive");
-      },
     }),
     [],
   );
 
   const runFugitiveCutscene = useCallback(
-    async (cutsceneState: GameState) => {
+    async (cutsceneState: GameState, options?: { skipInitialSetState?: boolean }) => {
       const token = fugitiveCutsceneToken(cutsceneState);
       if (!tryClaimFugitiveCutscene(token)) return;
 
@@ -181,7 +164,9 @@ export default function App() {
       setTurnTransitionPending(true);
       let succeeded = false;
       try {
-        setState(cutsceneState);
+        if (!options?.skipInitialSetState) {
+          setState(cutsceneState);
+        }
         const prevPrivacy: GameState = {
           ...cutsceneState,
           currentTurn: { ...cutsceneState.currentTurn, phase: TurnPhase.PRIVACY_DETECTIVE },
@@ -210,14 +195,20 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (state === null || !resumeFugitiveCutsceneRef.current) return;
-    if (state.currentTurn.phase !== TurnPhase.FUGITIVE_CUTSCENE) {
-      resumeFugitiveCutsceneRef.current = false;
-      return;
-    }
-    resumeFugitiveCutsceneRef.current = false;
-    void runFugitiveCutscene(state);
-  }, [runFugitiveCutscene, state]);
+    let cancelled = false;
+    void loadPersistedGameState().then((loaded) => {
+      if (cancelled) return;
+      const initial =
+        loaded ?? initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1);
+      setState(initial);
+      if (initial.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
+        void runFugitiveCutscene(initial, { skipInitialSetState: true });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [runFugitiveCutscene]);
 
   const commitPlayResult = async (
     prev: GameState,
@@ -232,7 +223,8 @@ export default function App() {
     const next = result.state;
     if (isEnteringFugitiveCutscene(prev, next)) {
       options?.onApplied?.();
-      await runFugitiveCutscene(next);
+      setState(next);
+      await runFugitiveCutscene(next, { skipInitialSetState: true });
       return;
     }
 
@@ -303,8 +295,22 @@ export default function App() {
   };
 
   const handleDismissPrivacyModal = () => {
-    if (cutsceneInProgressRef.current || turnTransitionPending) return;
-    void commitPlayResult(state, clearPrivacy(state));
+    if (
+      cutsceneInProgressRef.current ||
+      turnTransitionPending ||
+      privacyDismissPendingRef.current
+    ) {
+      return;
+    }
+    const result = clearPrivacy(state);
+    if (!result.ok) {
+      showToast(result.message, "error");
+      return;
+    }
+    privacyDismissPendingRef.current = true;
+    void commitPlayResult(state, result).finally(() => {
+      privacyDismissPendingRef.current = false;
+    });
   };
 
   const handlePassTurn = () => {

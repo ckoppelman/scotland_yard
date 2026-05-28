@@ -1,0 +1,13 @@
+{
+  "default": {
+    "ambient": [
+      "/audio/music/default/ambient/nojisuma-night_dew-429962.mp3"
+    ],
+    "detective": [
+      "/audio/music/default/detective/nojisuma-windless-160818.mp3"
+    ],
+    "fugitive": [
+      "/audio/music/default/fugitive/nojisuma-explore_at_night-242582.mp3"
+    ]
+  }
+}

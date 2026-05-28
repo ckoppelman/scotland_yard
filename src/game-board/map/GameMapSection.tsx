@@ -13,6 +13,7 @@ import { PendingTicketPopup } from "./PendingTicketPopup";
 import { effectiveTokenStation, stackDxForPlayer } from "./mapLayout";
 import { FugitiveCutsceneMapOverlay } from "../animations/FugitiveCutsceneMapOverlay";
 import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
+import type { FugitivePoofBurst } from "../animations/fugitivePoof";
 
 type BoardBackgroundRect = {
     x: number;
@@ -68,7 +69,7 @@ type Props = {
     tokenDragging: boolean;
     tokenDragVisual: { x: number; y: number };
     markerBoardPulseKeyById: Record<string, number>;
-    fugitivePoof: { mode: "in" | "out"; key: number } | null;
+    fugitivePoof: FugitivePoofBurst | null;
     detectiveTurnIntro: DetectiveTurnIntro | null;
 };
 

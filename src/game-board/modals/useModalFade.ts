@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type TransitionEvent } from "react";
 
+/** Matches `.privacy-turn-modal` opacity transition in modals.css, plus a small buffer. */
+const MODAL_FADE_FALLBACK_MS = 550;
+
 /**
  * Keeps a modal mounted through a fade-out after the user confirms, then runs `onComplete`.
  * `shouldDisplay` is the logical "this modal should be shown" flag from game rules.
@@ -29,7 +32,8 @@ export function useModalFade(shouldDisplay: boolean, onComplete: () => void) {
         if (completedRef.current) return;
         completedRef.current = true;
         onComplete();
-        setExiting(false);
+        // Stay exiting until `shouldDisplay` flips false — avoids reopening while the
+        // parent is still catching up (e.g. privacy dismiss → cutscene phase update).
     }, [onComplete]);
 
     useEffect(() => {
@@ -51,7 +55,7 @@ export function useModalFade(shouldDisplay: boolean, onComplete: () => void) {
 
     useEffect(() => {
         if (!exiting || paintOpen) return;
-        const t = window.setTimeout(finishClose, 700);
+        const t = window.setTimeout(finishClose, MODAL_FADE_FALLBACK_MS);
         return () => window.clearTimeout(t);
     }, [exiting, paintOpen, finishClose]);
 

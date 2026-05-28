@@ -8,6 +8,7 @@ type Props = {
     onOpenNewGameSettings: () => void;
     onOpenIntro: () => void;
     onOpenRules: () => void;
+    onOpenAcknowledgements: () => void;
     onOpenSettings: () => void;
     /** Grey out Pause when the game has ended or is already paused. */
     pauseDisabled: boolean;
@@ -26,6 +27,7 @@ export function AppGameMenu({
     onOpenNewGameSettings,
     onOpenIntro,
     onOpenRules,
+    onOpenAcknowledgements,
     onOpenSettings,
     pauseDisabled,
     resumeDisabled,
@@ -132,6 +134,17 @@ export function AppGameMenu({
                         }}
                     >
                         Rules
+                    </button>
+                    <button
+                        type="button"
+                        className="app-menu__item"
+                        role="menuitem"
+                        onClick={() => {
+                            onOpenAcknowledgements();
+                            setMenuOpen(false);
+                        }}
+                    >
+                        Acknowledgements
                     </button>
                 </div>
             )}

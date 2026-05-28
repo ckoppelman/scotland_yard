@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
     buildDetectiveTurnIntro,
     fugitiveCutsceneToken,
-    fugitiveMovedHints,
     isEnteringFugitiveCutscene,
     isFugitiveCutscenePhase,
     isRevealTurn,
@@ -65,7 +64,7 @@ describe("isEnteringFugitiveCutscene", () => {
 
 describe("isRevealTurn", () => {
     it("reads showMrX from the prior round index", () => {
-        const revealTurns = TURNS_24.map((t, i) => ({ showMrX: i === 0 }));
+        const revealTurns = TURNS_24.map((_t, i) => ({ showMrX: i === 0 }));
         const s = makeGameState({
             players: oneFugitiveRoster(),
             turns: revealTurns,
@@ -80,23 +79,6 @@ describe("isRevealTurn", () => {
             currentTurn: { turnNumber: 2, phase: TurnPhase.DETECTIVE },
         });
         expect(isRevealTurn(s)).toBe(false);
-    });
-});
-
-describe("fugitiveMovedHints", () => {
-    it("lists every fugitive with a station", () => {
-        const s = makeGameState({ players: twoFugitiveRoster() });
-        expect(fugitiveMovedHints(s)).toEqual([
-            { id: "fug-2", name: "Mr X", stationId: 3 },
-            { id: "fug-3", name: "Mr Y", stationId: 4 },
-        ]);
-    });
-
-    it("skips fugitives without a position", () => {
-        const players = twoFugitiveRoster();
-        players[3] = { ...players[3]!, position: null };
-        const s = makeGameState({ players });
-        expect(fugitiveMovedHints(s)).toEqual([{ id: "fug-2", name: "Mr X", stationId: 3 }]);
     });
 });
 
@@ -134,14 +116,13 @@ describe("buildDetectiveTurnIntro", () => {
         });
 
         const intro = buildDetectiveTurnIntro(prev, preview);
-        expect(intro.fugitives).toHaveLength(2);
         expect(intro.latestMoves).toHaveLength(2);
         expect(intro.latestMoves[0]?.ticket).toBe("taxi");
         expect(intro.latestMoves[1]?.ticket).toBe("bus");
     });
 
     it("marks reveal turns from preview detective state", () => {
-        const revealTurns = TURNS_24.map((t, i) => ({ showMrX: i === 0 }));
+        const revealTurns = TURNS_24.map((_t, i) => ({ showMrX: i === 0 }));
         const prev = makeGameState({
             players: oneFugitiveRoster(),
             currentTurn: { turnNumber: 1, phase: TurnPhase.FUGITIVE_CUTSCENE },

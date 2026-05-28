@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { playDetectivePhaseStartIntro } from "./playDetectivePhaseStartIntro";
 import { SfxType } from "./sfxTracks";
-import { GAMEPLAY_ANIMATION_MS } from "../game-board/animations/fugitivePoof";
-import { makeGameState, oneFugitiveRoster, twoFugitiveRoster } from "../test/gameFixtures";
+import { FUGITIVE_ANIMATION_STAGGER_MS, GAMEPLAY_ANIMATION_MS } from "../game/cutsceneTiming";
+import { makeGameState, oneFugitiveRoster, threeFugitiveRoster, twoFugitiveRoster } from "../test/gameFixtures";
 import { TurnPhase } from "../game/gameState";
 
 const playSfxForAtLeast = vi.fn();
@@ -49,28 +49,64 @@ describe("playDetectivePhaseStartIntro", () => {
         return { prev, preview };
     }
 
-    it("starts intro handlers and fugitive music override", async () => {
+    it("starts intro handlers with latest move count", async () => {
         const { prev, preview } = cutsceneStates();
         const started: string[] = [];
         const promise = playDetectivePhaseStartIntro(prev, preview, {
             onDetectiveTurnIntroStart: (intro) => started.push(`${intro.latestMoves.length}-moves`),
-            onMusicModeOverride: () => started.push("music"),
         });
 
         await vi.runAllTimersAsync();
         await promise;
 
-        expect(started).toEqual(["music", "2-moves"]);
+        expect(started).toEqual(["2-moves"]);
     });
 
-    it("plays transport sfx for the last fugitive move with animation duration", async () => {
+    it("plays each fugitive transport sfx on a 1.5s stagger", async () => {
         const { prev, preview } = cutsceneStates();
         const promise = playDetectivePhaseStartIntro(prev, preview);
+
+        await vi.advanceTimersByTimeAsync(0);
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.TAXI, GAMEPLAY_ANIMATION_MS);
+
+        await vi.advanceTimersByTimeAsync(FUGITIVE_ANIMATION_STAGGER_MS);
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.BUS, GAMEPLAY_ANIMATION_MS);
 
         await vi.runAllTimersAsync();
         await promise;
 
+        expect(playSfxForAtLeast).toHaveBeenCalledTimes(2);
+    });
+
+    it("extends cutscene timing when three fugitives moved", async () => {
+        const prev = makeGameState({
+            players: threeFugitiveRoster(),
+            currentTurn: { phase: TurnPhase.FUGITIVE_CUTSCENE, turnNumber: 2 },
+            turnLog: [
+                { turnNumber: 1, playerOrdinal: 2, ticket: "taxi", position: 4 },
+                { turnNumber: 1, playerOrdinal: 3, ticket: "bus", position: 3 },
+                { turnNumber: 1, playerOrdinal: 4, ticket: "underground", position: 2 },
+            ],
+        });
+        const preview = makeGameState({
+            players: threeFugitiveRoster(),
+            currentTurn: { phase: TurnPhase.DETECTIVE, turnNumber: 2 },
+        });
+        const promise = playDetectivePhaseStartIntro(prev, preview);
+
+        await vi.advanceTimersByTimeAsync(0);
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.TAXI, GAMEPLAY_ANIMATION_MS);
+
+        await vi.advanceTimersByTimeAsync(FUGITIVE_ANIMATION_STAGGER_MS);
         expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.BUS, GAMEPLAY_ANIMATION_MS);
+
+        await vi.advanceTimersByTimeAsync(FUGITIVE_ANIMATION_STAGGER_MS);
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.UNDERGROUND, GAMEPLAY_ANIMATION_MS);
+
+        await vi.runAllTimersAsync();
+        await promise;
+
+        expect(playSfxForAtLeast).toHaveBeenCalledTimes(3);
     });
 
     it("does not play the reveal screech on reveal turns without transport sfx", async () => {

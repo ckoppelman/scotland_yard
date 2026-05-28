@@ -2,37 +2,51 @@ export type MusicMode = "ambient" | "detective" | "fugitive";
 
 export type MusicThemeId = "default";
 
-export type MusicThemeTracks = Record<MusicMode, string>;
-
 export type MusicThemeOption = {
     id: MusicThemeId;
     label: string;
-    tracks: MusicThemeTracks;
 };
 
-export const MUSIC_THEME_OPTIONS: MusicThemeOption[] = [
-    {
-        id: "default",
-        label: "Default",
-        tracks: {
-            ambient: "/audio/nojisuma-night_dew-429962.mp3",
-            detective: "/audio/nojisuma-windless-160818.mp3",
-            fugitive: "/audio/nojisuma-explore_at_night-242582.mp3",
-        },
-    },
-];
+export const MUSIC_THEME_OPTIONS: MusicThemeOption[] = [{ id: "default", label: "Default" }];
 
 export const DEFAULT_MUSIC_THEME_ID: MusicThemeId = "default";
 
-const themesById = Object.fromEntries(MUSIC_THEME_OPTIONS.map((theme) => [theme.id, theme.tracks])) as Record<
-    MusicThemeId,
-    MusicThemeTracks
->;
+const MANIFEST_URL = "/audio/music/manifest.json";
 
-export function isMusicThemeId(value: string): value is MusicThemeId {
-    return value in themesById;
+type MusicManifest = Partial<Record<MusicThemeId, Partial<Record<MusicMode, string[]>>>>;
+
+let tracksByTheme: MusicManifest = {};
+let loaded = false;
+let loading: Promise<void> | null = null;
+
+/** Fetch theme/mode tracks from the generated manifest (see vite/musicManifestPlugin.ts). */
+export function loadMusicTracks(): Promise<void> {
+    if (loaded) return Promise.resolve();
+    if (loading) return loading;
+
+    loading = fetch(MANIFEST_URL)
+        .then((response) => {
+            if (!response.ok) throw new Error(`Music manifest missing (${response.status})`);
+            return response.json() as Promise<MusicManifest>;
+        })
+        .then((manifest) => {
+            tracksByTheme = manifest;
+            loaded = true;
+        })
+        .catch(() => {
+            tracksByTheme = {};
+            loaded = true;
+        });
+
+    return loading;
 }
 
+export function isMusicThemeId(value: string): value is MusicThemeId {
+    return value in tracksByTheme || value === DEFAULT_MUSIC_THEME_ID;
+}
+
+/** First sorted track in the theme/mode folder (see public/audio/music/). */
 export function trackForMode(mode: MusicMode, themeId: MusicThemeId = DEFAULT_MUSIC_THEME_ID): string {
-    return themesById[themeId][mode];
+    const tracks = tracksByTheme[themeId]?.[mode] ?? [];
+    return tracks[0] ?? "";
 }

@@ -1,4 +1,4 @@
-/* Fugitive cutscene — map overlay */
+/* Fugitive cutscene — map overlay. Beat length: GAMEPLAY_ANIMATION_MS in src/game/cutsceneTiming.ts (2000ms). */
 
 .fugitive-cutscene-overlay {
   position: absolute;

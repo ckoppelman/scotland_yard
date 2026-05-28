@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { playImmediateGameSfx, playPreTurnChangeSfx, turnWillChange } from "./playGameSfx";
+import { playImmediateGameSfx, playPostTurnChangeSfx, playPreTurnChangeSfx, turnWillChange } from "./playGameSfx";
 import { SfxType } from "./sfxTracks";
 import { TurnPhase } from "../game/gameState";
 import { makeGameState, oneFugitiveRoster, transition, twoFugitiveRoster } from "../test/gameFixtures";
@@ -55,6 +55,19 @@ describe("turnWillChange", () => {
         const next = transition(prev, { playerOrdinal: 2, doubleMovePart: 2 });
         expect(turnWillChange(prev, next)).toBe(false);
     });
+
+    it("is true when a move ends the game without advancing the active player", () => {
+        const prev = makeGameState({
+            players: roster,
+            currentTurn: { playerOrdinal: 0, phase: TurnPhase.DETECTIVE },
+            winner: null,
+        });
+        const next = {
+            ...transition(prev, { phase: TurnPhase.GAME_OVER }),
+            winner: { winner: "detective" as const, captureBy: "A" },
+        };
+        expect(turnWillChange(prev, next)).toBe(true);
+    });
 });
 
 describe("playPreTurnChangeSfx", () => {
@@ -79,7 +92,7 @@ describe("playPreTurnChangeSfx", () => {
         expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.TAXI);
     });
 
-    it("does not play reveal when detectives hand off to Mr X", async () => {
+    it("does not play reveal when detectives hand off to Mr X without a move ticket", async () => {
         const prev = makeGameState({
             players: oneFugitiveRoster(),
             currentTurn: { phase: TurnPhase.DETECTIVE, playerOrdinal: 1 },
@@ -89,6 +102,34 @@ describe("playPreTurnChangeSfx", () => {
         await playPreTurnChangeSfx(prev, next);
 
         expect(playSfxForAtLeast).not.toHaveBeenCalled();
+    });
+
+    it("plays transport sfx when last detective hands off to fugitive privacy", async () => {
+        const prev = makeGameState({
+            players: oneFugitiveRoster(),
+            currentTurn: { phase: TurnPhase.DETECTIVE, playerOrdinal: 1, turnNumber: 1 },
+        });
+        const next = {
+            ...transition(prev, { phase: TurnPhase.PRIVACY_FUGITIVE, playerOrdinal: 2 }),
+            turnLog: [{ turnNumber: 1, playerOrdinal: 1, ticket: "bus" as const, position: 3 }],
+        };
+
+        await playPreTurnChangeSfx(prev, next);
+
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.BUS);
+    });
+
+    it("plays transport sfx when last detective hands off directly to fugitives", async () => {
+        const prev = makeGameState({
+            players: oneFugitiveRoster(),
+            currentTurn: { phase: TurnPhase.DETECTIVE, playerOrdinal: 1 },
+            fugitivePrivacyDismissed: true,
+        });
+        const next = transition(prev, { phase: TurnPhase.FUGITIVE, playerOrdinal: 2 });
+
+        await playPreTurnChangeSfx(prev, next, { ticket: "taxi" });
+
+        expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.TAXI);
     });
 
     it("does not play reveal when clearing fugitive privacy", async () => {
@@ -167,5 +208,22 @@ describe("playImmediateGameSfx", () => {
         const s = makeGameState({ players: oneFugitiveRoster() });
         playImmediateGameSfx(s, s, { ticket: "bus" });
         expect(playSfx).toHaveBeenCalledWith(SfxType.BUS);
+    });
+});
+
+describe("playPostTurnChangeSfx", () => {
+    beforeEach(() => {
+        playSfx.mockReset();
+    });
+
+    it("plays game-over sfx when a winner is set", () => {
+        const prev = makeGameState({ players: oneFugitiveRoster(), winner: null });
+        const next = {
+            ...prev,
+            winner: { winner: "detective" as const, captureBy: "A" },
+            currentTurn: { ...prev.currentTurn, phase: TurnPhase.GAME_OVER },
+        };
+        playPostTurnChangeSfx(prev, next);
+        expect(playSfx).toHaveBeenCalledWith(SfxType.GAME_OVER);
     });
 });

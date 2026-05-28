@@ -10,8 +10,3 @@ export function createTransportAnimationBurst(ticket: Ticket): TransportAnimatio
     if (emoji === null) return null;
     return { emoji, id: Date.now() };
 }
-
-export function createFugitivePoofBurst(mode: "in" | "out"): { mode: "in" | "out"; key: number } | null {
-    if (!getAnimationsEnabled()) return null;
-    return { mode, key: Date.now() };
-}

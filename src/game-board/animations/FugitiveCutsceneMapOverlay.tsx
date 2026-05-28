@@ -1,4 +1,8 @@
 import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
+import { fugitiveAnimationDelaySeconds } from "../../game/cutsceneTiming";
+
+const EMOJI_TOP_BASE_PERCENT = 28;
+const EMOJI_TOP_STEP_PERCENT = 14;
 import { transportEmojiForTicket } from "./transportEmoji";
 
 type Props = {
@@ -6,35 +10,40 @@ type Props = {
 };
 
 export function FugitiveCutsceneMapOverlay({ intro }: Props) {
-    const lines = intro.fugitives.map((f) => `${f.name} has moved`);
-    const emojis = intro.latestMoves
-        .map((move) => transportEmojiForTicket(move.ticket))
-        .filter((emoji): emoji is string => emoji !== null);
+    const { latestMoves } = intro;
 
     return (
-        <div className="fugitive-cutscene-overlay" aria-live="polite" aria-hidden>
+        <div className="fugitive-cutscene-overlay" aria-live="polite">
             <div className="fugitive-cutscene-overlay__backdrop" />
             <div className="fugitive-cutscene-overlay__content">
-                {lines.map((line, index) => (
+                {latestMoves.map((move, index) => (
                     <p
-                        key={intro.fugitives[index]!.id}
+                        key={move.id}
                         className="fugitive-cutscene-overlay__headline"
-                        style={{ animationDelay: `${index * 0.12}s` }}
+                        style={{ animationDelay: `${fugitiveAnimationDelaySeconds(index)}s` }}
                     >
-                        {line}
+                        {move.playerName} has moved
                     </p>
                 ))}
             </div>
             <div className="fugitive-cutscene-overlay__emoji-layer" aria-hidden>
-                {emojis.map((emoji, index) => (
-                    <span
-                        key={`${intro.key}-${emoji}-${index}`}
-                        className="fugitive-cutscene-overlay__emoji"
-                        style={{ animationDelay: `${index * 0.35}s`, top: `${28 + index * 14}%` }}
-                    >
-                        {emoji}
-                    </span>
-                ))}
+                {latestMoves.map((move, index) => {
+                    const emoji = transportEmojiForTicket(move.ticket);
+                    if (emoji === null) return null;
+
+                    return (
+                        <span
+                            key={move.id}
+                            className="fugitive-cutscene-overlay__emoji"
+                            style={{
+                                animationDelay: `${fugitiveAnimationDelaySeconds(index)}s`,
+                                top: `${EMOJI_TOP_BASE_PERCENT + index * EMOJI_TOP_STEP_PERCENT}%`,
+                            }}
+                        >
+                            {emoji}
+                        </span>
+                    );
+                })}
             </div>
         </div>
     );

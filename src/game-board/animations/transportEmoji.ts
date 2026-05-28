@@ -1,9 +1,5 @@
 import type { Ticket } from "../../constants";
 
-export const TRANSPORT_ANIMATION_MS = 2000;
-
-export { GAMEPLAY_ANIMATION_MS } from "./fugitivePoof";
-
 const TICKET_EMOJI: Partial<Record<Ticket, string>> = {
     taxi: "🚕",
     bus: "🚐",

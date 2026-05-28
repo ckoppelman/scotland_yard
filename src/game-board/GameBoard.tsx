@@ -40,6 +40,7 @@ import {
     pixelCoords,
     sortedConnectionEndpoints,
 } from "./map/mapLayout";
+import { AcknowledgementsModal } from "./modals/AcknowledgementsModal";
 import { GameOverModal } from "./modals/GameOverModal";
 import { GameIntroModal } from "./modals/GameIntroModal";
 import { MustPassModal } from "./modals/MustPassModal";
@@ -93,6 +94,7 @@ export function GameBoard({
     const [dismissedGameIntro, setDismissedGameIntro] = useState(false);
     const [introFromMenu, setIntroFromMenu] = useState(false);
     const [rulesModalOpen, setRulesModalOpen] = useState(false);
+    const [acknowledgementsModalOpen, setAcknowledgementsModalOpen] = useState(false);
     const [settingsModalOpen, setSettingsModalOpen] = useState(false);
     const [newGameSettingsOpen, setNewGameSettingsOpen] = useState(false);
     const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
@@ -213,6 +215,10 @@ export function GameBoard({
         setRulesModalOpen(false);
     }, []);
 
+    const onAcknowledgementsModalComplete = useCallback(() => {
+        setAcknowledgementsModalOpen(false);
+    }, []);
+
     const onSettingsModalComplete = useCallback(() => {
         setSettingsModalOpen(false);
     }, []);
@@ -260,6 +266,7 @@ export function GameBoard({
     const pauseFade = useModalFade(showPauseModal, onResumePause);
     const gameIntroFade = useModalFade(showGameIntroModal, completeGameIntroDismiss);
     const rulesFade = useModalFade(rulesModalOpen, onRulesModalComplete);
+    const acknowledgementsFade = useModalFade(acknowledgementsModalOpen, onAcknowledgementsModalComplete);
     const settingsFade = useModalFade(settingsModalOpen, onSettingsModalComplete);
     const newGameSettingsFade = useModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
 
@@ -271,6 +278,15 @@ export function GameBoard({
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [settingsFade.requestClose, settingsModalOpen]);
+
+    useEffect(() => {
+        if (!acknowledgementsModalOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") acknowledgementsFade.requestClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [acknowledgementsFade.requestClose, acknowledgementsModalOpen]);
 
     const confirmNewGameWithSettings = useCallback(
         (settings: NewGameSettings) => {
@@ -682,6 +698,7 @@ export function GameBoard({
                 <NewGameSettingsModal fade={newGameSettingsFade} onConfirm={confirmNewGameWithSettings} />
             )}
             <QuickRulesModal fade={rulesFade} />
+            <AcknowledgementsModal fade={acknowledgementsFade} />
             <SettingsModal
                 fade={settingsFade}
                 musicThemeId={musicThemeId}
@@ -707,6 +724,7 @@ export function GameBoard({
                 onOpenNewGameSettings={() => setNewGameSettingsOpen(true)}
                 onOpenIntro={() => setIntroFromMenu(true)}
                 onOpenRules={() => setRulesModalOpen(true)}
+                onOpenAcknowledgements={() => setAcknowledgementsModalOpen(true)}
                 onOpenSettings={() => setSettingsModalOpen(true)}
                 pauseDisabled={winner !== null || isPaused}
                 resumeDisabled={winner !== null || !isPaused}

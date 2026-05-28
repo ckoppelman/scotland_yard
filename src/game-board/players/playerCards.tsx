@@ -4,6 +4,7 @@ import type { CurrentTurn, GameState, PlayerState, TurnLogEntry } from "../../ga
 import { TurnPhase } from "../../game/gameState";
 import { shouldShowMrX } from "../../game/displayLogic";
 import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
+import { fugitiveAnimationDelaySeconds } from "../../game/cutsceneTiming";
 import { MrXTicketFlip } from "../animations/MrXTicketFlip";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
@@ -205,7 +206,10 @@ export function MrXBoard({
     if (detectiveTurnIntro !== null) {
         detectiveTurnIntro.latestMoves.forEach((move, index) => {
             if (move.playerOrdinal !== player.description.order) return;
-            cutsceneFlipByRound.set(move.turnNumber, { ticket: move.ticket, delay: index * 0.18 });
+            cutsceneFlipByRound.set(move.turnNumber, {
+                ticket: move.ticket,
+                delay: fugitiveAnimationDelaySeconds(index),
+            });
         });
     }
 
