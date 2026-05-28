@@ -782,15 +782,15 @@ describe("initPlayer", () => {
 });
 
 describe("clearPrivacy", () => {
-    it("when already in detective phase and the next player is also a detective, stays on detective turn flow", () => {
+    it("rejects clearPrivacy outside a privacy phase", () => {
         const s = gameState({
-            players: [detective(0, "A", "red", 1), detective(1, "B", "blue", 2), fugitive(2, 3)],
+            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
             currentTurn: initialCurrentTurn({ phase: TurnPhase.DETECTIVE, playerOrdinal: 0 }),
         });
         const r = clearPrivacy(s);
-        expect(r.ok).toBe(true);
-        if (!r.ok) return;
-        expect(r.state.currentTurn.phase).toBe(TurnPhase.DETECTIVE);
+        expect(r.ok).toBe(false);
+        if (r.ok) return;
+        expect(r.message).toContain("privacy");
     });
 
     it("moves from privacy detective to fugitive cutscene when clearing", () => {
@@ -827,7 +827,7 @@ describe("clearPrivacy", () => {
         expect(r.state.fugitivePrivacyDismissed).toBe(true);
     });
 
-    it("skips fugitive privacy on later rounds after the first dismissal", () => {
+    it("enters fugitive privacy after the last detective even when previously dismissed", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
             currentTurn: initialCurrentTurn({ playerOrdinal: 0, phase: TurnPhase.DETECTIVE }),
@@ -842,7 +842,7 @@ describe("clearPrivacy", () => {
         );
         expect(played.ok).toBe(true);
         if (!played.ok) return;
-        expect(played.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+        expect(played.state.currentTurn.phase).toBe(TurnPhase.PRIVACY_FUGITIVE);
         expect(played.state.currentTurn.playerOrdinal).toBe(1);
     });
 

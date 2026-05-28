@@ -1,6 +1,7 @@
 import { Ticket } from "../constants";
-import { GameState, TurnLogEntry, PlayerState, TurnPhase, MapGraph } from "./gameState";
+import { GameState, TurnLogEntry, PlayerState, MapGraph } from "./gameState";
 import { Winner, DETECTIVE_CAPTURE_X_WIN_REASON, FUGITIVE_ESCAPE_WIN_REASON, DETECTIVES_ARE_TRAPPED_WIN_REASON, FUGITIVES_ARE_TRAPPED_WIN_REASON } from "../constants";
+import { completeCurrentPhase } from "./phases";
 
 export type PlayOk = { ok: true; state: GameState };
 export type PlayFail = { ok: false; message: string };
@@ -263,30 +264,26 @@ export function passTurn(state: GameState): PlayResult {
         [...currentTurn.fugitivesPassing, currentTurn.playerOrdinal];
 
 
-    const newState = {
+    const afterPass = {
         ...state,
-        winner: getWinner(state),
         currentTurn: {
             ...currentTurn,
             playerOrdinal: getPlayerOrdinalAfterMove(state),
             detectivesPassing: newDetectivesPassing,
             fugitivesPassing: newFugitivesPassing,
-            phase: getNextTurnPhase(state),
         },
     } as GameState;
 
-    const newWinner = getWinner(newState);
+    const advanced = completeCurrentPhase(afterPass);
+    if (!advanced.ok) return { ok: false, message: advanced.message };
+
+    const newWinner = getWinner(advanced.state);
     if (newWinner !== null) {
-        return {
-            ok: true,
-            state: {
-                ...newState,
-                winner: newWinner,
-                currentTurn: { ...newState.currentTurn, phase: TurnPhase.GAME_OVER },
-            },
-        };
+        const gameOver = completeCurrentPhase({ ...advanced.state, winner: newWinner });
+        if (!gameOver.ok) return { ok: false, message: gameOver.message };
+        return { ok: true, state: gameOver.state };
     }
-    return { ok: true, state: { ...newState, winner: null } };
+    return { ok: true, state: { ...advanced.state, winner: null } };
 }
 
 export function tryPlayNode(state: GameState, node: number): PlayResult {
@@ -317,18 +314,13 @@ export function tryPlayNode(state: GameState, node: number): PlayResult {
     if (!result.ok) return result;
 
     const turnNumberIncrement = (playerOrdinal < state.players.length - 1) ? 0 : 1;
-    let newState = { ...result.state, currentTurn: { ...result.state.currentTurn, ticket: null, turnNumber: result.state.currentTurn.turnNumber + turnNumberIncrement } };
+    const newState = { ...result.state, currentTurn: { ...result.state.currentTurn, ticket: null, turnNumber: result.state.currentTurn.turnNumber + turnNumberIncrement } };
 
     const newWinner = getWinner(newState);
     if (newWinner !== null) {
-        return {
-            ok: true,
-            state: {
-                ...newState,
-                winner: newWinner,
-                currentTurn: { ...newState.currentTurn, phase: TurnPhase.GAME_OVER },
-            } as GameState,
-        };
+        const gameOver = completeCurrentPhase({ ...newState, winner: newWinner });
+        if (!gameOver.ok) return { ok: false, message: gameOver.message };
+        return { ok: true, state: gameOver.state };
     }
 
     return { ok: true, state: { ...newState, winner: null } as GameState };
@@ -358,55 +350,21 @@ function getPlayerOrdinalAfterMove(state: GameState): number {
 }
 
 export function clearPrivacy(state: GameState): PlayResult {
-    const wasFugitivePrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
-    const newPhase = getNextTurnPhase(state, true);
-    return {
-        ok: true,
-        state: {
-            ...state,
-            fugitivePrivacyDismissed: wasFugitivePrivacy ? true : state.fugitivePrivacyDismissed,
-            currentTurn: { ...state.currentTurn, phase: newPhase },
-        },
-    };
+    const advanced = completeCurrentPhase(state);
+    if (!advanced.ok) return { ok: false, message: advanced.message };
+    if (!advanced.advanced) {
+        return { ok: false, message: "Not in a privacy phase." };
+    }
+    return { ok: true, state: advanced.state };
 }
 
 export function completeFugitiveCutscene(state: GameState): PlayResult {
-    if (state.currentTurn.phase !== TurnPhase.FUGITIVE_CUTSCENE) {
-        return { ok: false, message: "Not in a fugitive cutscene." };
+    const advanced = completeCurrentPhase(state);
+    if (!advanced.ok) return { ok: false, message: advanced.message };
+    if (!advanced.advanced) {
+        return { ok: false, message: "Cutscene phase is not ready to complete." };
     }
-    return {
-        ok: true,
-        state: {
-            ...state,
-            currentTurn: { ...state.currentTurn, phase: TurnPhase.DETECTIVE },
-        },
-    };
-}
-
-function getNextTurnPhase(state: GameState, shouldClearPrivacy: boolean | null = null): TurnPhase {
-    const { currentTurn, winner, players } = state;
-    if (winner !== null) return TurnPhase.GAME_OVER;
-
-    if (currentTurn.doubleMovePart === 1) {
-        return currentTurn.phase;
-    }
-
-    if (currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE && shouldClearPrivacy === true) {
-        return TurnPhase.FUGITIVE_CUTSCENE;
-    } else if (currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE && shouldClearPrivacy === true) {
-        return TurnPhase.FUGITIVE;
-    }
-
-    const player = players[currentTurn.playerOrdinal];
-    const nextPlayer = players[(currentTurn.playerOrdinal + 1) % players.length];
-
-    if (player.description.isDetective) {
-        if (nextPlayer.description.isDetective) return TurnPhase.DETECTIVE;
-        if (state.fugitivePrivacyDismissed) return TurnPhase.FUGITIVE;
-        return TurnPhase.PRIVACY_FUGITIVE;
-    } else if (!nextPlayer.description.isDetective) return TurnPhase.FUGITIVE;
-
-    return TurnPhase.PRIVACY_DETECTIVE;
+    return { ok: true, state: advanced.state };
 }
 
 function movePlayer(state: GameState, playerOrdinal: number, node: number, ticket: Ticket) : PlayResult {
@@ -445,16 +403,20 @@ function movePlayer(state: GameState, playerOrdinal: number, node: number, ticke
         doubleMovePart: state.currentTurn.doubleMovePart,
     } as TurnLogEntry;
 
-    return { ok: true, state: {
+    const afterMove = {
         ...state,
         currentTurn: {
             ...state.currentTurn,
             ticket: null,
             playerOrdinal: getPlayerOrdinalAfterMove(state),
-            doubleMovePart: state.currentTurn.doubleMovePart === 1 ? 2 : undefined,
-            phase: getNextTurnPhase(state),
+            doubleMovePart: state.currentTurn.doubleMovePart === 1 ? (2 as const) : undefined,
         },
         players: newPlayers,
         turnLog: [...state.turnLog, turnLogEntry],
-    } };
+    } as GameState;
+
+    const advanced = completeCurrentPhase(afterMove);
+    if (!advanced.ok) return { ok: false, message: advanced.message };
+
+    return { ok: true, state: advanced.state };
 }
