@@ -77,6 +77,7 @@
 }
 
 .board-wrap {
+  position: relative;
   border-radius: 0;
   border: none;
   background: transparent;
@@ -241,9 +242,109 @@
   transition: none;
 }
 
+.player-marker__body--poof-in {
+  will-change: opacity, filter;
+  animation: fugitive-poof-in 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.player-marker__body--poof-out {
+  will-change: opacity, filter;
+  animation: fugitive-poof-out 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+.mr-x-marker-icon .background-fill {
+  fill: white;
+}
+
+.fugitive-moved-hint {
+  animation: fugitive-moved-hint-pop 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fugitive-moved-hint--overlay .fugitive-moved-hint__text {
+  font-size: 12px;
+}
+
+.fugitive-moved-hint__bubble {
+  fill: rgba(18, 22, 32, 0.92);
+  stroke: rgba(255, 252, 245, 0.35);
+  stroke-width: 1.25px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+}
+
+.fugitive-moved-hint__text {
+  fill: #fffefb;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  user-select: none;
+  pointer-events: none;
+}
+
+@keyframes fugitive-moved-hint-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  78% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+
+@keyframes fugitive-poof-in {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  35% {
+    opacity: 0.7;
+    filter: blur(3px);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes fugitive-poof-out {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+  }
+
+  55% {
+    opacity: 0.45;
+    filter: blur(4px);
+  }
+
+  100% {
+    opacity: 0;
+    filter: blur(12px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .board-svg .player-marker {
     transition: none;
+  }
+
+  .player-marker__body--poof-in,
+  .player-marker__body--poof-out {
+    animation-duration: 0.35s;
+    will-change: auto;
   }
 }
 

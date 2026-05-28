@@ -26,6 +26,7 @@ type PlayerMarkerProps = {
      * Omit or leave 0 when no pulse is requested.
      */
     boardPulseKey?: number;
+    poofMode?: "in" | "out" | null;
 };
 
 function PlayerMarkerInner({
@@ -38,6 +39,7 @@ function PlayerMarkerInner({
     isDragging,
     isActiveTurn = false,
     boardPulseKey = 0,
+    poofMode = null,
 }: PlayerMarkerProps) {
     const fill = COLOR_TO_BORDER[player.description.color];
     const stationY = 44;
@@ -58,6 +60,9 @@ function PlayerMarkerInner({
             onPointerCancel={dragBindings?.onPointerCancel}
             id={`player-marker-${player.description.id}`}
         >
+            <g
+                className={`player-marker__body${poofMode === "in" ? " player-marker__body--poof-in" : ""}${poofMode === "out" ? " player-marker__body--poof-out" : ""}`}
+            >
             {boardPulseKey > 0 && (
                 <ellipse
                     key={boardPulseKey}
@@ -88,6 +93,7 @@ function PlayerMarkerInner({
             >
                 {stationId}
             </text>
+            </g>
         </g>
     );
 }
