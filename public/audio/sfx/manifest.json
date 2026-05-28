@@ -1,0 +1,74 @@
+{
+  "black": [
+    "/audio/sfx/black/Emoji Laugh - QuickSounds.com.mp3",
+    "/audio/sfx/black/the-sound-of-a-person-being-abducted-to-an-alien-ship-using-light-abduction.mp3",
+    "/audio/sfx/black/ufo-door-opening-sound.mp3"
+  ],
+  "bus": [
+    "/audio/sfx/bus/Bus Approach And Leave - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus Cabin Inside Stopping And Doors - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus City Transit Air Brake Release - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus City Transit Arrives At Bus Stop - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus City Transit Boarding Passengers - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus Door Closing 9 - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus Drives Away After Passengers Board - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Bus Pass By Europe - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Truck Long Short - QuickSounds.com.mp3",
+    "/audio/sfx/bus/Truck Mack 05 Exterior Airbrake - QuickSounds.com.mp3",
+    "/audio/sfx/bus/bbc_london---r_07042290.mp3",
+    "/audio/sfx/bus/bbc_london---r_07042291.mp3",
+    "/audio/sfx/bus/bbc_london---r_07042293.mp3"
+  ],
+  "cancel": [
+    "/audio/sfx/cancel/Cartoon boing sfx - QuickSounds.com.mp3",
+    "/audio/sfx/cancel/Cartoon run take off - QuickSounds.com.mp3",
+    "/audio/sfx/cancel/Cartoon running sound tiptoe - QuickSounds.com.mp3",
+    "/audio/sfx/cancel/Goofy ahh runnin - QuickSounds.com.mp3",
+    "/audio/sfx/cancel/warpy boing - QuickSounds.com.mp3"
+  ],
+  "double": [
+    "/audio/sfx/double/Cringe laugh - QuickSounds.com.mp3",
+    "/audio/sfx/double/another-run.mp3",
+    "/audio/sfx/double/runs-and-breathes.mp3",
+    "/audio/sfx/double/spaceship-acceleration.mp3"
+  ],
+  "fugitive-hide": [
+    "/audio/sfx/fugitive-hide/Gaster Vanish - QuickSounds.com.mp3",
+    "/audio/sfx/fugitive-hide/a-laser-shot-from-a-spaceship-of-alien-creatures.mp3",
+    "/audio/sfx/fugitive-hide/alien-disappearance.mp3",
+    "/audio/sfx/fugitive-hide/electric.mp3",
+    "/audio/sfx/fugitive-hide/sharply-hit-the-frame.mp3",
+    "/audio/sfx/fugitive-hide/the-sound-of-evaporation.mp3"
+  ],
+  "fugitive-reveal": [
+    "/audio/sfx/fugitive-reveal/Speed Bike Screech Brake - QuickSounds.com.mp3",
+    "/audio/sfx/fugitive-reveal/alien-landing.mp3"
+  ],
+  "game-over": [
+    "/audio/sfx/game-over/game-won.mp3",
+    "/audio/sfx/game-over/level-passing-sound.mp3",
+    "/audio/sfx/game-over/the-sound-of-high-achievement.mp3",
+    "/audio/sfx/game-over/winneris.ogg"
+  ],
+  "next-turn": [
+    "/audio/sfx/next-turn/american-tram-bell.mp3"
+  ],
+  "taxi": [
+    "/audio/sfx/taxi/Car engine speeding - QuickSounds.com.mp3",
+    "/audio/sfx/taxi/Truck Horn Passing W Horn - QuickSounds.com.mp3",
+    "/audio/sfx/taxi/mixkit-car-double-horn-719.wav",
+    "/audio/sfx/taxi/mixkit-car-horn-718.wav",
+    "/audio/sfx/taxi/mixkit-fast-car-drive-by-1538.wav",
+    "/audio/sfx/taxi/mixkit-short-car-ignition-1541.wav",
+    "/audio/sfx/taxi/short car horn - QuickSounds.com.mp3",
+    "/audio/sfx/taxi/taxi.mp3",
+    "/audio/sfx/taxi/taxiiiii.mp3"
+  ],
+  "underground": [
+    "/audio/sfx/underground/London Metro Tube Arrival - QuickSounds.com.mp3",
+    "/audio/sfx/underground/Subway Train Interior Underground Station Train Pulls In - QuickSounds.com.mp3",
+    "/audio/sfx/underground/Underground In London 2 - QuickSounds.com.mp3",
+    "/audio/sfx/underground/Underground Train Cabin Inside 4 - QuickSounds.com.mp3",
+    "/audio/sfx/underground/bbc_london-und_07020155.mp3"
+  ]
+}
