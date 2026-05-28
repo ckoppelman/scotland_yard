@@ -130,9 +130,13 @@
 }
 
 .mrx-ticket-flip {
+  /* Wide enough for “UNDERGROUND” on the flip face (transfer flight + board cutscene). */
+  --mr-x-board-ticket-width: 5.5rem;
+  --mr-x-board-ticket-height: 1.4rem;
   display: block;
   width: 100%;
-  min-height: 1.35rem;
+  max-width: var(--mr-x-board-ticket-width);
+  min-height: var(--mr-x-board-ticket-height);
   perspective: 400px;
 }
 
@@ -141,7 +145,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 1.35rem;
+  min-height: var(--mr-x-board-ticket-height);
   transform-style: preserve-3d;
 }
 
@@ -183,6 +187,13 @@
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  padding: 0 0.15rem;
+}
+
+.mrx-ticket-flip__face--underground .mrx-ticket-flip__label {
+  font-size: 0.56rem;
+  letter-spacing: 0.03em;
 }
 
 .mrx-ticket-flip__face--taxi {

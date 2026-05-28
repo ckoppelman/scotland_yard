@@ -96,7 +96,11 @@ export function MrXCard({
                       }
                     : () => {}
             }
-            id={variant === "control" ? `player-card-${player.description.id}-control` : undefined}
+            id={
+                variant === "control"
+                    ? `player-card-${player.description.id}-control`
+                    : `player-card-${player.description.id}`
+            }
         >
             <div className="player-card__head">
                 <PlayerCardPawnIcon player={player} />

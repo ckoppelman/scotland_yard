@@ -3,6 +3,12 @@ import type { DetectiveTurnIntro } from "./detectiveTurnIntro";
 /** One visual or SFX beat (headline, emoji sweep, ticket flip). Keep in sync with cutscene CSS durations. */
 export const GAMEPLAY_ANIMATION_MS = 2000;
 
+/** Detective → Mr. X ticket transfer flight in the players drawer. */
+export const TICKET_TRANSFER_FLIGHT_MS = 1600;
+
+/** Wait for the players sheet to open before measuring card targets. */
+export const SIDE_PANEL_OPEN_MS = 280;
+
 /** Delay between each fugitive's cutscene beat when multiple fugitives moved. See docs/fugitive-cutscene.md. */
 export const FUGITIVE_ANIMATION_STAGGER_MS = 1500;
 

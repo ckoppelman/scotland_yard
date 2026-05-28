@@ -11,6 +11,16 @@ export type PhaseActionResult =
 
 export type PhaseWaitKind = "player-move" | "privacy-modal" | "cutscene";
 
+export type SidePanelId = "control" | "mrx" | "players";
+
+/** Flying ticket from a detective marker to a fugitive card in the players drawer. */
+export type TicketTransferFlight = {
+    id: number;
+    ticket: Ticket;
+    detectiveId: string;
+    fugitiveId: string;
+};
+
 /** Presentation controlled by phase actions (music, markers, modals, cutscene beats). */
 export type PhasePresentation = {
     musicMode: MusicMode;
@@ -20,6 +30,9 @@ export type PhasePresentation = {
     /** Active cutscene move index for staggered headline / emoji / ticket flip. */
     cutsceneMoveIndex: number | null;
     interactionLocked: boolean;
+    /** When set, opens this side-dock tab (e.g. players drawer during ticket transfer). */
+    sidePanel: SidePanelId | null;
+    ticketTransferFlight: TicketTransferFlight | null;
 };
 
 export const INITIAL_PHASE_PRESENTATION: PhasePresentation = {
@@ -29,6 +42,8 @@ export const INITIAL_PHASE_PRESENTATION: PhasePresentation = {
     detectiveTurnIntro: null,
     cutsceneMoveIndex: null,
     interactionLocked: false,
+    sidePanel: null,
+    ticketTransferFlight: null,
 };
 
 /** Side-effect services injected into actions (SFX, animations). */
@@ -41,6 +56,7 @@ export type PhaseActionServices = {
     playGameOverSfx: () => void;
     ensureMusicPlaying: () => void;
     delay: (ms: number) => Promise<void>;
+    playTicketTransferToFugitive: (flight: Omit<TicketTransferFlight, "id">) => Promise<void>;
 };
 
 /** Move context passed into post-move actions. */

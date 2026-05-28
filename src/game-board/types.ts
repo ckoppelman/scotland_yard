@@ -46,4 +46,5 @@ export type GameBoardProps = {
     /** Blocks map/ticket input while a phase action runs move feedback. */
     interactionLocked?: boolean;
     fugitivePoof?: FugitivePoofBurst | null;
+    onTicketTransferComplete?: () => void;
 };

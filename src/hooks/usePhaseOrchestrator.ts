@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { GameSfxAction } from "../audio/playGameSfx";
 import { playImmediateGameSfx, playPostTurnChangeSfx, playPreTurnChangeSfx } from "../audio/playGameSfx";
 import { playSfxForAtLeast } from "../audio/sfx";
 import { ensureBackgroundMusicPlaying } from "../audio/useBackgroundMusic";
 import type { MusicMode } from "../audio/musicTracks";
 import type { Ticket } from "../constants";
-import { GAMEPLAY_ANIMATION_MS } from "../game/cutsceneTiming";
+import { GAMEPLAY_ANIMATION_MS, SIDE_PANEL_OPEN_MS, TICKET_TRANSFER_FLIGHT_MS } from "../game/cutsceneTiming";
 import {
     INITIAL_PHASE_PRESENTATION,
     PhaseOrchestrator,
@@ -57,6 +58,8 @@ export function usePhaseOrchestrator(
         [onTransportAnimation, onFugitivePoof],
     );
 
+    const ticketTransferResolveRef = useRef<(() => void) | null>(null);
+
     const services = useMemo<PhaseActionServices>(
         () => ({
             delay,
@@ -80,11 +83,42 @@ export function usePhaseOrchestrator(
                     moveFeedbackHandlers,
                 );
             },
+            playTicketTransferToFugitive: (flight) =>
+                new Promise<void>((resolve) => {
+                    ticketTransferResolveRef.current = resolve;
+                    flushSync(() => {
+                        setPresentation((p) => {
+                            const next = {
+                                ...p,
+                                sidePanel: "players" as const,
+                                ticketTransferFlight: { id: Date.now(), ...flight },
+                            };
+                            presentationRef.current = next;
+                            return next;
+                        });
+                    });
+                    window.setTimeout(() => {
+                        if (ticketTransferResolveRef.current === resolve) {
+                            ticketTransferResolveRef.current = null;
+                            resolve();
+                        }
+                    }, SIDE_PANEL_OPEN_MS + TICKET_TRANSFER_FLIGHT_MS + 400);
+                }),
         }),
         [moveFeedbackHandlers],
     );
-
     const orchestratorRef = useRef<PhaseOrchestrator | null>(null);
+
+    const completeTicketTransfer = useCallback(() => {
+        setPresentation((p) => {
+            const next = { ...p, ticketTransferFlight: null, sidePanel: null };
+            presentationRef.current = next;
+            return next;
+        });
+        const resolve = ticketTransferResolveRef.current;
+        ticketTransferResolveRef.current = null;
+        resolve?.();
+    }, []);
 
     useEffect(() => {
         orchestratorRef.current = new PhaseOrchestrator({
@@ -141,6 +175,7 @@ export function usePhaseOrchestrator(
         musicMode,
         commitPlayResult,
         resetPresentation,
+        completeTicketTransfer,
         interactionLocked: presentation.interactionLocked,
     };
 }

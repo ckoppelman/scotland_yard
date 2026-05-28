@@ -53,6 +53,7 @@ import type { GameBoardProps } from "./types";
 import { useModalFade } from "./modals/useModalFade";
 import { AppGameMenu } from "./shell/AppGameMenu";
 import { GameSideDock } from "./shell/GameSideDock";
+import { FlyingTicketTransfer } from "./animations/FlyingTicketTransfer";
 
 export function GameBoard({
     state,
@@ -85,6 +86,7 @@ export function GameBoard({
     onAnimationsEnabledChange,
     interactionLocked = false,
     fugitivePoof = null,
+    onTicketTransferComplete,
 }: GameBoardProps) {
     const { players, mapGraph, winner, currentTurn, turns, turnLog } = state;
     const detectiveTurnIntro = phasePresentation.detectiveTurnIntro;
@@ -102,10 +104,12 @@ export function GameBoard({
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
-    const [sidePanel, setSidePanel] = useState<"control" | "mrx" | "players" | null>(null);
+    const [userSidePanel, setUserSidePanel] = useState<"control" | "mrx" | "players" | null>(null);
+    /** Orchestrator overrides (e.g. ticket transfer) take effect on the same render — no useEffect lag. */
+    const sidePanel = phasePresentation.sidePanel ?? userSidePanel;
 
     const toggleSidePanel = useCallback((id: "control" | "mrx" | "players") => {
-        setSidePanel((p) => (p === id ? null : id));
+        setUserSidePanel((p) => (p === id ? null : id));
     }, []);
 
     const bumpMarkerPulseFromPlayerCard = useCallback((player: PlayerState) => {
@@ -118,11 +122,13 @@ export function GameBoard({
     useEffect(() => {
         if (sidePanel === null) return;
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setSidePanel(null);
+            if (e.key === "Escape" && phasePresentation.sidePanel === null) {
+                setUserSidePanel(null);
+            }
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [sidePanel]);
+    }, [sidePanel, phasePresentation.sidePanel]);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -180,7 +186,7 @@ export function GameBoard({
 
     useEffect(() => {
         if (detectiveTurnIntro === null) return;
-        setSidePanel((panel) => (panel === "mrx" ? panel : "mrx"));
+        setUserSidePanel((panel: typeof userSidePanel) => (panel === "mrx" ? panel : "mrx"));
     }, [detectiveTurnIntro?.key]);
 
     const completeGameIntroDismiss = useCallback(() => {
@@ -644,8 +650,17 @@ export function GameBoard({
 
     const status = useMemo(() => getGameStatusText(state), [state]);
 
+    const ticketTransferFlight = phasePresentation.ticketTransferFlight;
+
     return (
         <>
+            {ticketTransferFlight !== null && onTicketTransferComplete !== undefined && (
+                <FlyingTicketTransfer
+                    flight={ticketTransferFlight}
+                    playersPanelReady={sidePanel === "players"}
+                    onComplete={onTicketTransferComplete}
+                />
+            )}
             <PrivacyTurnModal
                 variant="mrx"
                 fade={mrXPrivacyFade}

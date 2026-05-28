@@ -62,6 +62,7 @@ export default function App() {
     musicMode,
     commitPlayResult: orchestratorCommit,
     resetPresentation,
+    completeTicketTransfer,
     interactionLocked,
   } = usePhaseOrchestrator(state, setState, setTransportAnimation, setFugitivePoof);
 
@@ -319,6 +320,7 @@ export default function App() {
         onAnimationsEnabledChange={handleAnimationsEnabledChange}
         interactionLocked={interactionLocked || state.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE}
         fugitivePoof={fugitivePoof}
+        onTicketTransferComplete={completeTicketTransfer}
       />
     </main>
   );

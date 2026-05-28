@@ -17,6 +17,7 @@ function mockServices(overrides: Partial<PhaseActionServices> = {}): PhaseAction
         playTransportFeedback: vi.fn().mockResolvedValue(undefined),
         playImmediateTransportFeedback: vi.fn(),
         ensureMusicPlaying: vi.fn(),
+        playTicketTransferToFugitive: vi.fn().mockResolvedValue(undefined),
         ...overrides,
     };
 }
@@ -34,6 +35,8 @@ function mockContext(
             detectiveTurnIntro: null,
             cutsceneMoveIndex: null,
             interactionLocked: false,
+            sidePanel: null,
+            ticketTransferFlight: null,
         }),
         patchPresentation: vi.fn(),
         ...partial,
