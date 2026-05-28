@@ -74,7 +74,7 @@ export const ACKNOWLEDGEMENT_SECTIONS: AcknowledgementSection[] = [
             },
             {
                 name: "My brother and sister",
-                role: "For playing so many hours of board games, and especially D for teaming up with me to write our own game. I love you.",
+                role: "For playing so many hours of board games, and especially D for teaming up with me to write our own game. I love you both.",
                 license: "",
                 url: "",
             },
