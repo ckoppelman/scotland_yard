@@ -91,6 +91,76 @@ function fugitive(ordinal: number, position: number | null, tickets: Partial<Rec
     };
 }
 
+function fugitiveNamed(
+    ordinal: number,
+    name: string,
+    color: Color,
+    position: number | null,
+    tickets: Partial<Record<Ticket, number>> = {},
+): PlayerState {
+    const base: Record<Ticket, number> = { taxi: 4, bus: 3, underground: 2, black: 5, double: 2 };
+    return {
+        description: {
+            id: `fug-${ordinal}`,
+            name,
+            color,
+            order: ordinal,
+            isDetective: false,
+        },
+        position,
+        tickets: { ...base, ...tickets },
+    };
+}
+
+function twoFugitiveRoster(): PlayerState[] {
+    return [
+        detective(0, "A", "red", 1),
+        detective(1, "B", "blue", 2),
+        fugitive(2, 4),
+        fugitiveNamed(3, "Mr Y", "mrY", 5),
+    ];
+}
+
+function pentGraph(): MapGraph {
+    return {
+        nodes: [
+            { id: 1, position: { x: 0, y: 0 } },
+            { id: 2, position: { x: 1, y: 0 } },
+            { id: 3, position: { x: 2, y: 0 } },
+            { id: 4, position: { x: 3, y: 0 } },
+            { id: 5, position: { x: 4, y: 0 } },
+        ],
+        connections: [
+            edge(1, 2, "taxi"),
+            edge(2, 3, "bus"),
+            edge(1, 3, "underground"),
+            edge(3, 4, "taxi"),
+            edge(4, 5, "taxi"),
+        ],
+        startingPositions: [1, 2, 3, 4, 5],
+    };
+}
+
+function threeFugitiveRoster(): PlayerState[] {
+    return [
+        detective(0, "A", "red", 1),
+        detective(1, "B", "blue", 2),
+        fugitive(2, 3),
+        fugitiveNamed(3, "Mr Y", "mrY", 4),
+        fugitiveNamed(4, "Mr Z", "mrZ", 5),
+    ];
+}
+
+function playMove(s: GameState, ticket: Ticket, node: number): GameState {
+    const t = tryPlayTicket(s, ticket);
+    expect(t.ok).toBe(true);
+    if (!t.ok) throw new Error(t.message);
+    const r = tryPlayNode(t.state, node);
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.message);
+    return r.state;
+}
+
 function initialCurrentTurn(partial: Partial<CurrentTurn>): CurrentTurn {
     return {
         playerOrdinal: 0,
@@ -774,5 +844,126 @@ describe("clearPrivacy", () => {
         if (!played.ok) return;
         expect(played.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
         expect(played.state.currentTurn.playerOrdinal).toBe(1);
+    });
+
+    it("rejects completing cutscene when not in cutscene phase", () => {
+        const s = gameState({
+            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
+            currentTurn: initialCurrentTurn({ phase: TurnPhase.DETECTIVE }),
+        });
+        expect(completeFugitiveCutscene(s).ok).toBe(false);
+    });
+});
+
+describe("multi-fugitive turn flow", () => {
+    it("last detective opens fugitive privacy before the first fugitive moves", () => {
+        const s = gameState({
+            players: twoFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 1, phase: TurnPhase.DETECTIVE }),
+        });
+        const next = playMove(s, "bus", 3);
+        expect(next.currentTurn.phase).toBe(TurnPhase.PRIVACY_FUGITIVE);
+        expect(next.currentTurn.playerOrdinal).toBe(2);
+    });
+
+    it("Mr X to Mr Y stays in fugitive phase without cutscene", () => {
+        const s = gameState({
+            players: twoFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 2, phase: TurnPhase.FUGITIVE }),
+        });
+        const next = playMove(s, "taxi", 5);
+        expect(next.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+        expect(next.currentTurn.playerOrdinal).toBe(3);
+        expect(next.currentTurn.turnNumber).toBe(1);
+    });
+
+    it("last fugitive opens detective privacy and increments the round", () => {
+        const s = gameState({
+            players: twoFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 3, phase: TurnPhase.FUGITIVE, turnNumber: 1 }),
+        });
+        const next = playMove(s, "taxi", 4);
+        expect(next.currentTurn.phase).toBe(TurnPhase.PRIVACY_DETECTIVE);
+        expect(next.currentTurn.playerOrdinal).toBe(0);
+        expect(next.currentTurn.turnNumber).toBe(2);
+    });
+
+    it("clearing detective privacy enters cutscene, then completes into detective play", () => {
+        const s = gameState({
+            players: twoFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ phase: TurnPhase.PRIVACY_DETECTIVE, turnNumber: 2 }),
+        });
+        const cutscene = clearPrivacy(s);
+        expect(cutscene.ok).toBe(true);
+        if (!cutscene.ok) return;
+        expect(cutscene.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE_CUTSCENE);
+
+        const detectives = completeFugitiveCutscene(cutscene.state);
+        expect(detectives.ok).toBe(true);
+        if (!detectives.ok) return;
+        expect(detectives.state.currentTurn.phase).toBe(TurnPhase.DETECTIVE);
+    });
+
+    it("chains three fugitives before detective privacy", () => {
+        let s = gameState({
+            players: threeFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 2, phase: TurnPhase.FUGITIVE }),
+        });
+        s = playMove(s, "taxi", 4);
+        expect(s.currentTurn.playerOrdinal).toBe(3);
+        expect(s.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+
+        s = playMove(s, "taxi", 5);
+        expect(s.currentTurn.playerOrdinal).toBe(4);
+        expect(s.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+
+        s = playMove(s, "taxi", 4);
+        expect(s.currentTurn.phase).toBe(TurnPhase.PRIVACY_DETECTIVE);
+        expect(s.currentTurn.playerOrdinal).toBe(0);
+    });
+
+    it("ends the game when any fugitive is trapped even if others could still move", () => {
+        const s = gameState({
+            players: twoFugitiveRoster(),
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 2, phase: TurnPhase.FUGITIVE }),
+        });
+        const trappedMrX = gameState({
+            ...s,
+            players: [
+                s.players[0]!,
+                s.players[1]!,
+                fugitive(2, 4, { taxi: 0, bus: 0, underground: 0, black: 0 }),
+                s.players[3]!,
+            ],
+        });
+        const r = passTurn(trappedMrX);
+        expect(r.ok).toBe(true);
+        if (!r.ok) return;
+        expect(r.state.winner?.winner).toBe("detective");
+        expect(r.state.currentTurn.phase).toBe(TurnPhase.GAME_OVER);
+    });
+
+    it("ends the game when every fugitive must pass", () => {
+        const noTickets = { taxi: 0, bus: 0, underground: 0, black: 0 };
+        const s = gameState({
+            players: [
+                detective(0, "A", "red", 1),
+                detective(1, "B", "blue", 2),
+                fugitive(2, 4, noTickets),
+                fugitiveNamed(3, "Mr Y", "mrY", 5, noTickets),
+            ],
+            mapGraph: pentGraph(),
+            currentTurn: initialCurrentTurn({ playerOrdinal: 3, phase: TurnPhase.FUGITIVE }),
+        });
+        const r = passTurn(s);
+        expect(r.ok).toBe(true);
+        if (!r.ok) return;
+        expect(r.state.winner?.winner).toBe("detective");
     });
 });
