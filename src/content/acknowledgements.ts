@@ -33,29 +33,105 @@ export const ACKNOWLEDGEMENT_SECTIONS: AcknowledgementSection[] = [
         ],
     },
     {
-        id: "music",
-        title: "Background music",
+        id: "app-author",
+        title: "Creator",
         paragraphs: [
-            "Ambient, detective, and fugitive themes switch automatically during play. Tracks live under public/audio/music/; all listed below are by nojisuma on Pixabay.",
+            "This web adaptation is an independent fan project created by Charles Koppelman-Milstein.  It is the first game I've built from scratch, and I'm really proud of it.",
         ],
         credits: [
             {
-                name: "Night Dew",
+                name: "Charles Koppelman-Milstein",
+                role: "Creator",
+                license: "MIT License",
+                url: "https://github.com/ckoppelman/scotland_yard",
+            },
+        ],
+    },
+    {
+        id: "thanks",
+        title: "Special Thanks",
+        paragraphs: [
+            "This would not have been possible without the help of the following people:",
+        ],
+        credits: [
+            {
+                name: "My children, J and W",
+                role: "For spending many hours playing and beating me at the original game, for play-testing and providing really great feedback.  I love you guys and I hope you enjoy board games as much as I do.",
+                license: "",
+                url: "",
+            },
+            {
+                name: "My wife",
+                role: "For tolerating my board game shelf and the time I spend playing them.  Thank you for allowing me to spend so many hours on this when I should have been in bed.  I cannot thank you enough for your constant support and love.  I am so grateful to have you in my life.",
+                license: "",
+                url: "",
+            },
+            {
+                name: "My father, of blessed memory",
+                role: "For introducing me to the original game and giving me a lifelong love of board games.  I sat so many hours in the living room playing this with him and I miss him so much.",
+                license: "",
+                url: "",
+            },
+            {
+                name: "My brother and sister",
+                role: "For playing so many hours of board games, and especially D for teaming up with me to write our own game. I love you.",
+                license: "",
+                url: "",
+            },
+            {
+                name: "My mother, of blessed memory",
+                role: "Love, encouragement, a childhood of blessings, and dealing with my teenage years.",
+                license: "",
+                url: "",
+            },
+        ],
+    },
+    {
+        id: "map-data",
+        title: "Map data",
+        paragraphs: [
+            "The default map is from the original game and is used without permission.",
+            "The pixel-perfect positioning of the stations is based on the extremely detailed data from AlexElvers/scotland-yard-data.",
+        ],
+        credits: [
+            {
+                name: "Alexander Elvers",
+                role: "Map data",
+                license: "No license",
+                url: "https://github.com/AlexElvers/scotland-yard-data",
+            },
+            {
+                name: "Ravensburger",
+                role: "Original board game publisher",
+                license: "Trademark — see publisher site",
+                url: RAVENSBURGER_HOME_URL,
+            }
+        ],
+    },
+    {
+        id: "music",
+        title: "Background music",
+        paragraphs: [
+            "Ambient, detective, and fugitive themes are all by [nojisuma](https://pixabay.com/users/nojisuma-23737290/) and hosted on [Pixabay](https://pixabay.com/).",
+        ],
+        credits: [
+            {
+                name: "夜露 (Night Dew), by nojisuma",
                 role: "Intro, pause, and game-over ambience",
                 license: "Pixabay Content License",
-                url: "https://pixabay.com/users/nojisuma-23737290/",
+                url: "https://pixabay.com/music/modern-classical-%E5%A4%9C%E9%9C%B2-night-dew-429962/",
             },
             {
-                name: "Explore at Night",
+                name: "夜に探訪 (Explore at Night), by nojisuma",
                 role: "Fugitive turns",
                 license: "Pixabay Content License",
-                url: "https://pixabay.com/users/nojisuma-23737290/",
+                url: "https://pixabay.com/music/adventure-%E5%A4%9C%E3%81%AB%E6%8E%A2%E8%A8%AA-explore-at-night-242582/",
             },
             {
-                name: "Windless",
+                name: "無風 (Windless), by nojisuma",
                 role: "Detective turns",
                 license: "Pixabay Content License",
-                url: "https://pixabay.com/users/nojisuma-23737290/",
+                url: "https://pixabay.com/music/beats-%E7%84%A1%E9%A2%A8-windless-160818/",
             },
         ],
     },
@@ -63,24 +139,30 @@ export const ACKNOWLEDGEMENT_SECTIONS: AcknowledgementSection[] = [
         id: "sfx",
         title: "Sound effects",
         paragraphs: [
-            "Move, UI, and dramatic stingers are chosen at random from curated folders. Sources include the providers below.",
+            "Sound effects are sourced from the websites below. If you think I have violated your copyright, please contact me and I will remove the offending sound effect.",
         ],
         credits: [
             {
+                name: "Freesound.org",
+                role: "Assorted sound effects",
+                license: "No license",
+                url: "https://freesound.org/",
+            },
+            {
                 name: "QuickSounds.com",
-                role: "Transport, fugitive reveal/hide, game-over, cancel, and UI effects",
+                role: "Assorted sound effects",
                 license: "QuickSounds.com terms (attribution required)",
                 url: "https://quicksounds.com/",
             },
             {
                 name: "Mixkit",
-                role: "Selected taxi horn and vehicle drive-by effects",
+                role: "Assorted sound effects",
                 license: "Mixkit License",
                 url: "https://mixkit.co/license/#sfxFree",
             },
             {
                 name: "BBC Sound Effects",
-                role: "London bus and Underground ambience samples",
+                role: "Assorted sound effects, especially London bus and Underground",
                 license: "BBC remArc / personal-use terms — attribution required",
                 url: "https://sound-effects.bbcrewind.co.uk/",
             },
