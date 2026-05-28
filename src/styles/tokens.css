@@ -1,6 +1,15 @@
+@font-face {
+  font-family: "Top Secret Stamp";
+  src: url("/fonts/top-secret-stamp/TopSecretStamp-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-ui: "DM Sans", system-ui, sans-serif;
+  --font-ticket-back: "Top Secret Stamp", "Arial Black", sans-serif;
 
   --bg: #e5e0d4;
   --bg-deep: #d4cdc0;

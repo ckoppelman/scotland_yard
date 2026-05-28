@@ -114,6 +114,129 @@
   color: var(--ink);
 }
 
+.mr-x-turn-ticket--cutscene {
+  position: relative;
+  padding: 0;
+  background: transparent !important;
+  color: inherit;
+  overflow: visible;
+  z-index: 1;
+}
+
+.mr-x-turn:has(.mr-x-turn-ticket--cutscene) {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.mrx-ticket-flip {
+  display: block;
+  width: 100%;
+  min-height: 1.35rem;
+  perspective: 400px;
+}
+
+.mrx-ticket-flip__card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 1.35rem;
+  transform-style: preserve-3d;
+}
+
+.mrx-ticket-flip__card.flip {
+  backface-visibility: visible !important;
+  animation: flip 2s ease infinite;
+}
+
+.mrx-ticket-flip__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 252, 245, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  backface-visibility: hidden;
+}
+
+.mrx-ticket-flip__face--back {
+  transform: rotateY(180deg);
+  background: linear-gradient(145deg, #9ecbf5 0%, #4a8fd8 42%, #1a4f9c 100%);
+}
+
+.mrx-ticket-flip__back-label {
+  font-family: var(--font-ticket-back);
+  font-size: 0.42rem;
+  line-height: 0.88;
+  text-align: center;
+  color: rgba(255, 252, 245, 0.96);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgba(10, 30, 70, 0.45);
+  padding: 0 0.12rem;
+  user-select: none;
+}
+
+.mrx-ticket-flip__label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.mrx-ticket-flip__face--taxi {
+  background: #e8d64c;
+  color: #3d3500;
+}
+
+.mrx-ticket-flip__face--bus {
+  background: #63d02d;
+  color: #1a3d0a;
+}
+
+.mrx-ticket-flip__face--underground {
+  background: #e830c3;
+  color: #fff;
+}
+
+.mrx-ticket-flip__face--black {
+  background: #0a0f14;
+  color: #e8e4dc;
+}
+
+.mrx-ticket-flip__face--double {
+  background: #c45c26;
+  color: #fff;
+}
+
+@keyframes flip {
+  0% {
+    transform: perspective(400px) rotateY(0);
+    animation-timing-function: ease-out;
+  }
+
+  40% {
+    transform: perspective(400px) translateZ(150px) rotateY(170deg);
+    animation-timing-function: ease-out;
+  }
+
+  50% {
+    transform: perspective(400px) translateZ(150px) rotateY(190deg) scale(1);
+    animation-timing-function: ease-in;
+  }
+
+  80% {
+    transform: perspective(400px) rotateY(360deg) scale(0.95);
+    animation-timing-function: ease-in;
+  }
+
+  100% {
+    transform: perspective(400px) scale(1);
+    animation-timing-function: ease-in;
+  }
+}
+
 .mr-x-turn-ticket.taxi-ticket {
   background: #e8d64c;
   color: #3d3500;
@@ -149,5 +272,11 @@
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: rgba(232, 228, 220, 0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mrx-ticket-flip__card.flip {
+    animation-duration: 0.35s;
+  }
 }
 

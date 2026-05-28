@@ -1,4 +1,5 @@
 import type { Ticket } from "../../constants";
+import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
 import type { GameState, PlayerState } from "../../game/gameState";
 import { MrXBoard, MrXCard, PlayerCard } from "../players/playerCards";
 import { ControlPanel } from "./ControlPanel";
@@ -19,6 +20,7 @@ type Props = {
     pendingValidTickets: Ticket[] | null;
     ticketPlayableFromCurrentNode: Record<Ticket, boolean>;
     onCancelPendingMove: () => void;
+    detectiveTurnIntro?: DetectiveTurnIntro | null;
 };
 
 /** Tabs + sliding sheet: Control (tickets), Mr. X log, player roster. */
@@ -36,6 +38,7 @@ export function GameSideDock({
     pendingValidTickets,
     ticketPlayableFromCurrentNode,
     onCancelPendingMove,
+    detectiveTurnIntro = null,
 }: Props) {
     const { winner, currentTurn } = state;
 
@@ -87,7 +90,12 @@ export function GameSideDock({
                         <p className="mrx-section__label">Mr. X turns</p>
                         {state.players.map((player) =>
                             player.description.isDetective ? null : (
-                                <MrXBoard key={player.description.id} state={state} player={player} />
+                                <MrXBoard
+                                    key={player.description.id}
+                                    state={state}
+                                    player={player}
+                                    detectiveTurnIntro={detectiveTurnIntro}
+                                />
                             ),
                         )}
                     </div>

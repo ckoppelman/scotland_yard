@@ -1,7 +1,10 @@
 import { COLOR_TO_BORDER } from "../../constants";
+import type { Ticket } from "../../constants";
 import type { CurrentTurn, GameState, PlayerState, TurnLogEntry } from "../../game/gameState";
 import { TurnPhase } from "../../game/gameState";
 import { shouldShowMrX } from "../../game/displayLogic";
+import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
+import { MrXTicketFlip } from "../animations/MrXTicketFlip";
 import { PlayerCardPawnIcon } from "./PlayerCardPawnIcon";
 
 
@@ -132,6 +135,7 @@ export function MrXTurn({
     shouldShowMrXPosition,
     hasDoubleMovePart1,
     hasDoubleMovePart2,
+    cutsceneFlip,
 }: {
     turnNumber: number;
     isShowMrXTurn: boolean;
@@ -140,6 +144,7 @@ export function MrXTurn({
     /** From {@link TurnLogEntry.doubleMovePart} for this round (both can be set after a full double). */
     hasDoubleMovePart1: boolean;
     hasDoubleMovePart2: boolean;
+    cutsceneFlip?: { ticket: Ticket; delay: number } | null;
 }) {
     let positionToShow: string;
     if (isShowMrXTurn || shouldShowMrXPosition) {
@@ -157,18 +162,35 @@ export function MrXTurn({
     ]
         .filter(Boolean)
         .join(" ");
+    const ticketLabel = turnLogEntry?.ticket?.toUpperCase() ?? "—";
     return (
         <div
             className={`mr-x-turn ${isShowMrXTurn ? "show-mr-x" : "hide-mr-x"} ${doubleOutlineClass}`.trim()}
         >
             <span className="mr-x-turn-number">{turnNumber + 1}</span>
-            <span className={`mr-x-turn-ticket ${ticketClass}`}>{turnLogEntry?.ticket?.toUpperCase() ?? "—"}</span>
+            <span
+                className={`mr-x-turn-ticket ${ticketClass}${cutsceneFlip ? " mr-x-turn-ticket--cutscene" : ""}`.trim()}
+            >
+                {cutsceneFlip ? (
+                    <MrXTicketFlip ticket={cutsceneFlip.ticket} delay={cutsceneFlip.delay} />
+                ) : (
+                    ticketLabel
+                )}
+            </span>
             <span className="mr-x-turn-position">{positionToShow}</span>
         </div>
     );
 }
 
-export function MrXBoard({ state, player }: { state: GameState; player: PlayerState }) {
+export function MrXBoard({
+    state,
+    player,
+    detectiveTurnIntro = null,
+}: {
+    state: GameState;
+    player: PlayerState;
+    detectiveTurnIntro?: DetectiveTurnIntro | null;
+}) {
     const { turnLog, turns } = state;
     /** Same round index can have two Mr. X moves (double); keep all legs for outline + last for display. */
     const mrXLogByRound = new Map<number, TurnLogEntry[]>();
@@ -179,6 +201,13 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
         mrXLogByRound.set(entry.turnNumber, list);
     }
     const shouldShowMrXPosition = shouldShowMrX(state);
+    const cutsceneFlipByRound = new Map<number, { ticket: Ticket; delay: number }>();
+    if (detectiveTurnIntro !== null) {
+        detectiveTurnIntro.latestMoves.forEach((move, index) => {
+            if (move.playerOrdinal !== player.description.order) return;
+            cutsceneFlipByRound.set(move.turnNumber, { ticket: move.ticket, delay: index * 0.18 });
+        });
+    }
 
     return (
         <div
@@ -210,6 +239,7 @@ export function MrXBoard({ state, player }: { state: GameState; player: PlayerSt
                             shouldShowMrXPosition={shouldShowMrXPosition}
                             hasDoubleMovePart1={hasDoubleMovePart1}
                             hasDoubleMovePart2={hasDoubleMovePart2}
+                            cutsceneFlip={cutsceneFlipByRound.get(roundIndex) ?? null}
                         />
                     );
                 })}
