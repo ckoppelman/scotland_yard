@@ -37,6 +37,7 @@ Use the game **menu → Acknowledgements** for in-app credits (music, sound effe
 
 | Doc | Contents |
 |-----|----------|
+| [`docs/game-phases.md`](docs/game-phases.md) | Macro phases (`complete()`), phase actions, orchestrator, and how rules advance the round |
 | [`docs/fugitive-cutscene.md`](docs/fugitive-cutscene.md) | Fugitive round-end cutscene: timing, stagger, audio, and related source files |
 | [`public/audio/ATTRIBUTION.md`](public/audio/ATTRIBUTION.md) | Music, SFX, font, and trademark attribution for shipped assets |
 
@@ -55,10 +56,13 @@ Use the game **menu → Acknowledgements** for in-app credits (music, sound effe
 | [`src/game/mapRegistry.ts`](src/game/mapRegistry.ts) | Maps ids to graphs and human-readable labels |
 | [`src/game/gameState.ts`](src/game/gameState.ts) | Types and `initialState()` (`GameState`, players, map graph, turn log) |
 | [`src/game/gameRules.ts`](src/game/gameRules.ts) | Pure moves: `tryPlayTicket`, `tryPlayNode`, `tryPlayMoveToAdjacent`, adjacency / ticket checks |
+| [`src/game/phases/`](src/game/phases/) | Macro phase classes; advance only via `completeCurrentPhase` / `Phase.complete()` |
+| [`src/game/phaseActions/`](src/game/phaseActions/) | Presentation sequences (music, markers, modals, cutscene beats); [`PhaseOrchestrator`](src/game/phaseActions/PhaseOrchestrator.ts) |
+| [`src/hooks/usePhaseOrchestrator.ts`](src/hooks/usePhaseOrchestrator.ts) | React bridge: `commitPlayResult`, presentation state, SFX/animation services |
 | [`src/game/persistGameState.ts`](src/game/persistGameState.ts) | Save/load game + encrypted Mr. X payload (`localStorage` / `sessionStorage`) |
 | [`src/game-board/`](src/game-board/) | Board UI: [`GameBoard.tsx`](src/game-board/GameBoard.tsx), [`shell/`](src/game-board/shell/) (menu, side dock), [`map/`](src/game-board/map/) (SVG, markers, ticket popup), [`modals/`](src/game-board/modals/), [`players/`](src/game-board/players/) — see [`index.ts`](src/game-board/index.ts) |
 | [`src/content/acknowledgements.ts`](src/content/acknowledgements.ts) | Copy for the in-game Acknowledgements modal |
-| [`src/audio/`](src/audio/) | Music, SFX, cutscene intro (`playDetectivePhaseStartIntro.ts`), handoff rules (`fugitiveVisibilitySfx.ts`) |
+| [`src/audio/`](src/audio/) | Music, SFX, handoff rules (`playGameSfx.ts`, `fugitiveVisibilitySfx.ts`) |
 | [`src/App.tsx`](src/App.tsx) | Wires state, persistence, toasts, drag-to-move flow |
 | [`src/constants.ts`](src/constants.ts) | Tickets, colors, game-over shape |
 
