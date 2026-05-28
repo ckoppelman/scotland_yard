@@ -23,6 +23,7 @@ import {
 import { playDetectivePhaseStartIntro } from "./audio/playDetectivePhaseStartIntro";
 import { fugitiveCutsceneToken, isEnteringFugitiveCutscene } from "./game/detectiveTurnIntro";
 import type { DetectiveTurnIntro } from "./game/detectiveTurnIntro";
+import { finishFugitiveCutscene, tryClaimFugitiveCutscene } from "./game/fugitiveCutsceneGuard";
 import { type MusicMode, type MusicThemeId } from "./audio/musicTracks";
 import { useBackgroundMusic } from "./audio/useBackgroundMusic";
 import { GameBoard } from "./game-board";
@@ -116,7 +117,12 @@ export default function App() {
     let cancelled = false;
     void loadPersistedGameState().then((loaded) => {
       if (cancelled) return;
-      setState(loaded ?? initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1));
+      const initial =
+        loaded ?? initialState(DEFAULT_GAME_MAP_ID, getMapGraph(DEFAULT_GAME_MAP_ID), 2, 1);
+      if (initial.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
+        resumeFugitiveCutsceneRef.current = true;
+      }
+      setState(initial);
     });
     return () => {
       cancelled = true;
@@ -136,7 +142,8 @@ export default function App() {
   const [transportAnimation, setTransportAnimation] = useState<TransportAnimationBurst | null>(null);
   const [fugitivePoof, setFugitivePoof] = useState<FugitivePoofBurst | null>(null);
   const [detectiveTurnIntro, setDetectiveTurnIntro] = useState<DetectiveTurnIntro | null>(null);
-  const fugitiveCutsceneStartedRef = useRef<string | null>(null);
+  const resumeFugitiveCutsceneRef = useRef(false);
+  const cutsceneInProgressRef = useRef(false);
 
   const moveFeedbackHandlers = useMemo<MoveFeedbackHandlers>(
     () => ({
@@ -167,8 +174,14 @@ export default function App() {
 
   const runFugitiveCutscene = useCallback(
     async (cutsceneState: GameState) => {
+      const token = fugitiveCutsceneToken(cutsceneState);
+      if (!tryClaimFugitiveCutscene(token)) return;
+
+      cutsceneInProgressRef.current = true;
       setTurnTransitionPending(true);
+      let succeeded = false;
       try {
+        setState(cutsceneState);
         const prevPrivacy: GameState = {
           ...cutsceneState,
           currentTurn: { ...cutsceneState.currentTurn, phase: TurnPhase.PRIVACY_DETECTIVE },
@@ -183,9 +196,12 @@ export default function App() {
           showToast(completed.message, "error");
           return;
         }
+        succeeded = true;
         setState(completed.state);
         playPostTurnChangeSfx(cutsceneState, completed.state);
       } finally {
+        finishFugitiveCutscene(token, succeeded);
+        cutsceneInProgressRef.current = false;
         setDetectiveTurnIntro(null);
         setTurnTransitionPending(false);
       }
@@ -194,13 +210,12 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (state === null || state.currentTurn.phase !== TurnPhase.FUGITIVE_CUTSCENE) {
-      fugitiveCutsceneStartedRef.current = null;
+    if (state === null || !resumeFugitiveCutsceneRef.current) return;
+    if (state.currentTurn.phase !== TurnPhase.FUGITIVE_CUTSCENE) {
+      resumeFugitiveCutsceneRef.current = false;
       return;
     }
-    const token = fugitiveCutsceneToken(state);
-    if (fugitiveCutsceneStartedRef.current === token) return;
-    fugitiveCutsceneStartedRef.current = token;
+    resumeFugitiveCutsceneRef.current = false;
     void runFugitiveCutscene(state);
   }, [runFugitiveCutscene, state]);
 
@@ -216,8 +231,8 @@ export default function App() {
 
     const next = result.state;
     if (isEnteringFugitiveCutscene(prev, next)) {
-      setState(next);
       options?.onApplied?.();
+      await runFugitiveCutscene(next);
       return;
     }
 
@@ -288,6 +303,7 @@ export default function App() {
   };
 
   const handleDismissPrivacyModal = () => {
+    if (cutsceneInProgressRef.current || turnTransitionPending) return;
     void commitPlayResult(state, clearPrivacy(state));
   };
 

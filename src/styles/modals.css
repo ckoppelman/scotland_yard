@@ -869,3 +869,7 @@
     transition-duration: 0.01ms;
   }
 }
+
+.mr-x-marker-icon .background-fill {
+  fill: white;
+}

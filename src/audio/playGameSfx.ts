@@ -1,8 +1,8 @@
 import type { Ticket } from "../constants";
-import { shouldShowMrX, shouldShowPrivacy } from "../game/displayLogic";
+import { shouldShowPrivacy } from "../game/displayLogic";
 import type { DetectiveTurnIntro } from "../game/detectiveTurnIntro";
 import type { GameState } from "../game/gameState";
-import { TurnPhase } from "../game/gameState";
+import { fugitiveVisibilitySfxType } from "./fugitiveVisibilitySfx";
 import { playSfx, playSfxForAtLeast, SfxType, ticketToSfxType } from "./sfx";
 
 export type GameSfxAction = "double-start" | "cancel-double" | "pass";
@@ -37,33 +37,6 @@ export function turnWillChange(
     if (playerWillAdvance(prev, next, options)) return true;
     if (shouldShowPrivacy(prev) && !shouldShowPrivacy(next)) return true;
     return false;
-}
-
-function fugitiveVisibilitySfxType(prev: GameState, next: GameState): SfxType | null {
-    const nextActive = next.players[next.currentTurn.playerOrdinal];
-    const prevActive = prev.players[prev.currentTurn.playerOrdinal];
-
-    // Fugitive rounds: no reveal/hide stingers when Mr. X is taking or continuing a turn.
-    if (
-        nextActive !== undefined &&
-        !nextActive.description.isDetective &&
-        next.currentTurn.phase === TurnPhase.FUGITIVE
-    ) {
-        return null;
-    }
-    if (
-        prevActive !== undefined &&
-        !prevActive.description.isDetective &&
-        prev.currentTurn.phase === TurnPhase.FUGITIVE &&
-        next.currentTurn.phase === TurnPhase.FUGITIVE
-    ) {
-        return null;
-    }
-
-    const prevVisible = shouldShowMrX(prev);
-    const nextVisible = shouldShowMrX(next);
-    if (prevVisible === nextVisible) return null;
-    return nextVisible ? SfxType.FUGITIVE_REVEAL : SfxType.FUGITIVE_HIDE;
 }
 
 function preTurnChangeSfxType(

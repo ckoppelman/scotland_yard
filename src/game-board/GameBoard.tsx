@@ -164,10 +164,10 @@ export function GameBoard({
     const showPauseModal = winner === null && isPaused;
 
     const showMrXPrivacyModal =
-        winner === null && !isPaused && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+        winner === null && !isPaused && !interactionLocked && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
 
     const showDetectivePrivacyModal =
-        winner === null && !isPaused && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
+        winner === null && !isPaused && !interactionLocked && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
     useEffect(() => {
         if (detectiveTurnIntro === null) return;
