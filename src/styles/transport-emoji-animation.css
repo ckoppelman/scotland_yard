@@ -1,0 +1,34 @@
+.transport-emoji-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 25000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.transport-emoji-overlay__emoji {
+  position: absolute;
+  top: 42%;
+  left: 0;
+  font-size: clamp(3.5rem, 14vw, 7rem);
+  line-height: 1;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.28));
+  animation: transport-emoji-cross 2s linear forwards;
+  will-change: transform;
+}
+
+@keyframes transport-emoji-cross {
+  from {
+    transform: translateX(115vw);
+  }
+
+  to {
+    transform: translateX(-25vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transport-emoji-overlay__emoji {
+    animation-duration: 2s;
+  }
+}
