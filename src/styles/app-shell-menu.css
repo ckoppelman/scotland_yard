@@ -136,6 +136,10 @@
   position: relative;
 }
 
+.game-layout--locked {
+  pointer-events: none;
+}
+
 .game-layout__map {
   flex: 1;
   min-height: 0;
