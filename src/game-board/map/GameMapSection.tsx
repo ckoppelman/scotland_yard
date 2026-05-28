@@ -11,6 +11,8 @@ import { pixelCoords } from "./mapLayout";
 import { PlayerMarker } from "./PlayerMarker";
 import { PendingTicketPopup } from "./PendingTicketPopup";
 import { effectiveTokenStation, stackDxForPlayer } from "./mapLayout";
+import { FugitiveCutsceneMapOverlay } from "../animations/FugitiveCutsceneMapOverlay";
+import type { DetectiveTurnIntro } from "../../game/detectiveTurnIntro";
 
 type BoardBackgroundRect = {
     x: number;
@@ -66,6 +68,8 @@ type Props = {
     tokenDragging: boolean;
     tokenDragVisual: { x: number; y: number };
     markerBoardPulseKeyById: Record<string, number>;
+    fugitivePoof: { mode: "in" | "out"; key: number } | null;
+    detectiveTurnIntro: DetectiveTurnIntro | null;
 };
 
 /**
@@ -110,7 +114,11 @@ export function GameMapSection({
     tokenDragging,
     tokenDragVisual,
     markerBoardPulseKeyById,
+    fugitivePoof,
+    detectiveTurnIntro,
 }: Props) {
+    const introActive = detectiveTurnIntro !== null;
+
     return (
         <div ref={mapAreaRef} className="game-layout__map">
             <section className="panel panel--map" aria-label="Game map">
@@ -137,6 +145,9 @@ export function GameMapSection({
                         maxWidth: "100%",
                     }}
                 >
+                    {introActive && detectiveTurnIntro !== null && (
+                        <FugitiveCutsceneMapOverlay intro={detectiveTurnIntro} />
+                    )}
                     <svg
                         ref={svgRef}
                         className={`board-svg${mapZoom > 1 ? " board-svg--pannable" : ""}${mapLayout.boardImage === null ? " board-svg--no-board-image" : ""}`}
@@ -166,16 +177,30 @@ export function GameMapSection({
                             {mapBoardNodeElements}
                             {markersRenderOrder.map((player) => {
                                 const isActive = player.description.order === activePlayer.description.order;
+                                const isFugitive = !player.description.isDetective;
                                 const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
-                                const shouldShowPrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE || state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
-                                if (shouldShowPrivacy || state.currentTurn.isPaused) {
+                                const shouldShowPrivacy =
+                                    state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE ||
+                                    state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+                                const inFugitiveCutscene =
+                                    state.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE;
+                                const poofMode =
+                                    isFugitive && fugitivePoof !== null ? fugitivePoof.mode : null;
+                                const forceRevealPoof =
+                                    (introActive || inFugitiveCutscene) &&
+                                    detectiveTurnIntro?.isRevealTurn === true &&
+                                    isFugitive &&
+                                    poofMode === "in";
+
+                                if ((shouldShowPrivacy || state.currentTurn.isPaused) && !forceRevealPoof) {
                                     return null;
                                 }
                                 if (
                                     state.winner === null &&
-                                    !player.description.isDetective &&
+                                    isFugitive &&
                                     !shouldShowMrX &&
-                                    activePlayer.description.isDetective
+                                    activePlayer.description.isDetective &&
+                                    !forceRevealPoof
                                 ) {
                                     return null;
                                 }
@@ -193,6 +218,7 @@ export function GameMapSection({
                                         isDragging={isActive && tokenDragging}
                                         isActiveTurn={isActive}
                                         boardPulseKey={markerBoardPulseKeyById[player.description.id] ?? 0}
+                                        poofMode={poofMode}
                                     />
                                 );
                             })}
