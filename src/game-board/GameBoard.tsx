@@ -47,6 +47,7 @@ import { PauseModal } from "./modals/PauseModal";
 import { PrivacyTurnModal } from "./modals/PrivacyTurnModal";
 import { NewGameSettingsModal } from "./modals/NewGameSettingsModal";
 import { QuickRulesModal } from "./modals/QuickRulesModal";
+import { SettingsModal } from "./modals/SettingsModal";
 import type { GameBoardProps } from "./types";
 import { useModalFade } from "./modals/useModalFade";
 import { AppGameMenu } from "./shell/AppGameMenu";
@@ -68,6 +69,22 @@ export function GameBoard({
     onPassTurn,
     onPause,
     onResumePause,
+    onMusicModeChange,
+    musicThemeId,
+    musicEnabled,
+    musicVolume,
+    sfxEnabled,
+    sfxVolume,
+    onMusicThemeChange,
+    onMusicEnabledChange,
+    onMusicVolumeChange,
+    onSfxEnabledChange,
+    onSfxVolumeChange,
+    animationsEnabled,
+    onAnimationsEnabledChange,
+    interactionLocked = false,
+    fugitivePoof = null,
+    detectiveTurnIntro = null,
 }: GameBoardProps) {
     const { players, mapGraph, winner, currentTurn, turns, turnLog } = state;
 
@@ -76,6 +93,7 @@ export function GameBoard({
     const [dismissedGameIntro, setDismissedGameIntro] = useState(false);
     const [introFromMenu, setIntroFromMenu] = useState(false);
     const [rulesModalOpen, setRulesModalOpen] = useState(false);
+    const [settingsModalOpen, setSettingsModalOpen] = useState(false);
     const [newGameSettingsOpen, setNewGameSettingsOpen] = useState(false);
     const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -151,6 +169,35 @@ export function GameBoard({
     const showDetectivePrivacyModal =
         winner === null && !isPaused && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
 
+    useEffect(() => {
+        if (detectiveTurnIntro === null) return;
+        setSidePanel((panel) => (panel === "mrx" ? panel : "mrx"));
+    }, [detectiveTurnIntro?.key]);
+
+    useEffect(() => {
+        if (detectiveTurnIntro !== null) {
+            onMusicModeChange("fugitive");
+            return;
+        }
+        if (state.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
+            onMusicModeChange("fugitive");
+            return;
+        }
+        let mode: "ambient" | "detective" | "fugitive" = "ambient";
+        if (!showGameIntroModal && !isPaused && winner === null) {
+            mode = activePlayer.description.isDetective ? "detective" : "fugitive";
+        }
+        onMusicModeChange(mode);
+    }, [
+        showGameIntroModal,
+        isPaused,
+        winner,
+        activePlayer.description.isDetective,
+        onMusicModeChange,
+        detectiveTurnIntro,
+        state.currentTurn.phase,
+    ]);
+
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);
         setIntroFromMenu(false);
@@ -164,6 +211,10 @@ export function GameBoard({
 
     const onRulesModalComplete = useCallback(() => {
         setRulesModalOpen(false);
+    }, []);
+
+    const onSettingsModalComplete = useCallback(() => {
+        setSettingsModalOpen(false);
     }, []);
 
     const onNewGameSettingsModalComplete = useCallback(() => {
@@ -209,7 +260,17 @@ export function GameBoard({
     const pauseFade = useModalFade(showPauseModal, onResumePause);
     const gameIntroFade = useModalFade(showGameIntroModal, completeGameIntroDismiss);
     const rulesFade = useModalFade(rulesModalOpen, onRulesModalComplete);
+    const settingsFade = useModalFade(settingsModalOpen, onSettingsModalComplete);
     const newGameSettingsFade = useModalFade(newGameSettingsOpen, onNewGameSettingsModalComplete);
+
+    useEffect(() => {
+        if (!settingsModalOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") settingsFade.requestClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [settingsFade.requestClose, settingsModalOpen]);
 
     const confirmNewGameWithSettings = useCallback(
         (settings: NewGameSettings) => {
@@ -621,6 +682,21 @@ export function GameBoard({
                 <NewGameSettingsModal fade={newGameSettingsFade} onConfirm={confirmNewGameWithSettings} />
             )}
             <QuickRulesModal fade={rulesFade} />
+            <SettingsModal
+                fade={settingsFade}
+                musicThemeId={musicThemeId}
+                musicEnabled={musicEnabled}
+                musicVolume={musicVolume}
+                sfxEnabled={sfxEnabled}
+                sfxVolume={sfxVolume}
+                onMusicThemeChange={onMusicThemeChange}
+                onMusicEnabledChange={onMusicEnabledChange}
+                onMusicVolumeChange={onMusicVolumeChange}
+                onSfxEnabledChange={onSfxEnabledChange}
+                onSfxVolumeChange={onSfxVolumeChange}
+                animationsEnabled={animationsEnabled}
+                onAnimationsEnabledChange={onAnimationsEnabledChange}
+            />
             {showMustPassModal && <MustPassModal activePlayer={activePlayer} onPass={onPassTurn} />}
             <PauseModal fade={pauseFade} currentPlayer={activePlayer} />
             <AppGameMenu
@@ -631,12 +707,13 @@ export function GameBoard({
                 onOpenNewGameSettings={() => setNewGameSettingsOpen(true)}
                 onOpenIntro={() => setIntroFromMenu(true)}
                 onOpenRules={() => setRulesModalOpen(true)}
+                onOpenSettings={() => setSettingsModalOpen(true)}
                 pauseDisabled={winner !== null || isPaused}
                 resumeDisabled={winner !== null || !isPaused}
                 onPause={onPause}
                 onResumePause={onResumePause}
             />
-            <div className="game-layout">
+            <div className={`game-layout${interactionLocked ? " game-layout--locked" : ""}`} aria-busy={interactionLocked}>
                 <GameMapSection
                     mapAreaRef={mapAreaRef}
                     svgRef={svgRef}
@@ -675,6 +752,8 @@ export function GameBoard({
                     tokenDragging={tokenDragging}
                     tokenDragVisual={tokenDragVisual}
                     markerBoardPulseKeyById={markerBoardPulseKeyById}
+                    fugitivePoof={fugitivePoof}
+                    detectiveTurnIntro={detectiveTurnIntro}
                 />
                 <GameSideDock
                     sidePanel={sidePanel}
@@ -690,6 +769,7 @@ export function GameBoard({
                     pendingValidTickets={pendingValidTickets}
                     ticketPlayableFromCurrentNode={ticketPlayableFromCurrentNode}
                     onCancelPendingMove={onCancelPendingMove}
+                    detectiveTurnIntro={detectiveTurnIntro}
                 />
             </div>
         </>

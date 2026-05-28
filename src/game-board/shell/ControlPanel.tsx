@@ -1,6 +1,5 @@
 import type { Ticket } from "../../constants";
 import type { CurrentTurn, PlayerState } from "../../game/gameState";
-import type { Winner } from "../../constants";
 
 function ticketAllowedForPending(ticket: Ticket, pendingValidTickets: Ticket[] | null): boolean {
     if (pendingValidTickets === null) return true;

@@ -1,4 +1,6 @@
+import type { MusicMode, MusicThemeId } from "../audio/musicTracks";
 import type { Ticket } from "../constants";
+import type { DetectiveTurnIntro } from "../game/detectiveTurnIntro";
 import type { GameState, NewGameSettings } from "../game/gameState";
 
 export type GameBoardProps = {
@@ -26,4 +28,21 @@ export type GameBoardProps = {
     /** Pause overlays a privacy modal; resume clears {@link GameState.currentTurn.isPaused}. */
     onPause: () => void;
     onResumePause: () => void;
+    onMusicModeChange: (mode: MusicMode) => void;
+    musicThemeId: MusicThemeId;
+    musicEnabled: boolean;
+    musicVolume: number;
+    sfxEnabled: boolean;
+    sfxVolume: number;
+    onMusicThemeChange: (themeId: MusicThemeId) => void;
+    onMusicEnabledChange: (enabled: boolean) => void;
+    onMusicVolumeChange: (volume: number) => void;
+    onSfxEnabledChange: (enabled: boolean) => void;
+    onSfxVolumeChange: (volume: number) => void;
+    animationsEnabled: boolean;
+    onAnimationsEnabledChange: (enabled: boolean) => void;
+    /** Blocks map/ticket input while a turn handoff sound is playing. */
+    interactionLocked?: boolean;
+    fugitivePoof?: { mode: "in" | "out"; key: number } | null;
+    detectiveTurnIntro?: DetectiveTurnIntro | null;
 };
