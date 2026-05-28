@@ -18,3 +18,7 @@ export function shouldShowPrivacy(state: GameState): boolean {
         state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE
     );
 }
+
+export function isEnteringPrivacyPhase(prev: GameState, next: GameState): boolean {
+    return !shouldShowPrivacy(prev) && shouldShowPrivacy(next);
+}

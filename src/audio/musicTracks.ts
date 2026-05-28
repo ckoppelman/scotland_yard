@@ -18,6 +18,22 @@ type MusicManifest = Partial<Record<MusicThemeId, Partial<Record<MusicMode, stri
 let tracksByTheme: MusicManifest = {};
 let loaded = false;
 let loading: Promise<void> | null = null;
+const loadListeners = new Set<() => void>();
+
+function notifyTracksLoaded(): void {
+    for (const listener of loadListeners) {
+        listener();
+    }
+}
+
+/** Subscribe to manifest load; fires immediately if tracks are already available. */
+export function onMusicTracksLoaded(listener: () => void): () => void {
+    loadListeners.add(listener);
+    if (loaded) listener();
+    return () => {
+        loadListeners.delete(listener);
+    };
+}
 
 /** Fetch theme/mode tracks from the generated manifest (see vite/musicManifestPlugin.ts). */
 export function loadMusicTracks(): Promise<void> {
@@ -32,10 +48,12 @@ export function loadMusicTracks(): Promise<void> {
         .then((manifest) => {
             tracksByTheme = manifest;
             loaded = true;
+            notifyTracksLoaded();
         })
         .catch(() => {
             tracksByTheme = {};
             loaded = true;
+            notifyTracksLoaded();
         });
 
     return loading;

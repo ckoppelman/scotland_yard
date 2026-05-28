@@ -107,6 +107,19 @@
   }
 }
 
+.fugitive-cutscene-overlay__headline--active,
+.fugitive-cutscene-overlay__emoji--active {
+  animation-delay: 0s;
+}
+
+.fugitive-cutscene-overlay__emoji--active {
+  animation: transport-emoji-cross 2s linear forwards;
+}
+
+.fugitive-cutscene-overlay__headline--active {
+  animation: fugitive-cutscene-headline 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fugitive-cutscene-overlay__headline,
   .fugitive-cutscene-overlay__emoji,

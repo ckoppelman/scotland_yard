@@ -187,10 +187,12 @@ export function MrXBoard({
     state,
     player,
     detectiveTurnIntro = null,
+    cutsceneMoveIndex = null,
 }: {
     state: GameState;
     player: PlayerState;
     detectiveTurnIntro?: DetectiveTurnIntro | null;
+    cutsceneMoveIndex?: number | null;
 }) {
     const { turnLog, turns } = state;
     /** Same round index can have two Mr. X moves (double); keep all legs for outline + last for display. */
@@ -206,9 +208,10 @@ export function MrXBoard({
     if (detectiveTurnIntro !== null) {
         detectiveTurnIntro.latestMoves.forEach((move, index) => {
             if (move.playerOrdinal !== player.description.order) return;
+            if (cutsceneMoveIndex !== null && index > cutsceneMoveIndex) return;
             cutsceneFlipByRound.set(move.turnNumber, {
                 ticket: move.ticket,
-                delay: fugitiveAnimationDelaySeconds(index),
+                delay: cutsceneMoveIndex === index ? 0 : fugitiveAnimationDelaySeconds(0),
             });
         });
     }

@@ -21,6 +21,7 @@ type Props = {
     ticketPlayableFromCurrentNode: Record<Ticket, boolean>;
     onCancelPendingMove: () => void;
     detectiveTurnIntro?: DetectiveTurnIntro | null;
+    cutsceneMoveIndex?: number | null;
 };
 
 /** Tabs + sliding sheet: Control (tickets), Mr. X log, player roster. */
@@ -39,6 +40,7 @@ export function GameSideDock({
     ticketPlayableFromCurrentNode,
     onCancelPendingMove,
     detectiveTurnIntro = null,
+    cutsceneMoveIndex = null,
 }: Props) {
     const { winner, currentTurn } = state;
 
@@ -95,6 +97,7 @@ export function GameSideDock({
                                     state={state}
                                     player={player}
                                     detectiveTurnIntro={detectiveTurnIntro}
+                                    cutsceneMoveIndex={cutsceneMoveIndex}
                                 />
                             ),
                         )}

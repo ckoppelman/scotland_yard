@@ -119,13 +119,13 @@ describe("playPreTurnChangeSfx", () => {
         expect(playSfxForAtLeast).toHaveBeenCalledWith(SfxType.BUS);
     });
 
-    it("plays transport sfx when last detective hands off directly to fugitives", async () => {
+    it("plays transport sfx when last detective hands off to fugitive privacy", async () => {
         const prev = makeGameState({
             players: oneFugitiveRoster(),
             currentTurn: { phase: TurnPhase.DETECTIVE, playerOrdinal: 1 },
             fugitivePrivacyDismissed: true,
         });
-        const next = transition(prev, { phase: TurnPhase.FUGITIVE, playerOrdinal: 2 });
+        const next = transition(prev, { phase: TurnPhase.PRIVACY_FUGITIVE, playerOrdinal: 2 });
 
         await playPreTurnChangeSfx(prev, next, { ticket: "taxi" });
 

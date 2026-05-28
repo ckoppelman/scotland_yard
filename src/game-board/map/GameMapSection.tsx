@@ -71,6 +71,8 @@ type Props = {
     markerBoardPulseKeyById: Record<string, number>;
     fugitivePoof: FugitivePoofBurst | null;
     detectiveTurnIntro: DetectiveTurnIntro | null;
+    cutsceneMoveIndex: number | null;
+    playerMarkersVisible: boolean;
 };
 
 /**
@@ -117,6 +119,8 @@ export function GameMapSection({
     markerBoardPulseKeyById,
     fugitivePoof,
     detectiveTurnIntro,
+    cutsceneMoveIndex,
+    playerMarkersVisible,
 }: Props) {
     const introActive = detectiveTurnIntro !== null;
 
@@ -147,7 +151,7 @@ export function GameMapSection({
                     }}
                 >
                     {introActive && detectiveTurnIntro !== null && (
-                        <FugitiveCutsceneMapOverlay intro={detectiveTurnIntro} />
+                        <FugitiveCutsceneMapOverlay intro={detectiveTurnIntro} activeMoveIndex={cutsceneMoveIndex} />
                     )}
                     <svg
                         ref={svgRef}
@@ -181,6 +185,7 @@ export function GameMapSection({
                                 const isFugitive = !player.description.isDetective;
                                 const shouldShowMrX = turns[currentTurn.turnNumber - 1]?.showMrX ?? false;
                                 const shouldShowPrivacy =
+                                    !playerMarkersVisible ||
                                     state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE ||
                                     state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
                                 const inFugitiveCutscene =

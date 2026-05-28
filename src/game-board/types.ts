@@ -1,11 +1,13 @@
-import type { MusicMode, MusicThemeId } from "../audio/musicTracks";
+import type { MusicThemeId } from "../audio/musicTracks";
 import type { Ticket } from "../constants";
-import type { DetectiveTurnIntro } from "../game/detectiveTurnIntro";
+import type { PhasePresentation } from "../game/phaseActions";
 import type { FugitivePoofBurst } from "./animations/fugitivePoof";
 import type { GameState, NewGameSettings } from "../game/gameState";
 
 export type GameBoardProps = {
     state: GameState;
+    /** Presentation driven by {@link PhaseOrchestrator} action sequences. */
+    phasePresentation: PhasePresentation;
     onDismissPrivacyModal: () => void;
     onTicketClick: (ticket: Ticket) => void;
     onNodeClick: (node: number) => void;
@@ -29,7 +31,6 @@ export type GameBoardProps = {
     /** Pause overlays a privacy modal; resume clears {@link GameState.currentTurn.isPaused}. */
     onPause: () => void;
     onResumePause: () => void;
-    onMusicModeChange: (mode: MusicMode) => void;
     musicThemeId: MusicThemeId;
     musicEnabled: boolean;
     musicVolume: number;
@@ -42,8 +43,7 @@ export type GameBoardProps = {
     onSfxVolumeChange: (volume: number) => void;
     animationsEnabled: boolean;
     onAnimationsEnabledChange: (enabled: boolean) => void;
-    /** Blocks map/ticket input while a turn handoff sound is playing. */
+    /** Blocks map/ticket input while a phase action runs move feedback. */
     interactionLocked?: boolean;
     fugitivePoof?: FugitivePoofBurst | null;
-    detectiveTurnIntro?: DetectiveTurnIntro | null;
 };

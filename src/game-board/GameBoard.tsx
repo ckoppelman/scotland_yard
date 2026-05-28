@@ -56,6 +56,7 @@ import { GameSideDock } from "./shell/GameSideDock";
 
 export function GameBoard({
     state,
+    phasePresentation,
     onDismissPrivacyModal,
     onTicketClick,
     onNodeClick,
@@ -70,7 +71,6 @@ export function GameBoard({
     onPassTurn,
     onPause,
     onResumePause,
-    onMusicModeChange,
     musicThemeId,
     musicEnabled,
     musicVolume,
@@ -85,9 +85,10 @@ export function GameBoard({
     onAnimationsEnabledChange,
     interactionLocked = false,
     fugitivePoof = null,
-    detectiveTurnIntro = null,
 }: GameBoardProps) {
     const { players, mapGraph, winner, currentTurn, turns, turnLog } = state;
+    const detectiveTurnIntro = phasePresentation.detectiveTurnIntro;
+    const cutsceneMoveIndex = phasePresentation.cutsceneMoveIndex;
 
     const activePlayer = state.players[state.currentTurn.playerOrdinal];
 
@@ -166,39 +167,21 @@ export function GameBoard({
     const showPauseModal = winner === null && isPaused;
 
     const showMrXPrivacyModal =
-        winner === null && !isPaused && !interactionLocked && state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
+        winner === null &&
+        !isPaused &&
+        (phasePresentation.privacyModal === "mrx" ||
+            state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE);
 
     const showDetectivePrivacyModal =
-        winner === null && !isPaused && !interactionLocked && state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE;
+        winner === null &&
+        !isPaused &&
+        (phasePresentation.privacyModal === "detectives" ||
+            state.currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE);
 
     useEffect(() => {
         if (detectiveTurnIntro === null) return;
         setSidePanel((panel) => (panel === "mrx" ? panel : "mrx"));
     }, [detectiveTurnIntro?.key]);
-
-    useEffect(() => {
-        if (detectiveTurnIntro !== null) {
-            onMusicModeChange("fugitive");
-            return;
-        }
-        if (state.currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
-            onMusicModeChange("fugitive");
-            return;
-        }
-        let mode: "ambient" | "detective" | "fugitive" = "ambient";
-        if (!showGameIntroModal && !isPaused && winner === null) {
-            mode = activePlayer.description.isDetective ? "detective" : "fugitive";
-        }
-        onMusicModeChange(mode);
-    }, [
-        showGameIntroModal,
-        isPaused,
-        winner,
-        activePlayer.description.isDetective,
-        onMusicModeChange,
-        detectiveTurnIntro,
-        state.currentTurn.phase,
-    ]);
 
     const completeGameIntroDismiss = useCallback(() => {
         setDismissedGameIntro(true);
@@ -772,6 +755,8 @@ export function GameBoard({
                     markerBoardPulseKeyById={markerBoardPulseKeyById}
                     fugitivePoof={fugitivePoof}
                     detectiveTurnIntro={detectiveTurnIntro}
+                    cutsceneMoveIndex={cutsceneMoveIndex}
+                    playerMarkersVisible={phasePresentation.playerMarkersVisible}
                 />
                 <GameSideDock
                     sidePanel={sidePanel}
@@ -788,6 +773,7 @@ export function GameBoard({
                     ticketPlayableFromCurrentNode={ticketPlayableFromCurrentNode}
                     onCancelPendingMove={onCancelPendingMove}
                     detectiveTurnIntro={detectiveTurnIntro}
+                    cutsceneMoveIndex={cutsceneMoveIndex}
                 />
             </div>
         </>
