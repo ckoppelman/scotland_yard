@@ -20,6 +20,7 @@ import {
     tryPlayNode,
     initPlayer,
     clearPrivacy,
+    completeFugitiveCutscene,
 } from "./gameRules";
 
 /** Fixed length so `getWinner` round-limit branch matches production `defaultTurns` (24). */
@@ -123,6 +124,7 @@ function gameState(partial: Omit<Partial<GameState>, "players"> & { players: Pla
         turns: TURNS_24,
         turnLog: [],
         gameRules: DEFAULT_GAME_RULES,
+        fugitivePrivacyDismissed: false,
         ...rest,
     };
 }
@@ -721,12 +723,23 @@ describe("clearPrivacy", () => {
         expect(r.state.currentTurn.phase).toBe(TurnPhase.DETECTIVE);
     });
 
-    it("moves from privacy detective to detective when clearing", () => {
+    it("moves from privacy detective to fugitive cutscene when clearing", () => {
         const s = gameState({
             players: [detective(0, "A", "red", 1), fugitive(1, 3)],
             currentTurn: initialCurrentTurn({ phase: TurnPhase.PRIVACY_DETECTIVE }),
         });
         const r = clearPrivacy(s);
+        expect(r.ok).toBe(true);
+        if (!r.ok) return;
+        expect(r.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE_CUTSCENE);
+    });
+
+    it("completes fugitive cutscene into detective phase", () => {
+        const s = gameState({
+            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
+            currentTurn: initialCurrentTurn({ phase: TurnPhase.FUGITIVE_CUTSCENE }),
+        });
+        const r = completeFugitiveCutscene(s);
         expect(r.ok).toBe(true);
         if (!r.ok) return;
         expect(r.state.currentTurn.phase).toBe(TurnPhase.DETECTIVE);
@@ -741,5 +754,25 @@ describe("clearPrivacy", () => {
         expect(r.ok).toBe(true);
         if (!r.ok) return;
         expect(r.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+        expect(r.state.fugitivePrivacyDismissed).toBe(true);
+    });
+
+    it("skips fugitive privacy on later rounds after the first dismissal", () => {
+        const s = gameState({
+            players: [detective(0, "A", "red", 1), fugitive(1, 3)],
+            currentTurn: initialCurrentTurn({ playerOrdinal: 0, phase: TurnPhase.DETECTIVE }),
+            fugitivePrivacyDismissed: true,
+        });
+        const played = tryPlayNode(
+            {
+                ...s,
+                currentTurn: { ...s.currentTurn, ticket: "taxi" as Ticket },
+            },
+            2,
+        );
+        expect(played.ok).toBe(true);
+        if (!played.ok) return;
+        expect(played.state.currentTurn.phase).toBe(TurnPhase.FUGITIVE);
+        expect(played.state.currentTurn.playerOrdinal).toBe(1);
     });
 });

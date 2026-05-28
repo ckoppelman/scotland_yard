@@ -1,5 +1,5 @@
 import { Ticket } from "../constants";
-import { PlayerDescription, GameState, TurnLogEntry, PlayerState, TurnPhase, MapGraph } from "./gameState";
+import { GameState, TurnLogEntry, PlayerState, TurnPhase, MapGraph } from "./gameState";
 import { Winner, DETECTIVE_CAPTURE_X_WIN_REASON, FUGITIVE_ESCAPE_WIN_REASON, DETECTIVES_ARE_TRAPPED_WIN_REASON, FUGITIVES_ARE_TRAPPED_WIN_REASON } from "../constants";
 
 export type PlayOk = { ok: true; state: GameState };
@@ -309,7 +309,7 @@ export function tryPlayNode(state: GameState, node: number): PlayResult {
         const need = validTickets.map(ticketLabel).join(" or ");
         return {
             ok: false,
-            message: `That connection needs a ${need} ticket (or black as a wildcard), not ${ticketLabel(state.currentTurn.ticket)}.`,
+            message: `That connection needs a ${need} ticket (or black as a wildcard), not ${ticketLabel(currentTurn.ticket)}.`,
         };
     }
 
@@ -358,12 +358,27 @@ function getPlayerOrdinalAfterMove(state: GameState): number {
 }
 
 export function clearPrivacy(state: GameState): PlayResult {
+    const wasFugitivePrivacy = state.currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE;
     const newPhase = getNextTurnPhase(state, true);
     return {
         ok: true,
         state: {
             ...state,
+            fugitivePrivacyDismissed: wasFugitivePrivacy ? true : state.fugitivePrivacyDismissed,
             currentTurn: { ...state.currentTurn, phase: newPhase },
+        },
+    };
+}
+
+export function completeFugitiveCutscene(state: GameState): PlayResult {
+    if (state.currentTurn.phase !== TurnPhase.FUGITIVE_CUTSCENE) {
+        return { ok: false, message: "Not in a fugitive cutscene." };
+    }
+    return {
+        ok: true,
+        state: {
+            ...state,
+            currentTurn: { ...state.currentTurn, phase: TurnPhase.DETECTIVE },
         },
     };
 }
@@ -377,7 +392,7 @@ function getNextTurnPhase(state: GameState, shouldClearPrivacy: boolean | null =
     }
 
     if (currentTurn.phase === TurnPhase.PRIVACY_DETECTIVE && shouldClearPrivacy === true) {
-        return TurnPhase.DETECTIVE;
+        return TurnPhase.FUGITIVE_CUTSCENE;
     } else if (currentTurn.phase === TurnPhase.PRIVACY_FUGITIVE && shouldClearPrivacy === true) {
         return TurnPhase.FUGITIVE;
     }
@@ -387,6 +402,7 @@ function getNextTurnPhase(state: GameState, shouldClearPrivacy: boolean | null =
 
     if (player.description.isDetective) {
         if (nextPlayer.description.isDetective) return TurnPhase.DETECTIVE;
+        if (state.fugitivePrivacyDismissed) return TurnPhase.FUGITIVE;
         return TurnPhase.PRIVACY_FUGITIVE;
     } else if (!nextPlayer.description.isDetective) return TurnPhase.FUGITIVE;
 

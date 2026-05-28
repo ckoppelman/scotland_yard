@@ -1,4 +1,5 @@
 import type { GameState } from "../game/gameState";
+import { TurnPhase } from "../game/gameState";
 
 /**
  * One sentence for the control panel header: who goes now, or who won.
@@ -13,6 +14,10 @@ export function getGameStatusText(state: GameState): string {
         } else {
             return `Mr. X foils Scotland Yard, launching a city-wide crime spree!`;
         }
+    }
+
+    if (currentTurn.phase === TurnPhase.FUGITIVE_CUTSCENE) {
+        return "Reviewing fugitive moves…";
     }
 
     let status = `${players[currentTurn.playerOrdinal].description.name}'s turn.`;

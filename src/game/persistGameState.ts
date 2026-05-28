@@ -37,6 +37,7 @@ type PersistedPayload = {
   winner: GameState["winner"];
   gameRules: GameState["gameRules"];
   turns: GameState["turns"];
+  fugitivePrivacyDismissed?: boolean;
   /** Mr X rows use position -1 as a sentinel; filled from ciphertext after decrypt */
   turnLog: TurnLog;
   /** AES-GCM(iv || ciphertext), base64 */
@@ -159,6 +160,7 @@ function stripForStorage(state: GameState): Omit<PersistedPayload, "mrxCipher"> 
     winner: state.winner,
     gameRules: state.gameRules,
     turns: state.turns,
+    fugitivePrivacyDismissed: state.fugitivePrivacyDismissed,
     turnLog,
   };
 }
@@ -188,6 +190,7 @@ function applySecret(
     mapGraph,
     turns: base.turns,
     turnLog,
+    fugitivePrivacyDismissed: base.fugitivePrivacyDismissed ?? false,
   };
 }
 

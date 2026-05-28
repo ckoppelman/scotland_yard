@@ -10,6 +10,8 @@ export enum TurnPhase {
   FUGITIVE = "fugitive",
   PRIVACY_DETECTIVE = "privacy_detective",
   PRIVACY_FUGITIVE = "privacy_fugitive",
+  /** Cinematic review of fugitive moves before detectives act. */
+  FUGITIVE_CUTSCENE = "fugitive_cutscene",
   GAME_OVER = "game_over",
 }
 
@@ -52,6 +54,8 @@ export type GameState = {
   turns: TurnState[];
   turnLog: TurnLog;
   gameRules: GameRules;
+  /** After the first fugitive privacy screen is dismissed, later fugitive rounds skip it. */
+  fugitivePrivacyDismissed: boolean;
 };
 
 export type GameRules = {
@@ -248,5 +252,6 @@ export function initialState(
     turns: defaultTurns,
     turnLog: [] as TurnLog,
     gameRules: DEFAULT_GAME_RULES,
+    fugitivePrivacyDismissed: false,
   };
 }
